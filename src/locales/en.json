@@ -1,0 +1,160 @@
+{
+  "app": {
+    "name": "Axiom",
+    "tagline": "Can you afford it?",
+    "description": "The brutally honest financial decision companion. Type a scenario. Get the truth."
+  },
+  "nav": {
+    "home": "Home",
+    "analyze": "Analyze",
+    "projections": "Projections",
+    "history": "History",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "title": "Can you afford it?",
+    "subtitle": "Describe a purchase in plain language. Axiom extracts the numbers, calculates the real cost, and tells you if it fits your life — no judgment, just math.",
+    "placeholder": "Can I afford a $40k Tesla Model 3 with $5k down over 60 months, earning $8k/month?",
+    "analyzeButton": "Analyze",
+    "analyzingButton": "Analyzing...",
+    "examples": "Try these:",
+    "example1": "Can I afford a $40k Tesla Model 3 with $5k down over 60 months, earning $8k/month?",
+    "example2": "Can I afford a $110k BMW M5 earning $2k/month with $5k down?",
+    "example3": "Can I afford a $150k studio apartment with $30k down over 30 years at 4.5%?",
+    "recentScenarios": "Recent Scenarios"
+  },
+  "analyze": {
+    "title": "{itemName}",
+    "scoreBreakdown": "Score Breakdown",
+    "debtToIncome": "Debt-to-Income Ratio",
+    "opportunityCost": "What If You Invested Instead?",
+    "totalCost": "Total Cost of Ownership",
+    "hiddenCosts": "Hidden Costs",
+    "preliminary": "Preliminary Score",
+    "preliminaryDesc": "Complete your profile for an accurate score.",
+    "completeProfile": "Complete Profile",
+    "scoreLabels": {
+      "A": "Excellent",
+      "B": "Good",
+      "C": "Fair",
+      "D": "Risky",
+      "F": "Danger"
+    }
+  },
+  "projections": {
+    "title": "10-Year Projection",
+    "subtitle": "Comparing the purchase path vs. investing the difference. The crossover shows when investing overtakes the asset value.",
+    "crossoverYear": "Crossover: Year {year}",
+    "crossoverDesc": "Investment value surpasses asset residual value",
+    "noCrossover": "No crossover within 10 years",
+    "stats": {
+      "netWorthDiff": "Net Worth Difference",
+      "assetValue": "Asset Value (Year 10)",
+      "investmentValue": "Investment Value (Year 10)"
+    }
+  },
+  "history": {
+    "title": "Scenario History",
+    "empty": "No scenarios yet. Analyze your first purchase to see it here.",
+    "deleteConfirm": "Delete this scenario?",
+    "score": "Score: {score} ({grade})",
+    "date": "Analyzed {date}"
+  },
+  "profile": {
+    "title": "Financial Profile",
+    "subtitle": "Your baseline for accurate scoring",
+    "why": "Why we need this",
+    "whyDesc": "Your profile makes the Sanggup Score ~40% more accurate. Without it, scores use conservative defaults and show a \"Preliminary\" badge. We never share this data — it stays in your browser.",
+    "fields": {
+      "monthlyIncome": {
+        "label": "Monthly Net Income",
+        "placeholder": "e.g., 8000",
+        "help": "After tax, what hits your account"
+      },
+      "emergencyFund": {
+        "label": "Emergency Fund",
+        "placeholder": "e.g., 15000",
+        "help": "Cash you can access in 24 hours"
+      },
+      "monthlySavings": {
+        "label": "Monthly Savings Rate",
+        "placeholder": "e.g., 2000",
+        "help": "What you actually save each month"
+      },
+      "existingDebt": {
+        "label": "Existing Monthly Debt Payments",
+        "placeholder": "e.g., 500",
+        "help": "Student loans, car payments, credit cards"
+      },
+      "investmentReturn": {
+        "label": "Expected Investment Return (%/year)",
+        "placeholder": "e.g., 7",
+        "help": "Conservative annual return for opportunity cost calc"
+      }
+    },
+    "saveButton": "Save Profile",
+    "saved": "Profile saved",
+    "currency": "USD"
+  },
+  "common": {
+    "currency": "USD",
+    "currencySymbol": "$",
+    "perMonth": "/mo",
+    "perYear": "/yr",
+    "score": "Score",
+    "grade": "Grade",
+    "months": "months",
+    "years": "years",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "cards": {
+    "dti": {
+      "title": "Debt-to-Income Ratio",
+      "safe": "Safe",
+      "warning": "Caution",
+      "danger": "Danger",
+      "desc": "Your monthly debt payments as % of income. Under 36% is healthy."
+    },
+    "tco": {
+      "title": "Total Cost of Ownership",
+      "desc": "All-in cost over the loan term including hidden costs."
+    },
+    "opportunity": {
+      "title": "Opportunity Cost",
+      "desc": "What you'd have if you invested the monthly payment instead."
+    },
+    "hiddenCosts": {
+      "title": "Hidden Costs",
+      "mandatory": "Mandatory",
+      "upfront": "Upfront",
+      "optional": "Optional",
+      "tax": "Tax",
+      "maintenance": "Maintenance",
+      "perYear": "/yr",
+      "upfrontLabel": "One-time"
+    },
+    "scoreBreakdown": {
+      "title": "Score Breakdown",
+      "factors": {
+        "dti": "DTI Impact",
+        "emergency": "Emergency Fund",
+        "savings": "Savings Rate",
+        "existingDebt": "Existing Debt",
+        "affordability": "Affordability"
+      }
+    }
+  },
+  "errors": {
+    "extractionFailed": "Could not understand your scenario. Please include: price, down payment, loan term, and your income.",
+    "missingNumbers": "Please include specific numbers: price, down payment, loan duration, and monthly income.",
+    "apiError": "Analysis service unavailable. Using offline mode.",
+    "invalidInput": "Invalid input. Check your numbers and try again."
+  }
+}

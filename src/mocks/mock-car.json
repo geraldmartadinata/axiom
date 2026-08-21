@@ -1,0 +1,41 @@
+{
+  "scenario": {
+    "raw_prompt": "Bisa beli Honda Civic RS Rp550jt DP Rp100jt cicil 60 bln, gaji Rp12jt/bln?",
+    "item_name": "Honda Civic RS",
+    "category": "vehicle"
+  },
+  "financials": {
+    "monthly_income": 12000000,
+    "base_price": 550000000,
+    "down_payment": 100000000,
+    "tenor_months": 60,
+    "interest_rate_assumed": 0.055,
+    "calculated_monthly_installment": null
+  },
+  "hidden_costs": [
+    {
+      "name": "Asuransi TLO (Total Loss Only)",
+      "amount_per_year": 8000000,
+      "amount_upfront": 0,
+      "type": "mandatory"
+    },
+    {
+      "name": "Pajak STNK & BPKB",
+      "amount_per_year": 2000000,
+      "amount_upfront": 5000000,
+      "type": "tax"
+    },
+    {
+      "name": "Perawatan rutin (oli, ban, servis)",
+      "amount_per_year": 5000000,
+      "amount_upfront": 0,
+      "type": "maintenance"
+    },
+    {
+      "name": "Parkir & Tol",
+      "amount_per_year": 6000000,
+      "amount_upfront": 0,
+      "type": "optional"
+    }
+  ]
+}

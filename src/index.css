@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a #09090b;
+}
+*::-webkit-scrollbar { width: 6px; }
+*::-webkit-scrollbar-track { background: #09090b; }
+*::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+
+body {
+  @apply bg-zinc-950 text-zinc-300 antialiased;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  margin: 0;
+}
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scale-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulse-glow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+
+.animate-fade-in { animation: fade-in 0.4s ease-out; }
+.animate-slide-up { animation: slide-up 0.5s ease-out; }
+.animate-scale-in { animation: scale-in 0.3s ease-out; }
+.animate-pulse-glow { animation: pulse-glow 1.4s ease-in-out infinite; }
+
+.stagger-1 { animation-delay: 0.05s; animation-fill-mode: backwards; }
+.stagger-2 { animation-delay: 0.1s; animation-fill-mode: backwards; }
+.stagger-3 { animation-delay: 0.15s; animation-fill-mode: backwards; }
+.stagger-4 { animation-delay: 0.2s; animation-fill-mode: backwards; }
+.stagger-5 { animation-delay: 0.25s; animation-fill-mode: backwards; }
+.stagger-6 { animation-delay: 0.3s; animation-fill-mode: backwards; }

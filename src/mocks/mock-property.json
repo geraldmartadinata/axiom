@@ -1,0 +1,47 @@
+{
+  "scenario": {
+    "raw_prompt": "Bisa beli ap studio Jakarta Rp1,2M DP Rp300jt cicil 30 th bunga 6.5%?",
+    "item_name": "Studio Apartment Jakarta",
+    "category": "property"
+  },
+  "financials": {
+    "monthly_income": 25000000,
+    "base_price": 1200000000,
+    "down_payment": 300000000,
+    "tenor_months": 360,
+    "interest_rate_assumed": 0.065,
+    "calculated_monthly_installment": null
+  },
+  "hidden_costs": [
+    {
+      "name": "Asuransi Properti",
+      "amount_per_year": 2000000,
+      "amount_upfront": 0,
+      "type": "optional"
+    },
+    {
+      "name": "Pajak BPHTB (5%)",
+      "amount_per_year": 0,
+      "amount_upfront": 60000000,
+      "type": "tax"
+    },
+    {
+      "name": "Notaris & Biaya Administrasi",
+      "amount_per_year": 0,
+      "amount_upfront": 25000000,
+      "type": "upfront"
+    },
+    {
+      "name": "Service Charge / Maintenance Bulanan",
+      "amount_per_year": 12000000,
+      "amount_upfront": 0,
+      "type": "maintenance"
+    },
+    {
+      "name": "Dana Sinking Fund",
+      "amount_per_year": 5000000,
+      "amount_upfront": 0,
+      "type": "mandatory"
+    }
+  ]
+}

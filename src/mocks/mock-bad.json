@@ -1,0 +1,35 @@
+{
+  "scenario": {
+    "raw_prompt": "Bisa beli Toyota Avanza Veloz Rp300jt DP Rp30jt cicil 60 bln, gaji Rp5jt/bln?",
+    "item_name": "Toyota Avanza Veloz",
+    "category": "vehicle"
+  },
+  "financials": {
+    "monthly_income": 5000000,
+    "base_price": 300000000,
+    "down_payment": 30000000,
+    "tenor_months": 60,
+    "interest_rate_assumed": 0.065,
+    "calculated_monthly_installment": null
+  },
+  "hidden_costs": [
+    {
+      "name": "Asuransi TLO",
+      "amount_per_year": 4000000,
+      "amount_upfront": 0,
+      "type": "mandatory"
+    },
+    {
+      "name": "Pajak STNK & BPKB",
+      "amount_per_year": 1000000,
+      "amount_upfront": 3000000,
+      "type": "tax"
+    },
+    {
+      "name": "Perawatan rutin",
+      "amount_per_year": 3000000,
+      "amount_upfront": 0,
+      "type": "maintenance"
+    }
+  ]
+}

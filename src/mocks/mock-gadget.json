@@ -1,0 +1,35 @@
+{
+  "scenario": {
+    "raw_prompt": "Bisa beli iPhone 16 Pro 256GB Rp24jt DP Rp5jt cicil 24 bln, gaji Rp15jt/bln?",
+    "item_name": "iPhone 16 Pro 256GB",
+    "category": "tech"
+  },
+  "financials": {
+    "monthly_income": 15000000,
+    "base_price": 24000000,
+    "down_payment": 5000000,
+    "tenor_months": 24,
+    "interest_rate_assumed": 0.06,
+    "calculated_monthly_installment": null
+  },
+  "hidden_costs": [
+    {
+      "name": "AppleCare+",
+      "amount_per_year": 300000,
+      "amount_upfront": 0,
+      "type": "optional"
+    },
+    {
+      "name": "Aksesoris (case, screen protector)",
+      "amount_per_year": 0,
+      "amount_upfront": 800000,
+      "type": "upfront"
+    },
+    {
+      "name": "Asuransi ganti baru",
+      "amount_per_year": 500000,
+      "amount_upfront": 0,
+      "type": "optional"
+    }
+  ]
+}

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axiom — Can you afford it?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ DESIGN TOKENS ============ */
+  :root {
+    --bg: #09090b;
+    --surface: rgba(24, 24, 27, 0.72);
+    --surface-solid: #18181b;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --primary: #22d3ee;
+    --primary-glow: rgba(34, 211, 238, 0.30);
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text: #fafafa;
+    --text-muted: #a1a1aa;
+    --text-subtle: #52525b;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-ui: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* subtle radial ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(600px 400px at 80% -10%, rgba(34, 211, 238, 0.06), transparent 70%),
+      radial-gradient(500px 350px at 10% 110%, rgba(16, 185, 129, 0.04), transparent 70%);
+    z-index: 0;
+  }
+
+  ::selection { background: rgba(34, 211, 238, 0.3); }
+
+  /* ============ NAVBAR (liquid glass) ============ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 64px;
+    background: rgba(9, 9, 11, 0.72);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary), #0891b2);
+    display: grid; place-items: center;
+    font-size: 15px; font-weight: 700; color: #09090b;
+    box-shadow: 0 0 20px var(--primary-glow);
+  }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 10px;
+    transition: all 0.2s var(--ease-spring);
+  }
+  .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+  .nav-links a.active { color: var(--primary); background: rgba(34,211,238,0.08); }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .lang-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-ui);
+    font-size: 12.5px; font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-spring);
+  }
+  .lang-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .lang-btn .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+
+  /* ============ HERO ============ */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 96px 24px 48px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(40px, 6vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(120deg, var(--primary), #67e8f9, var(--success));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero .subtitle {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--text-muted);
+    max-width: 640px;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  /* ============ INPUT CARD ============ */
+  .analyzer {
+    width: 100%;
+    max-width: 680px;
+    text-align: left;
+    background: var(--surface);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,211,238,0.04), 0 0 60px rgba(34,211,238,0.06);
+    transition: box-shadow 0.3s var(--ease-spring);
+  }
+  .analyzer:focus-within { box-shadow: 0 24px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(34,211,238,0.15), 0 0 80px var(--primary-glow); }
+  .analyzer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .ai-status { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--text-muted); text-transform: uppercase; }
+  .ai-status .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 var(--primary-glow);} 50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(34,211,238,0);} }
+  .ai-status .ver { color: var(--text-subtle); font-family: var(--font-mono); }
+  .analyzer textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 15.5px;
+    line-height: 1.6;
+    min-height: 60px;
+  }
+  .analyzer textarea::placeholder { color: var(--text-subtle); }
+  .chips-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; gap: 10px; }
+  .chips { display: flex; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s var(--ease-spring);
+  }
+  .chip:hover { color: var(--text); border-color: var(--border-strong); }
+  .chip.active { color: #09090b; background: var(--primary); border-color: var(--primary); box-shadow: 0 0 20px var(--primary-glow); }
+  .analyze-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--primary), #06b6d4);
+    color: #09090b;
+    border: none;
+    font-family: var(--font-ui);
+    font-size: 14px; font-weight: 700;
+    padding: 11px 22px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.25s var(--ease-spring);
+    box-shadow: 0 0 24px rgba(34,211,238,0.25);
+  }
+  .analyze-btn:hover { transform: translateY(-1px); box-shadow: 0 0 36px rgba(34,211,238,0.45); }
+  .analyze-btn:active { transform: translateY(0) scale(0.98); }
+  .analyze-btn.loading { opacity: 0.7; pointer-events: none; }
+
+  /* ============ BELOW FOLD ============ */
+  .below {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 24px 80px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--surface);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+    transition: transform 0.3s var(--ease-spring), border-color 0.3s var(--ease-spring);
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+  .card h3 { font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: 0.01em; margin-bottom: 4px; }
+  .card .card-sub { font-size: 12.5px; color: var(--text-subtle); margin-bottom: 20px; line-height: 1.5; }
+
+  /* --- gauge --- */
+  .gauge-wrap { display: flex; flex-direction: column; align-items: center; }
+  .gauge-arc { width: 220px; height: 220px; }
+  .gauge-label { margin-top: 12px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .gauge-label.safe { color: var(--success); }
+  .gauge-label.caution { color: var(--warning); }
+  .gauge-label.danger { color: var(--danger); }
+  .gauge-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: 20px; }
+  .metric {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }
+  .metric .m-label { font-size: 11px; color: var(--text-subtle); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+  .metric .m-value { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+  .metric .m-value.warn { color: var(--warning); }
+  .metric .m-value.good { color: var(--success); }
+  .metric .m-value.bad { color: var(--danger); }
+
+  /* --- chart --- */
+  .chart-wrap { position: relative; }
+  .chart-wrap svg { width: 100%; height: 220px; }
+  .wealth-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    color: #34d399;
+    font-family: var(--font-mono);
+    font-size: 18px; font-weight: 700;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    margin-top: 16px;
+  }
+  .chart-axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-subtle); font-family: var(--font-mono); margin-top: 6px; }
+  .legend { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: var(--text-muted); }
+  .legend .lg { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .sw { width: 10px; height: 10px; border-radius: 3px; }
+  .sw.asset { background: #f87171; }
+  .sw.invest { background: #34d399; }
+
+  /* --- sliders --- */
+  .param { margin-bottom: 24px; }
+  .param:last-child { margin-bottom: 0; }
+  .param-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .param-head label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .param-head output { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--text); }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--primary) var(--fill, 50%), rgba(255,255,255,0.08) var(--fill, 50%));
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--text);
+    border: 3px solid var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+    transition: transform 0.15s var(--ease-spring);
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--text); border: 3px solid var(--primary);
+    box-shadow: 0 0 12px var(--primary-glow);
+  }
+  .param-hint { font-size: 11.5px; color: var(--text-subtle); margin-top: 6px; }
+
+  /* --- risk tags --- */
+  .risk-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .risk-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .risk-tag.danger { color: var(--danger); background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); }
+  .risk-tag.warn { color: var(--warning); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); }
+  .risk-tag.info { color: var(--primary); background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.25); }
+
+  /* --- bottom row: recent + insight --- */
+  .grid-bottom { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+  .recent-chip {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-spring);
+  }
+  .recent-chip:hover { border-color: var(--border-strong); background: rgba(255,255,255,0.06); }
+  .recent-chip .r-name { font-size: 13.5px; font-weight: 500; }
+  .recent-chip .r-price { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); }
+  .recent-chip .r-score { font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 999px; }
+  .r-score.good { color: var(--success); background: rgba(16,185,129,0.1); }
+  .r-score.bad { color: var(--danger); background: rgba(239,68,68,0.1); }
+  .insight-box {
+    background: linear-gradient(135deg, rgba(34,211,238,0.08), rgba(16,185,129,0.05));
+    border: 1px solid rgba(34,211,238,0.2);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .insight-box .i-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; }
+  .insight-box .i-text { font-size: 15px; line-height: 1.6; color: var(--text); }
+  .insight-box .i-text strong { color: var(--primary); font-family: var(--font-mono); }
+
+  /* ============ MOTION HELPERS ============ */
+  [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 0.6s var(--ease-spring), transform 0.6s var(--ease-spring); }
+  [data-reveal].visible { opacity: 1; transform: translateY(0); }
+  [data-reveal="left"] { transform: translateX(-24px); }
+  [data-reveal="right"] { transform: translateX(24px); }
+  [data-reveal="left"].visible, [data-reveal="right"].visible { transform: translateX(0); }
+  .stagger > * { opacity: 0; transform: translateY(16px); transition: all 0.5s var(--ease-spring); }
+  .stagger.visible > * { opacity: 1; transform: translateY(0); }
+  .stagger.visible > *:nth-child(1) { transition-delay: 0.05s; }
+  .stagger.visible > *:nth-child(2) { transition-delay: 0.11s; }
+  .stagger.visible > *:nth-child(3) { transition-delay: 0.17s; }
+  .stagger.visible > *:nth-child(4) { transition-delay: 0.23s; }
+  .stagger.visible > *:nth-child(5) { transition-delay: 0.29s; }
+
+  .hidden-fold { display: none; }
+
+  .typing-cursor { display: inline-block; width: 2px; height: 1.2em; background: var(--primary); margin-left: 2px; vertical-align: text-bottom; animation: blink 0.9s infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+  .fold-hint {
+    margin-top: 40px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; color: var(--text-subtle);
+    animation: floaty 2.5s ease-in-out infinite;
+  }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .grid-2, .grid-bottom { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 480px) {
+    nav { padding: 0 16px; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LIQUID GLASS NAVBAR ============ -->
+<nav>
+  <div class="brand">
+    <div class="brand-mark">A</div>
+    <span>Axiom</span>
+  </div>
+  <div class="nav-links">
+    <a href="#" class="active" data-i18n="nav.dashboard">Dashboard</a>
+    <a href="#" data-i18n="nav.analyze">Analyze</a>
+    <a href="#" data-i18n="nav.projections">Projections</a>
+    <a href="#" data-i18n="nav.profile">Profile</a>
+  </div>
+  <div class="nav-right">
+    <button class="lang-btn" id="langBtn"><span class="dot"></span><span id="langLabel">EN</span></button>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<main>
+<section class="hero">
+  <h1 data-reveal><span data-i18n="hero.title1">Can you afford</span> <span class="grad" data-i18n="hero.title2">it?</span></h1>
+  <p class="subtitle" data-reveal data-i18n="hero.subtitle">Type a purchase. Get the truth — total cost, hidden fees, and what it costs you in missed investments.</p>
+
+  <div class="analyzer" data-reveal style="transition-delay:0.15s">
+    <div class="analyzer-head">
+      <div class="ai-status"><span class="pulse"></span><span data-i18n="analyzer.status">AI Analyzer Active</span><span class="ver">v2.4.1</span></div>
+    </div>
+    <textarea id="promptInput" rows="2" data-i18n-ph="analyzer.placeholder" placeholder="I want to buy a 2024 Honda Civic for Rp550M, putting Rp100M down over 60 months. Can I afford it?"></textarea>
+    <div class="chips-row">
+      <div class="chips" id="chipRow">
+        <button class="chip active" data-cat="auto">🚗 <span data-i18n="cat.auto">Auto</span></button>
+        <button class="chip" data-cat="house">🏠 <span data-i18n="cat.house">House</span></button>
+        <button class="chip" data-cat="tech">📱 <span data-i18n="cat.tech">Tech</span></button>
+      </div>
+      <button class="analyze-btn" id="analyzeBtn">
+        <span data-i18n="analyzer.cta">ANALYZE</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h7l-1 8 11-13h-7l1-7z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="fold-hint" data-i18n="hero.scroll">Scroll to explore</div>
+</section>
+
+<!-- ============ BELOW FOLD ============ -->
+<section class="below hidden-fold" id="belowFold">
+
+  <div class="grid-2">
+    <!-- HEALTH SCORE -->
+    <div class="card" data-reveal="left">
+      <h3 data-i18n="cards.health.title">Health Score</h3>
+      <p class="card-sub" data-i18n="cards.health.sub">Your financial readiness for this purchase</p>
+      <div class="gauge-wrap">
+        <svg class="gauge-arc" viewBox="0 0 200 200" id="gaugeSvg">
+          <!-- background track -->
+          <path id="gaugeTrack" d="M 100 100 m -76 0 a 76 76 0 1 1 152 0 a 76 76 0 1 1 -152 0" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14" stroke-linecap="round"/>
+          <!-- segmented zones -->
+          <path id="zoneDanger" d="M 100 100 m -76 0 a 76 76 0 1 1 152 0 a 76 76 0 1 1 -152 0" fill="none" stroke="url(#gradDanger)" stroke-width="14" stroke-linecap="butt" stroke-dasharray="99.5 477.5" stroke-dashoffset="0"/>
+          <path id="zoneMid" d="M 100 100 m -76 0 a 76 76 0 1 1 152 0 a 76 76 0 1 1 -152 0" fill="none" stroke="url(#gradMid)" stroke-width="14" stroke-linecap="butt" stroke-dasharray="99.5 477.5" stroke-dashoffset="0"/>
+          <path id="zoneGood" d="M 100 100 m -76 0 a 76 76 0 1 1 152 0 a 76 76 0 1 1 -152 0" fill="none" stroke="url(#gradGood)" stroke-width="14" stroke-linecap="butt" stroke-dasharray="99.5 477.5" stroke-dashoffset="0"/>
+          <!-- active score needle -->
+          <path id="gaugeNeedle" d="M 100 100 m -76 0 a 76 76 0 1 1 152 0 a 76 76 0 1 1 -152 0" fill="none" stroke="#fafafa" stroke-width="14" stroke-linecap="round" stroke-dasharray="0 477.5" stroke-dashoffset="0" style="filter: drop-shadow(0 0 8px rgba(250,250,250,0.4));"/>
+          <defs>
+            <linearGradient id="gradDanger" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#f97316"/></linearGradient>
+            <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient>
+            <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+          </defs>
+        </svg>
+        <div style="margin-top:-150px; text-align:center; pointer-events:none;">
+          <div style="font-family:var(--font-mono); font-size:44px; font-weight:700; line-height:1;" id="scoreValue">--</div>
+          <div class="gauge-label safe" id="scoreLabel" data-i18n="gauge.prelim">Preliminary</div>
+        </div>
+        <div class="risk-row">
+          <span class="risk-tag danger" id="riskTag1" data-i18n="risk.high">High Risk Asset</span>
+          <span class="risk-tag warn" id="riskTag2" data-i18n="risk.dti">DTI Over 30%</span>
+        </div>
+      </div>
+      <div class="gauge-metrics">
+        <div class="metric">
+          <div class="m-label" data-i18n="cards.health.dti">DTI Ratio</div>
+          <div class="m-value warn" id="dtiValue">--</div>
+        </div>
+        <div class="metric">
+          <div class="m-label" data-i18n="cards.health.post">Post-Purchase</div>
+          <div class="m-value" id="postValue">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHAT IF -->
+    <div class="card" data-reveal="right">
+      <h3 data-i18n="cards.whatif.title">The "What If" Scenario</h3>
+      <p class="card-sub" data-i18n="cards.whatif.sub">If you invested that monthly payment instead of buying...</p>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 480 220" preserveAspectRatio="none" id="chartSvg">
+          <defs>
+            <linearGradient id="wealthFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#34d399" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="assetFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f87171" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- grid lines -->
+          <line x1="0" y1="55" x2="480" y2="55" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3 3"/>
+          <line x1="0" y1="110" x2="480" y2="110" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3 3"/>
+          <line x1="0" y1="165" x2="480" y2="165" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3 3"/>
+          <!-- asset (depreciation) area -->
+          <path id="assetArea" d="" fill="url(#assetFill)"/>
+          <path id="assetLine" d="" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- investment area -->
+          <path id="investArea" d="" fill="url(#wealthFill)"/>
+          <path id="investLine" d="" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+          <!-- crossover marker -->
+          <circle id="crossoverDot" cx="0" cy="0" r="5" fill="#fafafa" stroke="#34d399" stroke-width="2.5" opacity="0"/>
+        </svg>
+        <div class="chart-axis">
+          <span data-i18n="cards.whatif.year0">YEAR 0</span>
+          <span data-i18n="cards.whatif.year5">YEAR 5</span>
+        </div>
+        <div class="wealth-badge" id="wealthBadge">+ Rp38.4M</div>
+        <div class="legend">
+          <span class="lg"><span class="sw invest"></span><span data-i18n="cards.whatif.invest">Invested</span></span>
+          <span class="lg"><span class="sw asset"></span><span data-i18n="cards.whatif.asset">Asset Value</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- PARAMETERS -->
+    <div class="card" data-reveal="left">
+      <h3 data-i18n="cards.params.title">Parameters</h3>
+      <p class="card-sub" data-i18n="cards.params.sub">Adjust to see how your score changes — find your real ceiling</p>
+      <div class="param">
+        <div class="param-head">
+          <label data-i18n="cards.params.dp">Down Payment</label>
+          <output id="dpOutput">Rp100.000.000</output>
+        </div>
+        <input type="range" id="dpSlider" min="0" max="400" value="100" step="5">
+        <div class="param-hint" data-i18n="cards.params.dpHint">0 – Rp400M · DP ≥ 20% unlocks better rates</div>
+      </div>
+      <div class="param">
+        <div class="param-head">
+          <label data-i18n="cards.params.term">Term Length</label>
+          <output id="termOutput">60 mo</output>
+        </div>
+        <input type="range" id="termSlider" min="12" max="96" value="60" step="6">
+        <div class="param-hint" data-i18n="cards.params.termHint">12 – 96 months · shorter = less interest</div>
+      </div>
+      <div class="param">
+        <div class="param-head">
+          <label data-i18n="cards.params.income">Monthly Income</label>
+          <output id="incomeOutput">Rp15.000.000</output>
+        </div>
+        <input type="range" id="incomeSlider" min="5" max="50" value="15" step="1">
+        <div class="param-hint" data-i18n="cards.params.incomeHint">Rp5M – Rp50M · after tax</div>
+      </div>
+    </div>
+
+    <!-- QUICK INSIGHT (B) -->
+    <div class="insight-box" data-reveal="right">
+      <div class="i-label" data-i18n="cards.insight.label">Axiom Insight</div>
+      <div class="i-text" data-i18n="cards.insight.text">At <strong>Rp15M/mo</strong> income, your real ceiling is a <strong>Rp385M</strong> car with 20% down. This purchase is <strong>Rp165M over</strong> your comfortable limit — or wait 14 months and save 30% more DP.</div>
+    </div>
+  </div>
+
+  <!-- RECENT ANALYSES (A) -->
+  <div class="card" data-reveal style="margin-top:24px;">
+    <h3 data-i18n="cards.recent.title">Recent Analyses</h3>
+    <p class="card-sub" data-i18n="cards.recent.sub">Pick up where you left off</p>
+    <div class="stagger" id="recentList">
+      <div class="recent-chip" data-score="good">
+        <span class="r-name">Toyota Avanza Veloz</span>
+        <span class="r-price">Rp300M · 60 mo</span>
+        <span class="r-score good">82</span>
+      </div>
+      <div class="recent-chip" data-score="bad">
+        <span class="r-name">Honda Civic RS</span>
+        <span class="r-price">Rp550M · 60 mo</span>
+        <span class="r-score bad">46</span>
+      </div>
+      <div class="recent-chip" data-score="good">
+        <span class="r-name">iPhone 16 Pro 256GB</span>
+        <span class="r-price">Rp24.5M · 24 mo</span>
+        <span class="r-score good">88</span>
+      </div>
+      <div class="recent-chip" data-score="bad">
+        <span class="r-name">Studio Apartment Jakarta</span>
+        <span class="r-price">Rp1.2B · 240 mo</span>
+        <span class="r-score bad">38</span>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center; margin-top:64px; font-size:12px; color:var(--text-subtle);">
+    Axiom v0 prototype · calculations are illustrative
+  </footer>
+</section>
+</main>
+
+<script>
+/* ============ I18N ============ */
+const I18N = {
+  en: {
+    'nav.dashboard': 'Dashboard', 'nav.analyze': 'Analyze', 'nav.projections': 'Projections', 'nav.profile': 'Profile',
+    'hero.title1': 'Can you afford', 'hero.title2': 'it?',
+    'hero.subtitle': 'Type a purchase. Get the truth — total cost, hidden fees, and what it costs you in missed investments.',
+    'hero.scroll': 'Scroll to explore',
+    'analyzer.status': 'AI Analyzer Active',
+    'analyzer.placeholder': 'I want to buy a 2024 Honda Civic for Rp550M, putting Rp100M down over 60 months. Can I afford it?',
+    'analyzer.cta': 'ANALYZE',
+    'cat.auto': 'Auto', 'cat.house': 'House', 'cat.tech': 'Tech',
+    'cards.health.title': 'Health Score', 'cards.health.sub': 'Your financial readiness for this purchase',
+    'cards.health.dti': 'DTI Ratio', 'cards.health.post': 'Post-Purchase',
+    'cards.whatif.title': 'The "What If" Scenario', 'cards.whatif.sub': 'If you invested that monthly payment instead of buying...',
+    'cards.whatif.year0': 'YEAR 0', 'cards.whatif.year5': 'YEAR 5',
+    'cards.whatif.invest': 'Invested', 'cards.whatif.asset': 'Asset Value',
+    'cards.params.title': 'Parameters', 'cards.params.sub': 'Adjust to see how your score changes — find your real ceiling',
+    'cards.params.dp': 'Down Payment', 'cards.params.term': 'Term Length', 'cards.params.income': 'Monthly Income',
+    'cards.params.dpHint': '0 – Rp400M · DP ≥ 20% unlocks better rates',
+    'cards.params.termHint': '12 – 96 months · shorter = less interest',
+    'cards.params.incomeHint': 'Rp5M – Rp50M · after tax',
+    'cards.insight.label': 'Axiom Insight',
+    'cards.insight.text': 'At <strong>Rp15M/mo</strong> income, your real ceiling is a <strong>Rp385M</strong> car with 20% down. This purchase is <strong>Rp165M over</strong> your comfortable limit — or wait 14 months and save 30% more DP.',
+    'cards.recent.title': 'Recent Analyses', 'cards.recent.sub': 'Pick up where you left off',
+    'gauge.prelim': 'Preliminary', 'gauge.safe': 'Safe Zone', 'gauge.caution': 'Caution Zone', 'gauge.danger': 'Danger Zone',
+    'risk.high': 'High Risk Asset', 'risk.dti': 'DTI Over 30%', 'risk.none': 'Within Limits'
+  },
+  id: {
+    'nav.dashboard': 'Beranda', 'nav.analyze': 'Analisis', 'nav.projections': 'Proyeksi', 'nav.profile': 'Profil',
+    'hero.title1': 'Bisa beli', 'hero.title2': 'nggak?',
+    'hero.subtitle': 'Tulis pembelianmu. Dapat kebenarannya — biaya total, biaya tersembunyi, dan berapa kerugianmu kalau uangnya diinvestasikan.',
+    'hero.scroll': 'Scroll untuk eksplorasi',
+    'analyzer.status': 'AI Analyzer Aktif',
+    'analyzer.placeholder': 'Saya mau beli Honda Civic 2024 seharga Rp550jt, DP Rp100jt cicil 60 bulan. Bisa nggak?',
+    'analyzer.cta': 'ANALISIS',
+    'cat.auto': 'Mobil', 'cat.house': 'Rumah', 'cat.tech': 'Gadget',
+    'cards.health.title': 'Skor Kesehatan', 'cards.health.sub': 'Kesiapan finansialmu untuk pembelian ini',
+    'cards.health.dti': 'Rasio DTI', 'cards.health.post': 'Setelah Beli',
+    'cards.whatif.title': 'Skenario "Bagaimana Kalau"', 'cards.whatif.sub': 'Kalau cicilan itu kamu investasikan, bukan buat beli...',
+    'cards.whatif.year0': 'TAHUN 0', 'cards.whatif.year5': 'TAHUN 5',
+    'cards.whatif.invest': 'Investasi', 'cards.whatif.asset': 'Nilai Aset',
+    'cards.params.title': 'Parameter', 'cards.params.sub': 'Geser untuk lihat skor berubah — temukan batas amanmu',
+    'cards.params.dp': 'Uang Muka', 'cards.params.term': 'Tenor', 'cards.params.income': 'Gaji Bulanan',
+    'cards.params.dpHint': 'Rp0 – Rp400jt · DP ≥ 20% dapat bunga lebih baik',
+    'cards.params.termHint': '12 – 96 bulan · lebih pendek = lebih sedikit bunga',
+    'cards.params.incomeHint': 'Rp5jt – Rp50jt · setelah pajak',
+    'cards.insight.label': 'Insight Axiom',
+    'cards.insight.text': 'Dengan gaji <strong>Rp15jt/bln</strong>, batas amanmu adalah mobil <strong>Rp385jt</strong> dengan DP 20%. Pembelian ini <strong>Rp165jt di atas</strong> batas nyamanmu — atau tunggu 14 bulan dan kumpulkan DP 30% lebih.',
+    'cards.recent.title': 'Analisis Terakhir', 'cards.recent.sub': 'Lanjutkan dari yang terakhir',
+    'gauge.prelim': 'Perkiraan', 'gauge.safe': 'Zona Aman', 'gauge.caution': 'Zona Waspada', 'gauge.danger': 'Zona Bahaya',
+    'risk.high': 'Aset Berisiko Tinggi', 'risk.dti': 'DTI di Atas 30%', 'risk.none': 'Dalam Batas Aman'
+  }
+};
+let lang = 'en';
+function setLang(l) {
+  lang = l;
+  document.getElementById('langLabel').textContent = l.toUpperCase();
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (I18N[l][key] !== undefined) el.innerHTML = I18N[l][key];
+  });
+  const ph = document.getElementById('promptInput');
+  ph.placeholder = I18N[l]['analyzer.placeholder'];
+  renderAll();
+}
+document.getElementById('langBtn').addEventListener('click', () => setLang(lang === 'en' ? 'id' : 'en'));
+
+/* ============ FORMATTING ============ */
+const fmtIDR = v => 'Rp' + Math.round(v).toLocaleString('id-ID');
+function fmtCompactIDR(v) {
+  if (v >= 1e9) return 'Rp' + (v / 1e9).toFixed(1).replace('.', ',') + 'M';
+  if (v >= 1e6) return 'Rp' + (v / 1e6).toFixed(0).replace('.', ',') + 'jt';
+  return 'Rp' + Math.round(v).toLocaleString('id-ID');
+}
+
+/* ============ SCORE ENGINE (illustrative, matches v0) ============ */
+const BASE_PRICE = 550e6; // Honda Civic RS
+function computeScore(dp, term, income) {
+  const dpRatio = dp / BASE_PRICE;
+  const loan = BASE_PRICE - dp;
+  const rate = dpRatio >= 0.2 ? 0.055 : 0.08; // better rate with 20% DP
+  const monthlyRate = rate / 12;
+  const n = term;
+  const installment = loan * (monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+  const monthlyIncome = income * 1e6;
+  const dti = (installment / monthlyIncome) * 100;
+  // score: 100 - DTI stretch - DP penalty (below 20%) - term penalty (over 60mo)
+  let score = 100 - Math.max(0, (dti - 15) * 1.5) - (dpRatio < 0.2 ? 10 : 0) - (term > 60 ? 6 : 0);
+  score = Math.max(8, Math.min(97, Math.round(score)));
+  return { score, dti, installment };
+}
+
+/* ============ GAUGE DRAW ============ */
+const GAUGE_LEN = 477.5;
+function drawGauge(score, animate = true) {
+  const needle = document.getElementById('gaugeNeedle');
+  const val = document.getElementById('scoreValue');
+  const label = document.getElementById('scoreLabel');
+  const target = (score / 100) * GAUGE_LEN;
+
+  val.textContent = score;
+  label.className = 'gauge-label ' + (score >= 75 ? 'safe' : score >= 50 ? 'caution' : 'danger');
+  const zoneKey = score >= 75 ? 'safe' : score >= 50 ? 'caution' : 'danger';
+  label.textContent = I18N[lang]['gauge.' + zoneKey];
+
+  // risk tags
+  const t1 = document.getElementById('riskTag1');
+  const t2 = document.getElementById('riskTag2');
+  t1.className = 'risk-tag ' + (score < 75 ? 'danger' : 'info');
+  t1.textContent = I18N[lang][score < 75 ? 'risk.high' : 'risk.none'];
+  t2.className = 'risk-tag ' + (score >= 75 ? 'info' : 'warn');
+  t2.textContent = I18N[lang][score >= 75 ? 'risk.none' : 'risk.dti'];
+
+  if (!animate) {
+    needle.style.strokeDasharray = target + ' ' + GAUGE_LEN;
+    return;
+  }
+  const start = performance.now();
+  const from = parseFloat(needle.style.strokeDasharray || '0') || 0;
+  const dur = 1200;
+  function finish() { needle.style.strokeDasharray = target + ' ' + GAUGE_LEN; }
+  function tick(now) {
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    needle.style.strokeDasharray = (from + (target - from) * eased) + ' ' + GAUGE_LEN;
+    if (p < 1) requestAnimationFrame(tick);
+    else finish();
+  }
+  requestAnimationFrame(tick);
+  // rAF fallback: guarantee final state even if the tab is backgrounded/throttled
+  setTimeout(finish, dur + 150);
+}
+
+/* ============ CHART DRAW ============ */
+const W = 480, H = 220;
+const assetData = [550, 470, 400, 340, 290, 248];   // depreciation
+const investData = [0, 42, 88, 140, 198, 264];       // growth (millions)
+function pathFor(data, yMax) {
+  const max = Math.max(...data);
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * W;
+    const y = H - 14 - (v / max) * (H - 28);
+    return [x, y];
+  });
+  let d = 'M ' + pts[0][0] + ' ' + pts[0][1];
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i];
+    const cx = (x0 + x1) / 2;
+    d += ' C ' + cx + ' ' + y0 + ' ' + cx + ' ' + y1 + ' ' + x1 + ' ' + y1;
+  }
+  return d;
+}
+function areaFor(d) {
+  return d + ' L ' + W + ' ' + H + ' L 0 ' + H + ' Z';
+}
+function drawChart(animate = true) {
+  const aLine = pathFor(assetData), iLine = pathFor(investData);
+  const aArea = areaFor(aLine), iArea = areaFor(iLine);
+  if (!animate) {
+    document.getElementById('assetLine').setAttribute('d', aLine);
+    document.getElementById('assetArea').setAttribute('d', aArea);
+    document.getElementById('investLine').setAttribute('d', iLine);
+    document.getElementById('investArea').setAttribute('d', iArea);
+    return;
+  }
+  const al = document.getElementById('assetLine');
+  const il = document.getElementById('investLine');
+  al.setAttribute('d', aLine); il.setAttribute('d', iLine);
+  document.getElementById('assetArea').setAttribute('d', aArea);
+  document.getElementById('investArea').setAttribute('d', iArea);
+  const aLen = al.getTotalLength(), iLen = il.getTotalLength();
+  al.style.strokeDasharray = aLen; al.style.strokeDashoffset = aLen;
+  il.style.strokeDasharray = iLen; il.style.strokeDashoffset = iLen;
+  const start = performance.now(), dur = 1000;
+  function finish() {
+    al.style.strokeDashoffset = 0;
+    il.style.strokeDashoffset = 0;
+  }
+  function tick(now) {
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    al.style.strokeDashoffset = aLen * (1 - eased);
+    il.style.strokeDashoffset = iLen * (1 - eased);
+    if (p < 1) requestAnimationFrame(tick);
+    else finish();
+  }
+  requestAnimationFrame(tick);
+  setTimeout(finish, dur + 150);
+}
+
+/* ============ RENDER ALL ============ */
+function renderAll(animate = true) {
+  const dp = parseInt(document.getElementById('dpSlider').value) * 1e6;
+  const term = parseInt(document.getElementById('termSlider').value);
+  const income = parseInt(document.getElementById('incomeSlider').value);
+  document.getElementById('dpOutput').textContent = fmtIDR(dp);
+  document.getElementById('termOutput').textContent = term + ' mo';
+  document.getElementById('incomeOutput').textContent = fmtCompactIDR(income * 1e6);
+
+  // slider fill
+  ['dpSlider', 'termSlider', 'incomeSlider'].forEach(id => {
+    const el = document.getElementById(id);
+    const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+    el.style.setProperty('--fill', pct + '%');
+  });
+
+  const { score, dti, installment } = computeScore(dp, term, income);
+  document.getElementById('dtiValue').textContent = dti.toFixed(1) + '%';
+  document.getElementById('dtiValue').className = 'm-value ' + (dti > 30 ? 'bad' : dti > 20 ? 'warn' : 'good');
+  document.getElementById('postValue').textContent = (dti * 1.18).toFixed(1) + '%';
+  document.getElementById('postValue').className = 'm-value ' + (dti * 1.18 > 35 ? 'bad' : 'warn');
+
+  drawGauge(score, animate);
+}
+
+['dpSlider', 'termSlider', 'incomeSlider'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => renderAll(false));
+});
+
+/* ============ ANALYZE FLOW ============ */
+document.getElementById('analyzeBtn').addEventListener('click', () => {
+  const btn = document.getElementById('analyzeBtn');
+  btn.classList.add('loading');
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    document.getElementById('belowFold').classList.remove('hidden-fold');
+    renderAll(true);
+    drawChart(true);
+    // reveal animations
+    requestAnimationFrame(() => {
+      document.querySelectorAll('#belowFold [data-reveal]').forEach((el, i) => {
+        setTimeout(() => el.classList.add('visible'), i * 120);
+      });
+      const stag = document.querySelector('.stagger');
+      setTimeout(() => stag.classList.add('visible'), 400);
+      // scroll
+      document.getElementById('belowFold').scrollIntoView({ behavior: 'smooth' });
+    });
+  }, 900);
+});
+
+/* ============ CHIP SELECT ============ */
+document.getElementById('chipRow').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+});
+
+/* ============ INIT ============ */
+setLang('en');
+// initial hero reveal
+requestAnimationFrame(() => {
+  document.querySelectorAll('.hero [data-reveal]').forEach((el, i) => {
+    setTimeout(() => el.classList.add('visible'), 150 + i * 130);
+  });
+});
+</script>
+</body>
+</html>
