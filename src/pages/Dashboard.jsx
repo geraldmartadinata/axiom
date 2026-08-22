@@ -5,6 +5,9 @@ import CommandCapsule from '../components/capsule/CommandCapsule'
 import ScenarioCard from '../components/cards/ScenarioCard'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
+import FinancialHealthWidget from '../components/dashboard/FinancialHealthWidget'
+import GrowthChartWidget from '../components/dashboard/GrowthChartWidget'
+import Footer from '../components/layout/Footer'
 import { Link } from 'react-router-dom'
 import { UserCircle } from 'lucide-react'
 
@@ -13,7 +16,7 @@ export default function Dashboard() {
   const { history, profile, isAnalyzing, loadFromHistory } = useAxiomStore()
   const { t } = useLanguage()
 
-  const recentScenarios = history.slice(0, 3)
+  const recentScenarios = history.slice(0, 5)
   const hasProfile = profile && profile.monthly_income > 0
 
   return (
@@ -42,23 +45,12 @@ export default function Dashboard() {
         <CommandCapsule />
       </div>
 
-      {/* Recent Scenarios or Empty State */}
-      {recentScenarios.length > 0 && (
-        <div className="mt-16">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
-            {t('dashboard.recentScenarios')}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recentScenarios.map(s => (
-              <ScenarioCard
-                key={s.id}
-                scenario={s}
-                onClick={() => { loadFromHistory(s.id); navigate('/analyze') }}
-              />
-            ))}
-          </div>
+      <div className="mt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <FinancialHealthWidget />
+          <GrowthChartWidget />
         </div>
-      )}
+      </div>
 
       {/* Profile Widget */}
       <div className="mt-16">
@@ -79,6 +71,26 @@ export default function Dashboard() {
           </Link>
         </Card>
       </div>
+
+      {/* Recent Scenarios or Empty State */}
+      {recentScenarios.length > 0 && (
+        <div className="mt-16">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
+            {t('dashboard.recentScenarios')}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recentScenarios.map(s => (
+              <ScenarioCard
+                key={s.id}
+                scenario={s}
+                onClick={() => { loadFromHistory(s.id); navigate('/analyze') }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </div>
   )
 }

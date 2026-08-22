@@ -3,6 +3,7 @@ import { useAxiomStore } from '../../store/useAxiomStore'
 import { useLanguage } from '../../store/LanguageContext.jsx'
 import { cn } from '../../utils/cn'
 import { Activity, BarChart3, History, User, Sparkles, Globe } from 'lucide-react'
+import LiquidGlassFilter from '../ui/LiquidGlassFilter'
 
 export default function DynamicIsland() {
   const { pathname } = useLocation()
@@ -23,8 +24,13 @@ export default function DynamicIsland() {
 
   return (
     <nav className="sticky top-4 z-50 px-4">
+      <LiquidGlassFilter />
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between bg-zinc-900/80 backdrop-blur-2xl border border-white/[6%] rounded-full px-3 py-2">
+        <div
+          className="flex items-center justify-between bg-zinc-900/40 border border-white/[15%] rounded-full px-3 py-2 shadow-2xl relative"
+          style={{ backdropFilter: 'url(#liquid-glass-filter) blur(16px)' }}
+        >
+          <div className="absolute inset-0 rounded-full border border-white/[10%] pointer-events-none mix-blend-overlay"></div>
           {/* Brand */}
           <Link to="/" className="flex items-center gap-2 pl-2">
             <span className="text-white font-bold text-lg tracking-tight">Axiom</span>

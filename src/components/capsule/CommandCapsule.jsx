@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAxiomStore } from '../../store/useAxiomStore'
 import { useLanguage } from '../../store/LanguageContext.jsx'
@@ -17,6 +17,58 @@ export default function CommandCapsule() {
     t('dashboard.example3'),
   ]
 
+  const [currentExampleIndex, setCurrentExampleIndex] = useState(0)
+  const [displayedText, setDisplayedText] = useState('')
+  const [isTyping, setIsTyping] = useState(true)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showCursor, setShowCursor] = useState(true)
+  const typingSpeed = 1000 / examples[currentExampleIndex].length
+  const deletingSpeed = 1000 / examples[currentExampleIndex].length
+  const currentExample = examples[currentExampleIndex]
+  const isFocusedRef = useRef(false)
+
+  useEffect(() => {
+    if (isFocusedRef.current || text) return
+
+    let timeout
+
+    if (isTyping) {
+      if (displayedText.length < currentExample.length) {
+        timeout = setTimeout(() => {
+          setDisplayedText(currentExample.slice(0, displayedText.length + 1))
+        }, typingSpeed)
+      } else {
+        setIsTyping(false)
+        // Wait 3 seconds, cursor blinks
+        timeout = setTimeout(() => {
+          setIsDeleting(true)
+        }, 3000)
+      }
+    } else if (isDeleting) {
+      if (displayedText.length > 0) {
+        timeout = setTimeout(() => {
+          setDisplayedText(currentExample.slice(0, displayedText.length - 1))
+        }, deletingSpeed)
+      } else {
+        setIsDeleting(false)
+        // Wait 1 second before typing next
+        timeout = setTimeout(() => {
+          setCurrentExampleIndex((prev) => (prev + 1) % examples.length)
+          setIsTyping(true)
+        }, 1000)
+      }
+    }
+
+    return () => clearTimeout(timeout)
+  }, [displayedText, isTyping, isDeleting, currentExample, currentExampleIndex, examples, text, typingSpeed, deletingSpeed])
+
+  useEffect(() => {
+    const cursorInterval = setInterval(() => {
+      setShowCursor(prev => !prev)
+    }, 500)
+    return () => clearInterval(cursorInterval)
+  }, [])
+
   const handleSubmit = async () => {
     if (!text.trim() || isAnalyzing) return
     await analyzePrompt(text)
@@ -30,13 +82,30 @@ export default function CommandCapsule() {
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="relative">
+        <div className="absolute inset-0 pointer-events-none px-5 py-4 text-base whitespace-pre-wrap break-words">
+          {(!text && !isFocusedRef.current) && (
+            <span className="text-zinc-600">
+              {displayedText}
+              <span className={`inline-block w-[2px] h-[1.1em] ml-0.5 align-middle bg-zinc-400 ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
+            </span>
+          )}
+        </div>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={t('dashboard.placeholder')}
+          onFocus={() => isFocusedRef.current = true}
+          onBlur={() => {
+            isFocusedRef.current = false;
+            if (!text) {
+              setDisplayedText('');
+              setIsTyping(true);
+              setIsDeleting(false);
+            }
+          }}
+          placeholder=""
           rows={3}
-          className="w-full bg-zinc-950/60 backdrop-blur-md border border-white/[6%] rounded-2xl px-5 py-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/[15%] transition-colors resize-none text-base"
+          className="w-full bg-zinc-950/60 backdrop-blur-md border border-white/[6%] rounded-2xl px-5 py-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/[15%] transition-colors resize-none text-base relative z-10 bg-transparent"
         />
       </div>
 
@@ -51,21 +120,6 @@ export default function CommandCapsule() {
           {!isAnalyzing && <ArrowRight className="h-4 w-4" />}
         </Button>
       </div>
-
-      {!text && (
-        <div className="mt-8 space-y-2">
-          <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">{t('dashboard.examples')}</p>
-          {examples.map((ex, i) => (
-            <button
-              key={i}
-              onClick={() => setText(ex)}
-              className="block w-full text-left px-4 py-2.5 rounded-xl bg-zinc-900/40 border border-white/[4%] text-sm text-zinc-400 hover:text-white hover:border-white/[10%] transition-all"
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   )
 }
