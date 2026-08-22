@@ -7,32 +7,66 @@
   "nav": {
     "home": "Home",
     "analyze": "Analyze",
-    "projections": "Projections",
-    "history": "History",
     "profile": "Profile"
   },
   "dashboard": {
-    "title": "Can you afford it?",
+    "title": "Can you afford",
+    "titleAccent": "it?",
     "subtitle": "Describe a purchase in plain language. Axiom extracts the numbers, calculates the real cost, and tells you if it fits your life — no judgment, just math.",
-    "placeholder": "Can I afford a $40k Tesla Model 3 with $5k down over 60 months, earning $8k/month?",
     "analyzeButton": "Analyze",
     "analyzingButton": "Analyzing...",
-    "examples": "Try these:",
     "example1": "Can I afford a $40k Tesla Model 3 with $5k down over 60 months, earning $8k/month?",
     "example2": "Can I afford a $110k BMW M5 earning $2k/month with $5k down?",
     "example3": "Can I afford a $150k studio apartment with $30k down over 30 years at 4.5%?",
-    "recentScenarios": "Recent Scenarios"
+    "overallTitle": "Your Financial Health",
+    "overallSub": "Based on confirmed purchases and your profile",
+    "overallEmpty": "Confirm a purchase to track your post-purchase health",
+    "recentTitle": "Recent Analyses",
+    "recentEmpty": "No analyses yet — your first purchase is waiting.",
+    "recentViewAll": "View all",
+    "insightLabel": "Axiom Insight",
+    "scrollHint": "Scroll to explore"
+  },
+  "analyzer": {
+    "status": "AI Analyzer Active",
+    "placeholder": "Can I afford a 2024 Honda Civic for $45k, putting $8k down over 60 months?",
+    "cta": "Analyze"
+  },
+  "cat": {
+    "auto": "Auto",
+    "house": "House",
+    "tech": "Tech"
   },
   "analyze": {
-    "title": "{itemName}",
+    "indexTitle": "Your Analyses",
+    "indexSub": "Pick up where you left off, or start something new.",
+    "newAnalysis": "New Analysis",
+    "noHistory": "You haven't analyzed anything yet.",
+    "noHistorySub": "Your first purchase is waiting. Type it in and get the truth.",
+    "emptyStateCta": "Start your first analysis",
+    "sessionNotFound": "Session not found",
+    "sessionNotFoundSub": "This analysis may have been deleted. Pick another one below.",
+    "backToAnalyses": "Back to analyses",
     "scoreBreakdown": "Score Breakdown",
     "debtToIncome": "Debt-to-Income Ratio",
     "opportunityCost": "What If You Invested Instead?",
     "totalCost": "Total Cost of Ownership",
     "hiddenCosts": "Hidden Costs",
+    "parameters": "Parameters",
     "preliminary": "Preliminary Score",
     "preliminaryDesc": "Complete your profile for an accurate score.",
     "completeProfile": "Complete Profile",
+    "confirmPurchase": "I actually bought this",
+    "confirmPurchaseSub": "Mark it confirmed to update your overall financial health",
+    "confirmed": "Purchase confirmed",
+    "confirmedSub": "Your overall health score now includes this debt",
+    "undoConfirm": "Undo",
+    "confirmModalTitle": "Confirm purchase",
+    "confirmModalSub": "Did the numbers match reality? Adjust if needed.",
+    "finalPrice": "Final price",
+    "finalDownPayment": "Final down payment",
+    "finalTerm": "Final term (months)",
+    "deleteSession": "Delete",
     "scoreLabels": {
       "A": "Excellent",
       "B": "Good",
@@ -41,30 +75,42 @@
       "F": "Danger"
     }
   },
-  "projections": {
-    "title": "10-Year Projection",
-    "subtitle": "Comparing the purchase path vs. investing the difference. The crossover shows when investing overtakes the asset value.",
-    "crossoverYear": "Crossover: Year {year}",
-    "crossoverDesc": "Investment value surpasses asset residual value",
-    "noCrossover": "No crossover within 10 years",
-    "stats": {
-      "netWorthDiff": "Net Worth Difference",
-      "assetValue": "Asset Value (Year 10)",
-      "investmentValue": "Investment Value (Year 10)"
-    }
+  "gauge": {
+    "prelim": "Preliminary",
+    "safe": "Safe Zone",
+    "caution": "Caution Zone",
+    "danger": "Danger Zone"
   },
-  "history": {
-    "title": "Scenario History",
-    "empty": "No scenarios yet. Analyze your first purchase to see it here.",
-    "deleteConfirm": "Delete this scenario?",
-    "score": "Score: {score} ({grade})",
-    "date": "Analyzed {date}"
+  "projections": {
+    "title": "The \"What If\" Scenario",
+    "subtitle": "If you invested that monthly payment instead of buying...",
+    "wealthLabel": "Potential Wealth",
+    "invested": "Invested",
+    "assetValue": "Asset Value",
+    "year0": "Year 0",
+    "year5": "Year 5",
+    "crossoverYear": "Crossover: Year {year}",
+    "recovery": "Savings Recovery Time",
+    "recoverySub": "Months to rebuild your emergency buffer",
+    "recoveryValue": "{months} months",
+    "retirement": "First Rp100M Invested",
+    "retirementSub": "How this purchase delays your first big milestone",
+    "retirementValue": "delayed {months} months",
+    "ceiling": "Time-to-Ceiling",
+    "ceilingSub": "How long until this purchase fits comfortably",
+    "ceilingValue": "{months} months",
+    "alternatives": "Alternative Milestones",
+    "alt1": "a fully-funded emergency fund",
+    "alt2": "20% of your next down payment",
+    "alt3": "a year of groceries",
+    "noCrossover": "No crossover within 10 years"
   },
   "profile": {
     "title": "Financial Profile",
     "subtitle": "Your baseline for accurate scoring",
     "why": "Why we need this",
-    "whyDesc": "Your profile makes the Sanggup Score ~40% more accurate. Without it, scores use conservative defaults and show a \"Preliminary\" badge. We never share this data — it stays in your browser.",
+    "whyDesc": "Your profile makes the score ~40% more accurate. Without it, scores use conservative defaults and show a \"Preliminary\" badge. We never share this data — it stays in your browser.",
+    "currencyToggle": "Currency",
     "fields": {
       "monthlyIncome": {
         "label": "Monthly Net Income",
@@ -77,7 +123,7 @@
         "help": "Cash you can access in 24 hours"
       },
       "monthlySavings": {
-        "label": "Monthly Savings Rate",
+        "label": "Monthly Savings",
         "placeholder": "e.g., 2000",
         "help": "What you actually save each month"
       },
@@ -93,26 +139,7 @@
       }
     },
     "saveButton": "Save Profile",
-    "saved": "Profile saved",
-    "currency": "USD"
-  },
-  "common": {
-    "currency": "USD",
-    "currencySymbol": "$",
-    "perMonth": "/mo",
-    "perYear": "/yr",
-    "score": "Score",
-    "grade": "Grade",
-    "months": "months",
-    "years": "years",
-    "loading": "Loading...",
-    "error": "Something went wrong",
-    "retry": "Try again",
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "confirm": "Confirm",
-    "close": "Close"
+    "saved": "Profile saved"
   },
   "cards": {
     "dti": {
@@ -149,7 +176,56 @@
         "existingDebt": "Existing Debt",
         "affordability": "Affordability"
       }
+    },
+    "params": {
+      "title": "Parameters",
+      "sub": "Adjust to see how your score changes — find your real ceiling",
+      "dp": "Down Payment",
+      "term": "Term Length",
+      "income": "Monthly Income",
+      "dpHint": "DP ≥ 20% unlocks better rates",
+      "termHint": "Shorter term = less interest",
+      "incomeHint": "After tax"
+    },
+    "health": {
+      "title": "Health Score",
+      "sub": "Your financial readiness for this purchase",
+      "dti": "DTI Ratio",
+      "post": "Post-Purchase",
+      "installment": "Installment"
+    },
+    "insight": {
+      "label": "Axiom Insight"
+    },
+    "overall": {
+      "title": "Overall Health",
+      "sub": "From confirmed purchases + profile",
+      "debtFactor": "Debt Load",
+      "emergencyFactor": "Emergency Fund",
+      "savingsFactor": "Savings Rate",
+      "dpFactor": "DP Discipline",
+      "confirmed": "{count} confirmed purchase(s)",
+      "noConfirmed": "No confirmed purchases yet"
     }
+  },
+  "common": {
+    "currency": "IDR",
+    "price": "Price",
+    "monthly": "Monthly",
+    "perMonth": "/mo",
+    "perYear": "/yr",
+    "score": "Score",
+    "months": "months",
+    "years": "years",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back"
   },
   "errors": {
     "extractionFailed": "Could not understand your scenario. Please include: price, down payment, loan term, and your income.",

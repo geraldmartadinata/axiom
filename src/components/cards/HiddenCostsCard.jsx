@@ -11,8 +11,9 @@ const typeBadgeConfig = {
   maintenance: { status: 'purple', labelKey: 'cards.hiddenCosts.maintenance' },
 }
 
-export default function HiddenCostsCard({ hiddenCosts, tenorMonths }) {
-  const { t, lang } = useLanguage()
+export default function HiddenCostsCard({ hiddenCosts, tenorMonths, lang, currency }) {
+  const { t } = useLanguage()
+  const uiLang = lang || 'en'
   const years = (tenorMonths || 0) / 12
 
   return (
@@ -36,11 +37,11 @@ export default function HiddenCostsCard({ hiddenCosts, tenorMonths }) {
                 <div className="text-right">
                   {cost.amount_per_year ? (
                     <p className="text-sm text-zinc-200 font-medium">
-                      {formatCurrency(cost.amount_per_year)}{t('cards.hiddenCosts.perYear')}
-                      <span className="text-zinc-500 text-xs"> &rarr; {formatCurrency(total)} total</span>
+                      {formatCurrency(cost.amount_per_year, uiLang, currency)}{t('cards.hiddenCosts.perYear')}
+                      <span className="text-zinc-500 text-xs"> &rarr; {formatCurrency(total, uiLang, currency)} total</span>
                     </p>
                   ) : (
-                    <p className="text-sm text-zinc-200 font-medium">{formatCurrency(cost.amount_upfront)} {t('cards.hiddenCosts.upfrontLabel')}</p>
+                    <p className="text-sm text-zinc-200 font-medium">{formatCurrency(cost.amount_upfront, uiLang, currency)} {t('cards.hiddenCosts.upfrontLabel')}</p>
                   )}
                 </div>
               </div>
