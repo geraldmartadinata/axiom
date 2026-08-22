@@ -37,10 +37,7 @@ export default function DynamicIsland() {
         <div className="glass rounded-2xl px-3 py-2 shadow-2xl shadow-black/40 flex items-center justify-between">
           {/* Brand + overall score */}
           <Link to="/" className="flex items-center gap-2.5 pl-2">
-            <span className="grid place-items-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 text-zinc-950 text-sm font-bold shadow-[0_0_16px_rgba(34,211,238,0.35)]">
-              A
-            </span>
-            <span className="text-white font-bold text-[15px] tracking-tight font-display">Axiom</span>
+            <span className="text-white font-bold text-lg tracking-tight">Axiom</span>
             <span
               className={cn(
                 'ml-1 px-2 py-0.5 rounded-full border text-[11px] font-bold tabular-nums',
@@ -50,7 +47,7 @@ export default function DynamicIsland() {
                 ? `${overall.confirmedCount} confirmed purchase(s)`
                 : 'No confirmed purchases yet'}
             >
-              {overall.confirmedCount > 0 ? overall.score : '—'}
+              {overall.confirmedCount > 0 ? overall.score : '0'}
             </span>
           </Link>
 
@@ -86,7 +83,7 @@ export default function DynamicIsland() {
           className="glass rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-semibold text-zinc-300 hover:text-white hover:border-white/20 transition-all shadow-lg shadow-black/30"
           aria-label={lang === 'en' ? 'Switch to Indonesian' : 'Switch to English'}
         >
-          {lang === 'en' ? <FlagID /> : <FlagUS />}
+          {lang === 'en' ? <FlagUS /> : <FlagID />}
           <span className="uppercase tabular-nums">{lang}</span>
         </button>
       </div>

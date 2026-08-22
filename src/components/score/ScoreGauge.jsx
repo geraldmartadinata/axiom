@@ -33,42 +33,58 @@ export default function ScoreGauge({
 
   const offset = circumference - (animatedScore / 100) * circumference
 
-  // zone segments: [startFraction, endFraction, color]
-  const zones = [
-    [0, 0.5, 'rgba(239,68,68,0.55)'],
-    [0.5, 0.8, 'rgba(251,191,36,0.55)'],
-    [0.8, 1, 'rgba(52,211,153,0.55)'],
-  ]
+  const gradientId = `score-gradient-${score}`
+
+  const renderGradient = () => {
+    if (score <= 33) {
+      return (
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#ef4444" />
+          <stop offset="100%" stopColor="#ef4444" />
+        </linearGradient>
+      )
+    } else if (score <= 66) {
+      return (
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ef4444" />
+          <stop offset="33%" stopColor="#ef4444" />
+          <stop offset="100%" stopColor="#eab308" />
+        </linearGradient>
+      )
+    } else {
+      return (
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ef4444" />
+          <stop offset="33%" stopColor="#ef4444" />
+          <stop offset="66%" stopColor="#eab308" />
+          <stop offset="100%" stopColor="#22c55e" />
+        </linearGradient>
+      )
+    }
+  }
 
   return (
     <div className="relative inline-flex flex-col items-center">
       <svg width={size} height={size} className="transform">
-        {/* Zone segments (full scale visible) */}
-        {zones.map(([start, end, zoneColor], i) => {
-          const zoneLen = (end - start) * circumference
-          const zoneOffset = circumference - start * circumference
-          return (
-            <circle
-              key={i}
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              fill="none"
-              stroke={zoneColor}
-              strokeWidth={strokeWidth}
-              strokeDasharray={`${zoneLen} ${circumference}`}
-              strokeDashoffset={zoneOffset}
-              transform={`rotate(-90 ${size / 2} ${size / 2})`}
-            />
-          )
-        })}
+        <defs>
+          {renderGradient()}
+        </defs>
+        {/* Background track (optional, helps visualize full circle) */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.05)"
+          strokeWidth={strokeWidth}
+        />
         {/* Active progress ring */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={color}
+          stroke={`url(#${gradientId})`}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}

@@ -7,7 +7,7 @@ export function FlagID({ className = 'w-4 h-3 rounded-[2px]' }) {
   return (
     <svg viewBox="0 0 16 12" className={className} aria-hidden="true">
       <rect width="16" height="12" fill="#CE1126" />
-      <rect y="4" width="16" height="4" fill="#FFFFFF" />
+      <rect y="6" width="16" height="6" fill="#FFFFFF" />
     </svg>
   )
 }
