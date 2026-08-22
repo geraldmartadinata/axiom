@@ -1,51 +1,73 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAxiomStore } from '../../store/useAxiomStore'
 import { useLanguage } from '../../store/LanguageContext.jsx'
+import { computeOverallScore } from '../../utils/overallScore'
 import { cn } from '../../utils/cn'
-import { Activity, BarChart3, History, User, Sparkles, Globe } from 'lucide-react'
+import { Sparkles, Activity, User } from 'lucide-react'
+import Flag, { FlagID, FlagUS } from '../ui/Flag'
 
+/**
+ * Liquid-glass floating navbar.
+ * - 3 main pages: Dashboard / Analyze / Profile
+ * - Overall health score badge (from confirmed purchases + profile)
+ * - Language toggle is SEPARATE, fixed top-right, with country flags
+ */
 export default function DynamicIsland() {
   const { pathname } = useLocation()
-  const isAnalyzing = useAxiomStore(s => s.isAnalyzing)
-  const scenario = useAxiomStore(s => s.currentScenario)
+  const history = useAxiomStore(s => s.history)
+  const profile = useAxiomStore(s => s.profile)
   const { lang, t, toggleLang } = useLanguage()
 
+  const overall = computeOverallScore(history, profile)
+  const scoreColor =
+    overall.status === 'SAFE' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' :
+    overall.status === 'WARNING' ? 'bg-amber-500/15 text-amber-400 border-amber-500/25' :
+    'bg-red-500/15 text-red-400 border-red-500/25'
+
   const links = [
-    { to: '/', label: t('nav.home'), icon: Sparkles },
+    { to: '/', label: t('nav.home'), icon: Sparkles, end: true },
     { to: '/analyze', label: t('nav.analyze'), icon: Activity },
-    { to: '/projections', label: t('nav.projections'), icon: BarChart3 },
-    { to: '/history', label: t('nav.history'), icon: History },
     { to: '/profile', label: t('nav.profile'), icon: User },
   ]
 
-  const score = scenario?.enrichment?.sanggup_score
-  const scoreColor = score ? (score.score >= 80 ? 'text-emerald-400' : score.score >= 50 ? 'text-amber-400' : 'text-red-400') : ''
-
   return (
-    <nav className="sticky top-4 z-50 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center justify-between bg-zinc-900/80 backdrop-blur-2xl border border-white/[6%] rounded-full px-3 py-2">
-          {/* Brand */}
-          <Link to="/" className="flex items-center gap-2 pl-2">
-            <span className="text-white font-bold text-lg tracking-tight">Axiom</span>
-            {isAnalyzing && <span className="text-zinc-500 text-sm animate-fade-in">{t('dashboard.analyzingButton')}</span>}
-            {!isAnalyzing && score && (
-              <span className={cn('text-sm font-bold', scoreColor)}>{score.score}</span>
-            )}
+    <>
+      {/* Floating liquid-glass pill */}
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-xl">
+        <div className="glass rounded-2xl px-3 py-2 shadow-2xl shadow-black/40 flex items-center justify-between">
+          {/* Brand + overall score */}
+          <Link to="/" className="flex items-center gap-2.5 pl-2">
+            <span className="grid place-items-center w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 text-zinc-950 text-sm font-bold shadow-[0_0_16px_rgba(34,211,238,0.35)]">
+              A
+            </span>
+            <span className="text-white font-bold text-[15px] tracking-tight font-display">Axiom</span>
+            <span
+              className={cn(
+                'ml-1 px-2 py-0.5 rounded-full border text-[11px] font-bold tabular-nums',
+                scoreColor
+              )}
+              title={overall.confirmedCount > 0
+                ? `${overall.confirmedCount} confirmed purchase(s)`
+                : 'No confirmed purchases yet'}
+            >
+              {overall.confirmedCount > 0 ? overall.score : '—'}
+            </span>
           </Link>
 
-          {/* Links + Language Switcher */}
+          {/* Links */}
           <div className="flex items-center gap-1">
             {links.map(link => {
               const Icon = link.icon
-              const active = pathname === link.to
+              const active = link.end ? pathname === link.to : pathname.startsWith(link.to)
               return (
                 <Link
                   key={link.to}
                   to={link.to}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                    active ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                    active
+                      ? 'bg-cyan-400/10 text-cyan-300'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -53,17 +75,21 @@ export default function DynamicIsland() {
                 </Link>
               )
             })}
-            <button
-              onClick={toggleLang}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-zinc-500 hover:text-white hover:bg-white/5 transition-all"
-              aria-label={lang === 'en' ? 'Switch to Indonesian' : 'Switch to English'}
-            >
-              <Globe className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline uppercase">{lang}</span>
-            </button>
           </div>
         </div>
+      </nav>
+
+      {/* Separate language toggle — fixed top-right with flags */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={toggleLang}
+          className="glass rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-semibold text-zinc-300 hover:text-white hover:border-white/20 transition-all shadow-lg shadow-black/30"
+          aria-label={lang === 'en' ? 'Switch to Indonesian' : 'Switch to English'}
+        >
+          {lang === 'en' ? <FlagID /> : <FlagUS />}
+          <span className="uppercase tabular-nums">{lang}</span>
+        </button>
       </div>
-    </nav>
+    </>
   )
 }

@@ -3,8 +3,9 @@ import Badge from '../ui/Badge'
 import { useLanguage } from '../../store/LanguageContext.jsx'
 import { formatCurrency } from '../../utils/format'
 
-export default function DTICard({ dti, status, newInstallment, existingDebt, income }) {
+export default function DTICard({ dti, status, newInstallment, existingDebt, income, lang, currency }) {
   const { t } = useLanguage()
+  const uiLang = lang || 'en'
   const statusBadge = status === 'SAFE' ? 'safe' : status === 'WARNING' ? 'warning' : 'danger'
   const markerPos = Math.min(dti, 100)
 
@@ -43,15 +44,15 @@ export default function DTICard({ dti, status, newInstallment, existingDebt, inc
       <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/[6%]">
         <div>
           <p className="text-xs text-zinc-600 mb-1">{t('analyze.debtToIncome').includes('Debt-to-Income') ? 'New Payment' : 'Cicilan Baru'}</p>
-          <p className="text-sm text-white font-medium">{formatCurrency(newInstallment)}</p>
+          <p className="text-sm text-white font-medium">{formatCurrency(newInstallment, uiLang, currency)}</p>
         </div>
         <div>
           <p className="text-xs text-zinc-600 mb-1">{t('analyze.debtToIncome').includes('Debt-to-Income') ? 'Existing Debt' : 'Hutang Lain'}</p>
-          <p className="text-sm text-white font-medium">{formatCurrency(existingDebt)}</p>
+          <p className="text-sm text-white font-medium">{formatCurrency(existingDebt, uiLang, currency)}</p>
         </div>
         <div>
           <p className="text-xs text-zinc-600 mb-1">{t('analyze.debtToIncome').includes('Debt-to-Income') ? 'Income' : 'Penghasilan'}</p>
-          <p className="text-sm text-white font-medium">{formatCurrency(income)}</p>
+          <p className="text-sm text-white font-medium">{formatCurrency(income, uiLang, currency)}</p>
         </div>
       </div>
     </Card>

@@ -1,3 +1,13 @@
+/**
+ * Formatting utilities.
+ *
+ * Two flavors:
+ *  - useFormat()  — hook, follows the active UI language
+ *  - static fns   — explicit (amount, lang, currency?) for per-session
+ *                   formatting (a session analyzed in IDR renders in IDR
+ *                   even if the UI switches to English)
+ */
+
 import { useLanguage } from '../store/LanguageContext.jsx'
 
 export function useFormat() {
@@ -53,26 +63,31 @@ export function useFormat() {
   return { formatCurrency: fmtCurrency, formatNumber: fmtNumber, formatDate: fmtDate, formatCompact: fmtCompact, formatPercent: fmtPercent, locale, currency }
 }
 
-export function formatCurrency(amount, lang = 'en') {
+function resolve(lang, currency) {
   const locale = lang === 'id' ? 'id-ID' : 'en-US'
-  const currency = lang === 'id' ? 'IDR' : 'USD'
-  if (amount == null || isNaN(amount)) return currency === 'IDR' ? 'Rp0' : '$0'
+  const cur = currency || (lang === 'id' ? 'IDR' : 'USD')
+  return { locale, currency: cur }
+}
+
+export function formatCurrency(amount, lang = 'en', currency) {
+  const { locale, currency: cur } = resolve(lang, currency)
+  if (amount == null || isNaN(amount)) return cur === 'IDR' ? 'Rp0' : '$0'
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency,
+    currency: cur,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount)
 }
 
 export function formatNumber(amount, lang = 'en') {
-  const locale = lang === 'id' ? 'id-ID' : 'en-US'
+  const { locale } = resolve(lang)
   if (amount == null || isNaN(amount)) return '0'
   return new Intl.NumberFormat(locale).format(Math.round(amount))
 }
 
 export function formatDate(isoString, lang = 'en') {
-  const locale = lang === 'id' ? 'id-ID' : 'en-US'
+  const { locale } = resolve(lang)
   if (!isoString) return ''
   return new Date(isoString).toLocaleDateString(locale, {
     month: 'short',
@@ -81,12 +96,12 @@ export function formatDate(isoString, lang = 'en') {
   })
 }
 
-export function formatCompact(amount, lang = 'en') {
-  const currency = lang === 'id' ? 'IDR' : 'USD'
-  if (amount == null || isNaN(amount)) return currency === 'IDR' ? 'Rp0' : '$0'
+export function formatCompact(amount, lang = 'en', currency) {
+  const { currency: cur } = resolve(lang, currency)
+  if (amount == null || isNaN(amount)) return cur === 'IDR' ? 'Rp0' : '$0'
   const abs = Math.abs(amount)
   const sign = amount < 0 ? '-' : ''
-  const symbol = currency === 'IDR' ? 'Rp' : '$'
+  const symbol = cur === 'IDR' ? 'Rp' : '$'
   if (abs >= 1000000000) return sign + symbol + (abs / 1000000000).toFixed(1) + (lang === 'id' ? 'M' : 'B')
   if (abs >= 1000000) return sign + symbol + (abs / 1000000).toFixed(1) + 'M'
   if (abs >= 1000) return sign + symbol + (abs / 1000).toFixed(0) + 'K'
@@ -94,7 +109,7 @@ export function formatCompact(amount, lang = 'en') {
 }
 
 export function formatPercent(value, lang = 'en', decimals = 1) {
-  const locale = lang === 'id' ? 'id-ID' : 'en-US'
+  const { locale } = resolve(lang)
   if (value == null || isNaN(value)) return '0%'
   return new Intl.NumberFormat(locale, {
     style: 'percent',

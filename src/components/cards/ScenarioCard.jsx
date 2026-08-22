@@ -1,7 +1,10 @@
+import { Link } from 'react-router-dom'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import { formatCurrency, formatDate } from '../../utils/format'
-import { Trash2 } from 'lucide-react'
+import { useLanguage } from '../../store/LanguageContext.jsx'
+import { Trash2, CheckCircle2 } from 'lucide-react'
+import { cn } from '../../utils/cn'
 
 const categoryColors = {
   vehicle: 'info',
@@ -9,17 +12,27 @@ const categoryColors = {
   property: 'safe',
 }
 
-export default function ScenarioCard({ scenario, onClick, onDelete, compact = false, lang = 'en' }) {
+/**
+ * ScenarioCard — a clickable session card.
+ * - `to`: link target (per-session route)
+ * - `onDelete`: optional delete handler
+ * - shows status badge when the purchase was CONFIRMED
+ */
+export default function ScenarioCard({ scenario, to, onClick, onDelete, compact = false, lang = 'en' }) {
+  const { t } = useLanguage()
   const score = scenario?.enrichment?.sanggup_score
   const scoreStatus = score ? (score.score >= 80 ? 'safe' : score.score >= 50 ? 'warning' : 'danger') : 'neutral'
   const catBadge = categoryColors[scenario?.scenario?.category] || 'neutral'
+  const currency = scenario?.currency || 'IDR'
+  const confirmed = scenario?.status === 'CONFIRMED'
 
-  return (
-    <Card onClick={onClick} className="group relative">
+  const inner = (
+    <>
       {onDelete && (
         <button
           onClick={(e) => { e.stopPropagation(); onDelete() }}
           className="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+          aria-label={t('common.delete')}
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -28,6 +41,12 @@ export default function ScenarioCard({ scenario, onClick, onDelete, compact = fa
       <div className="flex items-center gap-2 mb-3">
         <Badge status={catBadge}>{scenario?.scenario?.category}</Badge>
         {score && <Badge status={scoreStatus}>{score.score}</Badge>}
+        {confirmed && (
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400">
+            <CheckCircle2 className="h-3 w-3" />
+            {t('analyze.confirmed')}
+          </span>
+        )}
       </div>
 
       <h3 className="text-base font-semibold text-white mb-1 truncate">{scenario?.scenario?.item_name}</h3>
@@ -36,15 +55,26 @@ export default function ScenarioCard({ scenario, onClick, onDelete, compact = fa
       {!compact && (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-xs text-zinc-600">Price</p>
-            <p className="text-sm text-white font-medium">{formatCurrency(scenario?.financials?.base_price, lang)}</p>
+            <p className="text-xs text-zinc-600">{t('common.price')}</p>
+            <p className="text-sm text-white font-medium tabular-nums">{formatCurrency(scenario?.financials?.base_price, lang, currency)}</p>
           </div>
           <div>
-            <p className="text-xs text-zinc-600">Monthly</p>
-            <p className="text-sm text-white font-medium">{formatCurrency(scenario?.financials?.calculated_monthly_installment, lang)}</p>
+            <p className="text-xs text-zinc-600">{t('common.monthly')}</p>
+            <p className="text-sm text-white font-medium tabular-nums">{formatCurrency(scenario?.financials?.calculated_monthly_installment, lang, currency)}</p>
           </div>
         </div>
       )}
-    </Card>
+    </>
   )
+
+  const cardClass = cn('group relative', to ? 'cursor-pointer' : '')
+
+  if (to) {
+    return (
+      <Link to={to} className="block h-full">
+        <Card className={cardClass}>{inner}</Card>
+      </Link>
+    )
+  }
+  return <Card onClick={onClick} className={cardClass}>{inner}</Card>
 }

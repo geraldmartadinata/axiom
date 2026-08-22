@@ -1,5 +1,5 @@
 import { enrichScenario } from '../utils/calculations'
-import { getProfile, saveScenarioToHistory } from '../store/useAxiomStore'
+import { useAxiomStore } from '../store/useAxiomStore'
 import mockCar from '../mocks/mock-car.json'
 import mockGadget from '../mocks/mock-gadget.json'
 import mockProperty from '../mocks/mock-property.json'
@@ -151,8 +151,7 @@ export async function extractAndEnrich(prompt) {
       rawScenario = await mockExtract(prompt)
     }
   }
-  const profile = getProfile()
+  const profile = useAxiomStore.getState().profile
   const enriched = enrichScenario(rawScenario, profile)
-  saveScenarioToHistory(enriched)
   return enriched
 }

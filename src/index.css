@@ -10,19 +10,33 @@
 
 body {
   @apply bg-zinc-950 text-zinc-300 antialiased;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: "DM Sans", system-ui, -apple-system, sans-serif;
   margin: 0;
 }
 
+/* Display type */
+.font-display {
+  font-family: "Space Grotesk", "DM Sans", system-ui, sans-serif;
+}
+
+/* Numbers align when animating / tabulating */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ============ Animations ============ */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scale-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
 @keyframes pulse-glow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
 
 .animate-fade-in { animation: fade-in 0.4s ease-out; }
-.animate-slide-up { animation: slide-up 0.5s ease-out; }
-.animate-scale-in { animation: scale-in 0.3s ease-out; }
+.animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.animate-scale-in { animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .animate-pulse-glow { animation: pulse-glow 1.4s ease-in-out infinite; }
+.animate-floaty { animation: floaty 2.5s ease-in-out infinite; }
 
 .stagger-1 { animation-delay: 0.05s; animation-fill-mode: backwards; }
 .stagger-2 { animation-delay: 0.1s; animation-fill-mode: backwards; }
@@ -30,3 +44,42 @@ body {
 .stagger-4 { animation-delay: 0.2s; animation-fill-mode: backwards; }
 .stagger-5 { animation-delay: 0.25s; animation-fill-mode: backwards; }
 .stagger-6 { animation-delay: 0.3s; animation-fill-mode: backwards; }
+
+/* ============ Range sliders (emerald, per design feedback) ============ */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #10b981 var(--fill, 50%), rgba(255,255,255,0.08) var(--fill, 50%));
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fafafa;
+  border: 3px solid #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fafafa;
+  border: 3px solid #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+}
+
+/* ============ Liquid glass ============ */
+.glass {
+  background: rgba(24, 24, 27, 0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}

@@ -2,159 +2,235 @@
   "app": {
     "name": "Axiom",
     "tagline": "Bisa beli nggak?",
-    "description": "Pendamping keuangan yang jujur banget. Tulis skenarionya. Dapat kebenarannya."
+    "description": "Pendamping keputusan finansial yang jujur banget. Tulis skenarionya. Dapat kebenarannya."
   },
   "nav": {
     "home": "Beranda",
     "analyze": "Analisis",
-    "projections": "Proyeksi",
-    "history": "Riwayat",
     "profile": "Profil"
   },
   "dashboard": {
-    "title": "Bisa beli nggak?",
-    "subtitle": "Tulis pembelian dalam bahasa sehari-hari. Axiom ambil angkanya, hitung biaya aslinya, dan bilang bisa atau nggak cocok sama hidupmu — tanpa hakiman, cuma matematik.",
-    "placeholder": "Bisa beli iPhone 16 Pro 256GB Rp24jt DP Rp5jt cicil 24 bln, gaji Rp15jt/bln?",
+    "title": "Bisa beli",
+    "titleAccent": "nggak?",
+    "subtitle": "Tulis pembelian dalam bahasa sehari-hari. Axiom mengekstrak angkanya, menghitung biaya aslinya, dan memberi tahu kamu apakah itu pas dengan hidupmu — tanpa menghakimi, murni matematika.",
     "analyzeButton": "Analisis",
     "analyzingButton": "Menganalisis...",
-    "examples": "Coba ini:",
-    "example1": "Bisa beli iPhone 16 Pro 256GB Rp24jt DP Rp5jt cicil 24 bln, gaji Rp15jt/bln?",
-    "example2": "Bisa beli Honda Civic RS Rp550jt DP Rp100jt cicil 60 bln, gaji Rp12jt/bln?",
-    "example3": "Bisa beli ap studio Jakarta Rp1,2M DP Rp300jt cicil 30 th bunga 6.5%?",
-    "recentScenarios": "Skenario Terbaru"
+    "example1": "Bisa beli Honda Civic RS Rp550jt DP Rp100jt cicil 60 bln, gaji Rp12jt/bln?",
+    "example2": "Bisa beli BMW M5 Rp1,8M gaji Rp3jt DP Rp80jt?",
+    "example3": "Bisa beli apartemen studio Jakarta Rp1,2M DP Rp300jt cicil 30 th bunga 6,5%?",
+    "overallTitle": "Kesehatan Finansialmu",
+    "overallSub": "Berdasarkan pembelian terkonfirmasi dan profilmu",
+    "overallEmpty": "Konfirmasi pembelian untuk melacak kesehatan pasca-pembelian",
+    "recentTitle": "Analisis Terakhir",
+    "recentEmpty": "Belum ada analisis — pembelian pertamamu menunggu.",
+    "recentViewAll": "Lihat semua",
+    "insightLabel": "Insight Axiom",
+    "scrollHint": "Scroll untuk eksplorasi"
+  },
+  "analyzer": {
+    "status": "AI Analyzer Aktif",
+    "placeholder": "Bisa beli Honda Civic 2024 Rp450jt, DP Rp80jt cicil 60 bln?",
+    "cta": "Analisis"
+  },
+  "cat": {
+    "auto": "Mobil",
+    "house": "Rumah",
+    "tech": "Gadget"
   },
   "analyze": {
-    "title": "{itemName}",
+    "indexTitle": "Analisismu",
+    "indexSub": "Lanjutkan dari yang terakhir, atau mulai yang baru.",
+    "newAnalysis": "Analisis Baru",
+    "noHistory": "Kamu belum menganalisis apa pun.",
+    "noHistorySub": "Pembelian pertamamu menunggu. Tulis dan dapat kebenarannya.",
+    "emptyStateCta": "Mulai analisis pertamamu",
+    "sessionNotFound": "Sesi tidak ditemukan",
+    "sessionNotFoundSub": "Analisis ini mungkin sudah dihapus. Pilih yang lain di bawah.",
+    "backToAnalyses": "Kembali ke analisis",
     "scoreBreakdown": "Rincian Skor",
     "debtToIncome": "Rasio Hutang ke Penghasilan",
     "opportunityCost": "Kalau Diinvestasikan Aja?",
     "totalCost": "Total Biaya Kepemilikan",
     "hiddenCosts": "Biaya Tersembunyi",
-    "preliminary": "Skor Sementara",
-    "preliminaryDesc": "Lengkapi profil untuk skor akurat.",
+    "parameters": "Parameter",
+    "preliminary": "Skor Perkiraan",
+    "preliminaryDesc": "Lengkapi profilmu untuk skor yang akurat.",
     "completeProfile": "Lengkapi Profil",
+    "confirmPurchase": "Saya benar-benar membeli ini",
+    "confirmPurchaseSub": "Tandai terkonfirmasi untuk memperbarui kesehatan finansialmu",
+    "confirmed": "Pembelian terkonfirmasi",
+    "confirmedSub": "Skor kesehatan keseluruhanmu kini termasuk utang ini",
+    "undoConfirm": "Urungkan",
+    "confirmModalTitle": "Konfirmasi pembelian",
+    "confirmModalSub": "Apakah angkanya sesuai kenyataan? Sesuaikan bila perlu.",
+    "finalPrice": "Harga akhir",
+    "finalDownPayment": "DP akhir",
+    "finalTerm": "Tenor akhir (bulan)",
+    "deleteSession": "Hapus",
     "scoreLabels": {
-      "A": "Sangat Baik",
-      "B": "Baik",
+      "A": "Luar Biasa",
+      "B": "Bagus",
       "C": "Cukup",
       "D": "Berisiko",
-      "F": "Berbahaya"
+      "F": "Bahaya"
     }
+  },
+  "gauge": {
+    "prelim": "Perkiraan",
+    "safe": "Zona Aman",
+    "caution": "Zona Waspada",
+    "danger": "Zona Bahaya"
   },
   "projections": {
-    "title": "Proyeksi 10 Tahun",
-    "subtitle": "Bandingin jalur beli vs invest selisihnya. Titik crossover = kapan investasi nyebelin nilai aset.",
-    "crossoverYear": "Crossover: Tahun ke-{year}",
-    "crossoverDesc": "Nilai investasi melewati nilai sisa aset",
-    "noCrossover": "Tidak ada crossover dalam 10 tahun",
-    "stats": {
-      "netWorthDiff": "Selisih Net Worth",
-      "assetValue": "Nilai Aset (Tahun 10)",
-      "investmentValue": "Nilai Investasi (Tahun 10)"
-    }
-  },
-  "history": {
-    "title": "Riwayat Skenario",
-    "empty": "Belum ada skenario. Analisis pembelian pertama buat lihat di sini.",
-    "deleteConfirm": "Hapus skenario ini?",
-    "score": "Skor: {score} ({grade})",
-    "date": "Dianalisis {date}"
+    "title": "Skenario \"Bagaimana Kalau\"",
+    "subtitle": "Kalau cicilan itu kamu investasikan, bukan buat beli...",
+    "wealthLabel": "Potensi Kekayaan",
+    "invested": "Investasi",
+    "assetValue": "Nilai Aset",
+    "year0": "Tahun 0",
+    "year5": "Tahun 5",
+    "crossoverYear": "Crossover: Tahun {year}",
+    "recovery": "Waktu Pulih Tabungan",
+    "recoverySub": "Bulan untuk membangun kembali dana darurat",
+    "recoveryValue": "{months} bulan",
+    "retirement": "Investasi Pertama Rp100jt",
+    "retirementSub": "Seberapa jauh pembelian ini menunda milestone pertamamu",
+    "retirementValue": "tertunda {months} bulan",
+    "ceiling": "Waktu ke Batas Aman",
+    "ceilingSub": "Berapa lama sampai pembelian ini terasa nyaman",
+    "ceilingValue": "{months} bulan",
+    "alternatives": "Milestone Alternatif",
+    "alt1": "dana darurat yang terisi penuh",
+    "alt2": "20% DP pembelianmu berikutnya",
+    "alt3": "belanja setahun",
+    "noCrossover": "Tidak ada crossover dalam 10 tahun"
   },
   "profile": {
-    "title": "Profil Keuangan",
-    "subtitle": "Baseline buat skor yang akurat",
-    "why": "Kenapa butuh ini?",
-    "whyDesc": "Profil bikin Sanggup Score ~40% lebih akurat. Tanpa dia, skor pakai default konservatif dan kasih badge \"Sementara\". Data aman di browser, nggak dikirim ke mana-mana.",
+    "title": "Profil Finansial",
+    "subtitle": "Dasar untuk skor yang akurat",
+    "why": "Kenapa kami butuh ini",
+    "whyDesc": "Profilmu membuat skor ~40% lebih akurat. Tanpa itu, skor memakai asumsi konservatif dan menampilkan badge \"Perkiraan\". Data ini tidak pernah dibagikan — tersimpan di browser-mu.",
+    "currencyToggle": "Mata Uang",
     "fields": {
       "monthlyIncome": {
-        "label": "Penghasilan Bulan Bersih",
-        "placeholder": "mis. 15000000",
-        "help": "Pasca pajak, yang masuk rekening"
+        "label": "Gaji Bersih Bulanan",
+        "placeholder": "cth: 15000000",
+        "help": "Setelah pajak, yang masuk rekening"
       },
       "emergencyFund": {
         "label": "Dana Darurat",
-        "placeholder": "mis. 50000000",
-        "help": "Uang cair bisa diambil 24 jam"
+        "placeholder": "cth: 30000000",
+        "help": "Uang tunai yang bisa diakses dalam 24 jam"
       },
       "monthlySavings": {
         "label": "Tabungan Bulanan",
-        "placeholder": "mis. 3000000",
-        "help": "Yang benar-benar nabung tiap bulan"
+        "placeholder": "cth: 2000000",
+        "help": "Yang benar-benar kamu tabung tiap bulan"
       },
       "existingDebt": {
-        "label": "Cicilan Lain yang Masih Jalan",
-        "placeholder": "mis. 2000000",
-        "help": "KTA, cicilan motor, kartu kredit"
+        "label": "Cicilan Bulanan yang Ada",
+        "placeholder": "cth: 500000",
+        "help": "Kredit mahasiswa, mobil, kartu kredit"
       },
       "investmentReturn": {
-        "label": "Return Investasi Diharapkan (%/tahun)",
-        "placeholder": "mis. 8",
-        "help": "Return konservatif buat hitung opportunity cost"
+        "label": "Ekspektasi Return Investasi (%/tahun)",
+        "placeholder": "cth: 7",
+        "help": "Return tahunan konservatif untuk hitung biaya peluang"
       }
     },
     "saveButton": "Simpan Profil",
-    "saved": "Profil tersimpan",
-    "currency": "IDR"
-  },
-  "common": {
-    "currency": "IDR",
-    "currencySymbol": "Rp",
-    "perMonth": "/bln",
-    "perYear": "/thn",
-    "score": "Skor",
-    "grade": "Grade",
-    "months": "bulan",
-    "years": "tahun",
-    "loading": "Memuat...",
-    "error": "Ada yang salah",
-    "retry": "Coba lagi",
-    "save": "Simpan",
-    "cancel": "Batal",
-    "delete": "Hapus",
-    "confirm": "Konfirmasi",
-    "close": "Tutup"
+    "saved": "Profil tersimpan"
   },
   "cards": {
     "dti": {
       "title": "Rasio Hutang ke Penghasilan",
       "safe": "Aman",
-      "warning": "Hati-hati",
+      "warning": "Waspada",
       "danger": "Bahaya",
-      "desc": "Cicilan bulanan sebagai % penghasilan. Di bawah 36% sehat."
+      "desc": "Cicilan bulananmu sebagai % penghasilan. Di bawah 36% itu sehat."
     },
     "tco": {
       "title": "Total Biaya Kepemilikan",
-      "desc": "Total biaya selama cicilan termasuk biaya tersembunyi."
+      "desc": "Biaya all-in selama tenor termasuk biaya tersembunyi."
     },
     "opportunity": {
       "title": "Biaya Peluang",
-      "desc": "Apa yang didapet kalau cicilan diinvestasikan aja."
+      "desc": "Yang kamu punya kalau cicilan itu diinvestasikan."
     },
     "hiddenCosts": {
       "title": "Biaya Tersembunyi",
       "mandatory": "Wajib",
-      "upfront": "Di Muka",
+      "upfront": "Awal",
       "optional": "Opsional",
       "tax": "Pajak",
       "maintenance": "Perawatan",
       "perYear": "/thn",
-      "upfrontLabel": "Sekali Bayar"
+      "upfrontLabel": "Sekali bayar"
     },
     "scoreBreakdown": {
       "title": "Rincian Skor",
       "factors": {
         "dti": "Dampak DTI",
         "emergency": "Dana Darurat",
-        "savings": "Tabungan",
-        "existingDebt": "Hutang Lain",
-        "affordability": "Kemampuan Beli"
+        "savings": "Rasio Tabungan",
+        "existingDebt": "Hutang yang Ada",
+        "affordability": "Keterjangkauan"
       }
+    },
+    "params": {
+      "title": "Parameter",
+      "sub": "Geser untuk lihat skor berubah — temukan batas amanmu",
+      "dp": "Uang Muka",
+      "term": "Tenor",
+      "income": "Gaji Bulanan",
+      "dpHint": "DP ≥ 20% dapat bunga lebih baik",
+      "termHint": "Tenor pendek = bunga lebih sedikit",
+      "incomeHint": "Setelah pajak"
+    },
+    "health": {
+      "title": "Skor Kesehatan",
+      "sub": "Kesiapan finansialmu untuk pembelian ini",
+      "dti": "Rasio DTI",
+      "post": "Setelah Beli",
+      "installment": "Cicilan"
+    },
+    "insight": {
+      "label": "Insight Axiom"
+    },
+    "overall": {
+      "title": "Kesehatan Keseluruhan",
+      "sub": "Dari pembelian terkonfirmasi + profil",
+      "debtFactor": "Beban Hutang",
+      "emergencyFactor": "Dana Darurat",
+      "savingsFactor": "Rasio Tabungan",
+      "dpFactor": "Disiplin DP",
+      "confirmed": "{count} pembelian terkonfirmasi",
+      "noConfirmed": "Belum ada pembelian terkonfirmasi"
     }
   },
+  "common": {
+    "currency": "IDR",
+    "price": "Harga",
+    "monthly": "Cicilan",
+    "perMonth": "/bln",
+    "perYear": "/thn",
+    "score": "Skor",
+    "months": "bulan",
+    "years": "tahun",
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan",
+    "retry": "Coba lagi",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "confirm": "Konfirmasi",
+    "close": "Tutup",
+    "back": "Kembali"
+  },
   "errors": {
-    "extractionFailed": "Gak ngerti skenarionya. Masukin: harga, DP, tenor cicilan, dan gaji.",
-    "missingNumbers": "Masukin angka spesifik: harga, DP, durasi cicilan, gaji bulanan.",
-    "apiError": "Layanan analisis down. Pakai mode offline.",
-    "invalidInput": "Input nggak valid. Cek angkanya dan coba lagi."
+    "extractionFailed": "Tidak bisa memahami skenariomu. Sertakan: harga, DP, tenor, dan penghasilan.",
+    "missingNumbers": "Sertakan angka spesifik: harga, DP, durasi pinjaman, dan penghasilan bulanan.",
+    "apiError": "Layanan analisis tidak tersedia. Memakai mode offline.",
+    "invalidInput": "Input tidak valid. Periksa angkamu dan coba lagi."
   }
 }

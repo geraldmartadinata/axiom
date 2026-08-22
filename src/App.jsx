@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
-import Analyze from './pages/Analyze'
-import Projections from './pages/Projections'
-import History from './pages/History'
+import AnalyzeIndex from './pages/analyze/AnalyzeIndex'
+import AnalyzeEditor from './pages/analyze/AnalyzeEditor'
+import AnalyzeSession from './pages/analyze/AnalyzeSession'
 import Profile from './pages/Profile'
 
 export default function App() {
@@ -12,9 +12,10 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/analyze" element={<Analyze />} />
-          <Route path="/projections" element={<Projections />} />
-          <Route path="/history" element={<History />} />
+          {/* Session picker + per-session workspace */}
+          <Route path="/analyze" element={<AnalyzeIndex />} />
+          <Route path="/analyze/new" element={<AnalyzeEditor />} />
+          <Route path="/analyze/:sessionId" element={<AnalyzeSession />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
