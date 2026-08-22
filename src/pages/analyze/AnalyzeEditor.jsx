@@ -32,7 +32,7 @@ export default function AnalyzeEditor() {
       </Link>
 
       <h1 className="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">
-        {t('dashboard.title')} <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">{t('dashboard.titleAccent')}</span>
+        {t('dashboard.title')} <span className="bg-gradient-to-r from-emerald-400 to-emerald-400 bg-clip-text text-transparent">{t('dashboard.titleAccent')}</span>
       </h1>
       <p className="text-zinc-500 text-sm sm:text-base mb-10 max-w-lg mx-auto leading-relaxed">
         {t('dashboard.subtitle')}

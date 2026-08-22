@@ -15,7 +15,7 @@ const CATEGORY_META = {
 
 /**
  * The neon AI analyzer input.
- * - cyan left border + focus glow (v0 style)
+ * - emerald left border + focus glow (v0 style)
  * - category chips with Lucide icons (NO emojis)
  * - typing-effect recommendations while idle
  */
@@ -79,23 +79,12 @@ export default function CommandCapsule({ autoFocus = false }) {
     <div className="w-full max-w-2xl mx-auto">
       <div
         className={cn(
-          'relative rounded-2xl border border-white/10 border-l-2 border-l-cyan-400',
+          'relative rounded-2xl border border-white/10 border-l-2 border-l-emerald-400',
           'bg-zinc-900/70 backdrop-blur-xl saturate-150 p-5 shadow-2xl shadow-black/40',
           'transition-all duration-300',
           hasText && 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
         )}
       >
-        {/* header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 text-[11px] font-semibold tracking-widest uppercase text-zinc-400">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
-            </span>
-            {t('analyzer.status')}
-          </div>
-        </div>
-
         {/* input */}
         <div className="relative min-h-[72px]">
           <textarea
@@ -110,7 +99,7 @@ export default function CommandCapsule({ autoFocus = false }) {
           {/* typing-effect ghost text (only when idle) */}
           {!hasText && !isAnalyzing && (
             <div className="absolute inset-0 pointer-events-none flex items-start pt-0">
-              <span className="text-[15px] leading-relaxed text-zinc-700">{typing}<span className="inline-block w-[2px] h-[1.1em] bg-cyan-400/70 ml-0.5 align-middle animate-pulse" /></span>
+              <span className="text-[15px] leading-relaxed text-zinc-700">{typing}<span className="inline-block w-[2px] h-[1.1em] bg-emerald-400/70 ml-0.5 align-middle animate-pulse" /></span>
             </div>
           )}
         </div>
@@ -129,7 +118,7 @@ export default function CommandCapsule({ autoFocus = false }) {
                   className={cn(
                     'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all',
                     active
-                      ? 'bg-cyan-400 text-zinc-950 shadow-[0_0_16px_rgba(34,211,238,0.35)]'
+                      ? 'bg-emerald-400 text-zinc-950 shadow-[0_0_16px_rgba(34,211,238,0.35)]'
                       : 'bg-white/5 text-zinc-400 border border-white/10 hover:text-white hover:border-white/20'
                   )}
                 >
@@ -146,7 +135,7 @@ export default function CommandCapsule({ autoFocus = false }) {
             className={cn(
               'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all',
               hasText && !isAnalyzing
-                ? 'bg-gradient-to-br from-cyan-400 to-cyan-600 text-zinc-950 shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:shadow-[0_0_36px_rgba(34,211,238,0.45)] hover:-translate-y-px active:translate-y-0'
+                ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-zinc-950 shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:shadow-[0_0_36px_rgba(34,211,238,0.45)] hover:-translate-y-px active:translate-y-0'
                 : 'bg-white/5 text-zinc-600 cursor-not-allowed'
             )}
           >

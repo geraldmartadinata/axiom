@@ -19,10 +19,13 @@ export default function DynamicIsland() {
   const { lang, t, toggleLang } = useLanguage()
 
   const overall = computeOverallScore(history, profile)
-  const scoreColor =
-    overall.status === 'SAFE' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' :
-    overall.status === 'WARNING' ? 'bg-amber-500/15 text-amber-400 border-amber-500/25' :
-    'bg-red-500/15 text-red-400 border-red-500/25'
+
+  let scoreColor = 'text-white' // default state
+  if (overall.confirmedCount > 0) {
+    if (overall.score <= 33) scoreColor = 'text-red-500'
+    else if (overall.score <= 66) scoreColor = 'text-amber-500'
+    else scoreColor = 'text-emerald-500'
+  }
 
   const links = [
     { to: '/', label: t('nav.home'), icon: Sparkles, end: true },
@@ -36,11 +39,11 @@ export default function DynamicIsland() {
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-xl">
         <div className="glass rounded-2xl px-3 py-2 shadow-2xl shadow-black/40 flex items-center justify-between">
           {/* Brand + overall score */}
-          <Link to="/" className="flex items-center gap-2.5 pl-2">
+          <Link to="/" className="flex items-center gap-1.5 pl-2">
             <span className="text-white font-bold text-lg tracking-tight">Axiom</span>
             <span
               className={cn(
-                'ml-1 px-2 py-0.5 rounded-full border text-[11px] font-bold tabular-nums',
+                'font-bold text-lg tracking-tight tabular-nums',
                 scoreColor
               )}
               title={overall.confirmedCount > 0
@@ -63,7 +66,7 @@ export default function DynamicIsland() {
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
                     active
-                      ? 'bg-cyan-400/10 text-cyan-300'
+                      ? 'bg-emerald-400/10 text-emerald-300'
                       : 'text-zinc-400 hover:text-white hover:bg-white/5'
                   )}
                 >
