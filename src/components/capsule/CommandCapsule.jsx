@@ -15,7 +15,7 @@ const CATEGORY_META = {
 
 /**
  * The neon AI analyzer input.
- * - cyan left border + focus glow (v0 style)
+ * - emerald left border + focus glow (v0 style)
  * - category chips with Lucide icons (NO emojis)
  * - typing-effect recommendations while idle
  */
@@ -25,6 +25,7 @@ export default function CommandCapsule({ autoFocus = false }) {
   const [typing, setTyping] = useState('')
   const [typingIndex, setTypingIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
   const navigate = useNavigate()
   const { isAnalyzing, analyzeError, analyzePrompt } = useAxiomStore()
   const { t, lang } = useLanguage()
@@ -38,26 +39,52 @@ export default function CommandCapsule({ autoFocus = false }) {
 
   // Typing effect: cycles through examples, type → pause → erase
   useEffect(() => {
-    if (text) { setTyping(''); return }
+    if (text) {
+      setTyping('')
+      return
+    }
+
     let cancelled = false
+    const current = examples[typingIndex % examples.length]
+
     const step = () => {
       if (cancelled) return
-      const current = examples[typingIndex % examples.length]
-      if (charIndex < current.length) {
-        setTyping(current.slice(0, charIndex + 1))
-        setCharIndex(c => c + 1)
-        typingRef.current = setTimeout(step, 32)
+
+      const totalTypingTime = 1000 // 1 second total typing
+      const speed = Math.max(20, totalTypingTime / current.length)
+
+      if (!isDeleting) {
+        if (charIndex < current.length) {
+          setTyping(current.slice(0, charIndex + 1))
+          setCharIndex(c => c + 1)
+          typingRef.current = setTimeout(step, speed)
+        } else {
+          // Finished typing, wait 3 seconds before deleting
+          typingRef.current = setTimeout(() => {
+            setIsDeleting(true)
+          }, 3000)
+        }
       } else {
-        typingRef.current = setTimeout(() => {
-          setTyping('')
-          setCharIndex(0)
-          setTypingIndex(i => i + 1)
-        }, 2200)
+        if (charIndex > 0) {
+          setTyping(current.slice(0, charIndex - 1))
+          setCharIndex(c => c - 1)
+          typingRef.current = setTimeout(step, speed)
+        } else {
+          // Finished deleting, wait 1 second before next prompt
+          setIsDeleting(false)
+          typingRef.current = setTimeout(() => {
+            setTypingIndex(i => i + 1)
+          }, 1000)
+        }
       }
     }
+
     step()
-    return () => { cancelled = true; clearTimeout(typingRef.current) }
-  }, [charIndex, typingIndex, text, examples, lang])
+    return () => {
+      cancelled = true
+      clearTimeout(typingRef.current)
+    }
+  }, [charIndex, isDeleting, typingIndex, text, examples, lang])
 
   const handleSubmit = async () => {
     if (!text.trim() || isAnalyzing) return
@@ -79,23 +106,12 @@ export default function CommandCapsule({ autoFocus = false }) {
     <div className="w-full max-w-2xl mx-auto">
       <div
         className={cn(
-          'relative rounded-2xl border border-white/10 border-l-2 border-l-cyan-400',
+          'relative rounded-2xl border border-white/10 border-l-2 border-l-emerald-400',
           'bg-zinc-900/70 backdrop-blur-xl saturate-150 p-5 shadow-2xl shadow-black/40',
           'transition-all duration-300',
           hasText && 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
         )}
       >
-        {/* header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 text-[11px] font-semibold tracking-widest uppercase text-zinc-400">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400" />
-            </span>
-            {t('analyzer.status')}
-          </div>
-        </div>
-
         {/* input */}
         <div className="relative min-h-[72px]">
           <textarea
@@ -110,7 +126,7 @@ export default function CommandCapsule({ autoFocus = false }) {
           {/* typing-effect ghost text (only when idle) */}
           {!hasText && !isAnalyzing && (
             <div className="absolute inset-0 pointer-events-none flex items-start pt-0">
-              <span className="text-[15px] leading-relaxed text-zinc-700">{typing}<span className="inline-block w-[2px] h-[1.1em] bg-cyan-400/70 ml-0.5 align-middle animate-pulse" /></span>
+              <span className="text-[15px] leading-relaxed text-zinc-700">{typing}<span className="inline-block w-[2px] h-[1.1em] bg-emerald-400/70 ml-0.5 align-middle animate-pulse" /></span>
             </div>
           )}
         </div>
@@ -129,7 +145,7 @@ export default function CommandCapsule({ autoFocus = false }) {
                   className={cn(
                     'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all',
                     active
-                      ? 'bg-cyan-400 text-zinc-950 shadow-[0_0_16px_rgba(34,211,238,0.35)]'
+                      ? 'bg-emerald-400 text-zinc-950 shadow-[0_0_16px_rgba(34,211,238,0.35)]'
                       : 'bg-white/5 text-zinc-400 border border-white/10 hover:text-white hover:border-white/20'
                   )}
                 >
@@ -146,7 +162,7 @@ export default function CommandCapsule({ autoFocus = false }) {
             className={cn(
               'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all',
               hasText && !isAnalyzing
-                ? 'bg-gradient-to-br from-cyan-400 to-cyan-600 text-zinc-950 shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:shadow-[0_0_36px_rgba(34,211,238,0.45)] hover:-translate-y-px active:translate-y-0'
+                ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-zinc-950 shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:shadow-[0_0_36px_rgba(34,211,238,0.45)] hover:-translate-y-px active:translate-y-0'
                 : 'bg-white/5 text-zinc-600 cursor-not-allowed'
             )}
           >
@@ -160,20 +176,6 @@ export default function CommandCapsule({ autoFocus = false }) {
         <p className="mt-3 text-sm text-red-400 animate-fade-in">{analyzeError}</p>
       )}
 
-      {/* example quick-picks when idle */}
-      {!hasText && (
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          {examples.map((ex, i) => (
-            <button
-              key={i}
-              onClick={() => setText(ex)}
-              className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-zinc-500 hover:text-white hover:border-white/20 transition-all"
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

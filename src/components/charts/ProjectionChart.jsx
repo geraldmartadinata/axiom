@@ -88,7 +88,7 @@ export default function ProjectionChart({ scenario }) {
   const wealthValue = opportunity?.total || 0
   const milestoneAlternatives = [
     { icon: <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />, text: t('projections.alt1') },
-    { icon: <Home className="h-3.5 w-3.5 text-cyan-400" />, text: t('projections.alt2') },
+    { icon: <Home className="h-3.5 w-3.5 text-emerald-400" />, text: t('projections.alt2') },
     { icon: <ShoppingCart className="h-3.5 w-3.5 text-amber-400" />, text: t('projections.alt3') },
   ]
 
@@ -182,7 +182,7 @@ export default function ProjectionChart({ scenario }) {
           label={t('projections.retirement')}
           sub={t('projections.retirementSub')}
           value={t('projections.retirementValue').replace('{months}', delayMonths)}
-          accent="text-cyan-400"
+          accent="text-emerald-400"
         />
         <FramingCard
           label={t('projections.ceiling')}
