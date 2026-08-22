@@ -32,10 +32,7 @@ export default function Dashboard() {
       {/* ============ HERO (above fold) ============ */}
       <section className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 text-center pt-24 pb-16">
         <h1 className="font-display text-4xl sm:text-6xl font-bold text-white tracking-tight mb-4 animate-slide-up">
-          {t('dashboard.title')}{' '}
-          <span className="bg-gradient-to-r from-emerald-400 via-emerald-300 to-emerald-400 bg-clip-text text-transparent">
-            {t('dashboard.titleAccent')}
-          </span>
+          {t('dashboard.title')} {t('dashboard.titleAccent')}
         </h1>
         <p className="text-zinc-400 text-base sm:text-lg max-w-xl leading-relaxed mb-10 animate-slide-up stagger-2">
           {t('dashboard.subtitle')}

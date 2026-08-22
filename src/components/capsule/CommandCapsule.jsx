@@ -25,6 +25,7 @@ export default function CommandCapsule({ autoFocus = false }) {
   const [typing, setTyping] = useState('')
   const [typingIndex, setTypingIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
   const navigate = useNavigate()
   const { isAnalyzing, analyzeError, analyzePrompt } = useAxiomStore()
   const { t, lang } = useLanguage()
@@ -38,26 +39,52 @@ export default function CommandCapsule({ autoFocus = false }) {
 
   // Typing effect: cycles through examples, type → pause → erase
   useEffect(() => {
-    if (text) { setTyping(''); return }
+    if (text) {
+      setTyping('')
+      return
+    }
+
     let cancelled = false
+    const current = examples[typingIndex % examples.length]
+
     const step = () => {
       if (cancelled) return
-      const current = examples[typingIndex % examples.length]
-      if (charIndex < current.length) {
-        setTyping(current.slice(0, charIndex + 1))
-        setCharIndex(c => c + 1)
-        typingRef.current = setTimeout(step, 32)
+
+      const totalTypingTime = 1000 // 1 second total typing
+      const speed = Math.max(20, totalTypingTime / current.length)
+
+      if (!isDeleting) {
+        if (charIndex < current.length) {
+          setTyping(current.slice(0, charIndex + 1))
+          setCharIndex(c => c + 1)
+          typingRef.current = setTimeout(step, speed)
+        } else {
+          // Finished typing, wait 3 seconds before deleting
+          typingRef.current = setTimeout(() => {
+            setIsDeleting(true)
+          }, 3000)
+        }
       } else {
-        typingRef.current = setTimeout(() => {
-          setTyping('')
-          setCharIndex(0)
-          setTypingIndex(i => i + 1)
-        }, 2200)
+        if (charIndex > 0) {
+          setTyping(current.slice(0, charIndex - 1))
+          setCharIndex(c => c - 1)
+          typingRef.current = setTimeout(step, speed)
+        } else {
+          // Finished deleting, wait 1 second before next prompt
+          setIsDeleting(false)
+          typingRef.current = setTimeout(() => {
+            setTypingIndex(i => i + 1)
+          }, 1000)
+        }
       }
     }
+
     step()
-    return () => { cancelled = true; clearTimeout(typingRef.current) }
-  }, [charIndex, typingIndex, text, examples, lang])
+    return () => {
+      cancelled = true
+      clearTimeout(typingRef.current)
+    }
+  }, [charIndex, isDeleting, typingIndex, text, examples, lang])
 
   const handleSubmit = async () => {
     if (!text.trim() || isAnalyzing) return
@@ -149,20 +176,6 @@ export default function CommandCapsule({ autoFocus = false }) {
         <p className="mt-3 text-sm text-red-400 animate-fade-in">{analyzeError}</p>
       )}
 
-      {/* example quick-picks when idle */}
-      {!hasText && (
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          {examples.map((ex, i) => (
-            <button
-              key={i}
-              onClick={() => setText(ex)}
-              className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-zinc-500 hover:text-white hover:border-white/20 transition-all"
-            >
-              {ex}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

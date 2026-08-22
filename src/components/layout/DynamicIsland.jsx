@@ -35,9 +35,39 @@ export default function DynamicIsland() {
 
   return (
     <>
+      {/* SVG Filter definition for Liquid Glass Effect */}
+      <svg className="hidden">
+        <defs>
+          <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+            <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.5 0" in="noise" result="coloredNoise" />
+            <feDisplacementMap in="SourceGraphic" in2="coloredNoise" scale="12" xChannelSelector="R" yChannelSelector="G" result="displacement" />
+            <feGaussianBlur in="displacement" stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+
       {/* Floating liquid-glass pill */}
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-xl">
-        <div className="glass rounded-2xl px-3 py-2 shadow-2xl shadow-black/40 flex items-center justify-between">
+        <div
+          className="relative rounded-2xl px-3 py-2 flex items-center justify-between border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden"
+        >
+          {/* Liquid Glass Background Layer */}
+          <div
+            className="absolute inset-0 pointer-events-none rounded-2xl"
+            style={{
+              backdropFilter: 'blur(16px) url(#liquid-glass)',
+              WebkitBackdropFilter: 'blur(16px)',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1), inset 0 2px 20px rgba(255,255,255,0.05)',
+              zIndex: -1
+            }}
+          />
+
           {/* Brand + overall score */}
           <Link to="/" className="flex items-center gap-1.5 pl-2">
             <span className="text-white font-bold text-lg tracking-tight">Axiom</span>
@@ -83,9 +113,19 @@ export default function DynamicIsland() {
       <div className="fixed top-4 right-4 z-50">
         <button
           onClick={toggleLang}
-          className="glass rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-semibold text-zinc-300 hover:text-white hover:border-white/20 transition-all shadow-lg shadow-black/30"
+          className="relative rounded-full px-3 py-1.5 flex items-center gap-2 text-xs font-semibold text-zinc-300 hover:text-white transition-all overflow-hidden border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]"
           aria-label={lang === 'en' ? 'Switch to Indonesian' : 'Switch to English'}
         >
+          <div
+            className="absolute inset-0 pointer-events-none rounded-full"
+            style={{
+              backdropFilter: 'blur(16px) url(#liquid-glass)',
+              WebkitBackdropFilter: 'blur(16px)',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1), inset 0 2px 10px rgba(255,255,255,0.05)',
+              zIndex: -1
+            }}
+          />
           {lang === 'en' ? <FlagUS /> : <FlagID />}
           <span className="uppercase tabular-nums">{lang}</span>
         </button>
