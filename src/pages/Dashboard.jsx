@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { useAxiomStore } from '../store/useAxiomStore'
 import { useLanguage } from '../store/LanguageContext.jsx'
+import { motion } from 'framer-motion'
 import CommandCapsule from '../components/capsule/CommandCapsule'
 import ScenarioCard from '../components/cards/ScenarioCard'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import FinancialHealthWidget from '../components/dashboard/FinancialHealthWidget'
 import GrowthChartWidget from '../components/dashboard/GrowthChartWidget'
-import Footer from '../components/layout/Footer'
 import { Link } from 'react-router-dom'
 import { UserCircle } from 'lucide-react'
 
@@ -35,7 +35,12 @@ export default function Dashboard() {
       )}
 
       {/* Hero */}
-      <div className="text-center py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="text-center py-16"
+      >
         <h1 className="text-5xl sm:text-6xl font-extrabold text-white tracking-tight mb-4">
           {t('dashboard.title')}
         </h1>
@@ -43,17 +48,27 @@ export default function Dashboard() {
           {t('dashboard.subtitle')}
         </p>
         <CommandCapsule />
-      </div>
+      </motion.div>
 
-      <div className="mt-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className="mt-16"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <FinancialHealthWidget />
           <GrowthChartWidget />
         </div>
-      </div>
+      </motion.div>
 
       {/* Profile Widget */}
-      <div className="mt-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="mt-16"
+      >
         <Card className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <UserCircle className="h-8 w-8 text-zinc-500" />
@@ -70,11 +85,16 @@ export default function Dashboard() {
             </Button>
           </Link>
         </Card>
-      </div>
+      </motion.div>
 
       {/* Recent Scenarios or Empty State */}
       {recentScenarios.length > 0 && (
-        <div className="mt-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-16"
+        >
           <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500 mb-4">
             {t('dashboard.recentScenarios')}
           </h2>
@@ -87,10 +107,8 @@ export default function Dashboard() {
               />
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
-
-      <Footer />
     </div>
   )
 }
