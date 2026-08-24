@@ -29,7 +29,7 @@ export default function ScoreGauge({
   showArcLabels = false,
 }) {
   // Determine personalized label from score
-  const getPersonalizedLabel = useMemo(() => {
+  const personalizedLabel = useMemo(() => {
     if (score === 0) return labels.noPurchase || 'No purchase made'
     if (score <= 10) return labels.veryBad || 'Very Bad'
     if (score <= 20) return labels.bad || 'Bad'
@@ -180,7 +180,7 @@ export default function ScoreGauge({
               'font-display text-sm sm:text-base mt-2 tracking-wide',
               isPreliminary ? 'text-zinc-500' : 'text-white'
             )}>
-              {isPreliminary ? (labels.prelim || 'Preliminary') : getPersonalizedLabel()}
+              {isPreliminary ? (labels.prelim || 'Preliminary') : personalizedLabel}
             </div>
             {isPreliminary && (
               <motion.span

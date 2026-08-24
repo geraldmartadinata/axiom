@@ -11,12 +11,13 @@ import Parameters from '../components/parameters/Parameters'
 import { calculateDTI } from '../utils/calculations'
 import { formatCurrency } from '../utils/format'
 import { cn } from '../utils/cn'
-import { ArrowLeft, ChevronDown } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { ArrowLeft, ChevronDown, RefreshCw, CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function Analyze() {
   const scenario = useAxiomStore(s => s.currentScenario)
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  const profile = useAxiomStore(s => s.profile)
 
   if (!scenario) return <Navigate to="/" replace />
 
@@ -27,8 +28,8 @@ export default function Analyze() {
 
   const dtiResult = calculateDTI(
     financials.calculated_monthly_installment,
-    sanggup.isPreliminary ? financials.monthly_income : useAxiomStore.getState().profile?.monthly_income || financials.monthly_income,
-    useAxiomStore.getState().profile?.existing_monthly_debt || 0
+    sanggup.isPreliminary ? financials.monthly_income : profile?.monthly_income || financials.monthly_income,
+    profile?.existing_monthly_debt || 0
   )
 
   // Labels for ScoreGauge (personalized, like Dashboard)
@@ -54,6 +55,13 @@ export default function Analyze() {
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+  }
+
+  // Dynamic score label from grade
+  const getScoreLabel = (grade, isPreliminary) => {
+    if (isPreliminary) return t('analyze.preliminary')
+    const labels = t('analyze.scoreLabels')
+    return labels[grade] || grade
   }
 
   return (
@@ -85,10 +93,10 @@ export default function Analyze() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
         >
-          <p className="text-sm text-zinc-500 mb-1">{t('analyze.scoreBreakdown').replace('Rincian ', '').replace('Breakdown', '')}</p>
+          <p className="text-sm text-zinc-500 mb-1">{t('analyze.scoreBreakdown')}</p>
           <h1 className="font-display text-2xl font-bold text-white tracking-tight">{sc.item_name}</h1>
         </motion.div>
-        <div className="w-20" />
+        <motion.div className="w-20" />
       </motion.div>
 
       {/* Main layout: Left (score + breakdown + DTI) | Right (cards + parameters) */}
@@ -96,12 +104,12 @@ export default function Analyze() {
         className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         variants={containerVariants}
       >
-        {/* LEFT COLUMN — Vertical Score Stack */}
+        {/* LEFT COLUMN — Vertical Score Stack (Stitch Style) */}
         <motion.div 
           className="lg:col-span-1 space-y-6"
           variants={itemVariants}
         >
-          {/* Score Gauge - Large, Vertical */}
+          {/* Score Gauge - Large, Vertical, Center */}
           <motion.div 
             className="p-8 bg-zinc-900/60 backdrop-blur-xl border border-white/[6%] rounded-3xl text-center"
             variants={itemVariants}
@@ -109,9 +117,9 @@ export default function Analyze() {
             <ScoreGauge
               score={sanggup.score}
               isPreliminary={sanggup.isPreliminary}
-              scoreLabel={t('analyze.scoreLabels')[sanggup.grade] || sanggup.grade}
+              scoreLabel={getScoreLabel(sanggup.grade, sanggup.isPreliminary)}
               labels={gaugeLabels}
-              size={220}
+              size={240}
               showArcLabels={true}
             />
             {sanggup.isPreliminary && (
@@ -123,9 +131,41 @@ export default function Analyze() {
               >
                 <p className="text-sm text-amber-400 mb-1">{t('analyze.preliminary')}</p>
                 <p className="text-xs text-zinc-500">{t('analyze.preliminaryDesc')}</p>
+                <motion.button
+                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sand/10 border border-sand/20 text-sand text-sm font-semibold hover:bg-sand/20 transition-all"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  {t('analyze.completeProfile')}
+                </motion.button>
               </motion.div>
             )}
           </motion.div>
+
+          {/* Confirm Purchase Section */}
+          {!sanggup.isPreliminary && (
+            <motion.div 
+              className="p-6 bg-zinc-900/60 backdrop-blur-xl border border-white/[6%] rounded-3xl"
+              variants={itemVariants}
+            >
+              <motion.h3 
+                className="font-display text-lg font-semibold text-white mb-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >{t('analyze.confirmPurchase')}</motion.h3>
+              <p className="text-sm text-zinc-400 mb-4">{t('analyze.confirmPurchaseSub')}</p>
+              <motion.button
+                className="w-full inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-zinc-950 text-sm font-bold shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:shadow-[0_0_36px_rgba(34,211,238,0.45)] hover:-translate-y-px transition-all"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                {t('analyze.confirmPurchase')}
+              </motion.button>
+            </motion.div>
+          )}
 
           {/* Score Breakdown */}
           <motion.div 
@@ -147,9 +187,9 @@ export default function Analyze() {
               dti={dtiResult.dti}
               status={dtiResult.status}
               newInstallment={financials.calculated_monthly_installment}
-              existingDebt={useAxiomStore.getState().profile?.existing_monthly_debt || 0}
-              income={sanggup.isPreliminary ? financials.monthly_income : useAxiomStore.getState().profile?.monthly_income || financials.monthly_income}
-              lang={useLanguage.getState().lang}
+              existingDebt={profile?.existing_monthly_debt || 0}
+              income={sanggup.isPreliminary ? financials.monthly_income : profile?.monthly_income || financials.monthly_income}
+              lang={lang}
             />
           </motion.div>
         </motion.div>
@@ -163,14 +203,14 @@ export default function Analyze() {
             <OpportunityCostCard
               opportunity={opp}
               purchasePrice={financials.down_payment + (financials.calculated_monthly_installment * financials.tenor_months)}
-              lang={useLanguage.getState().lang}
+              lang={lang}
             />
           </motion.div>
           <motion.div variants={itemVariants}>
-            <TCOCard breakdown={tco.breakdown} total={tco.total} lang={useLanguage.getState().lang} />
+            <TCOCard breakdown={tco.breakdown} total={tco.total} lang={lang} />
           </motion.div>
           <motion.div variants={itemVariants}>
-            <HiddenCostsCard hiddenCosts={hidden_costs} tenorMonths={financials.tenor_months} lang={useLanguage.getState().lang} />
+            <HiddenCostsCard hiddenCosts={hidden_costs} tenorMonths={financials.tenor_months} lang={lang} />
           </motion.div>
           <motion.div variants={itemVariants}>
             <Parameters scenario={scenario} />

@@ -6,6 +6,7 @@
   },
   "nav": {
     "home": "Beranda",
+    "dashboard": "Dashboard",
     "analyze": "Analisis",
     "profile": "Profil"
   },
@@ -25,7 +26,16 @@
     "recentEmpty": "Belum ada analisis — pembelian pertamamu menunggu.",
     "recentViewAll": "Lihat semua",
     "insightLabel": "Insight Axiom",
-    "scrollHint": "Scroll untuk eksplorasi"
+    "scrollHint": "Scroll untuk eksplorasi",
+    "healthTitle": "Kesehatan Finansial",
+    "liquidity": "Likuiditas",
+    "debtToIncome": "Rasio Utang",
+    "baselineTitle": "Parameter Dasar",
+    "monthlyIncome": "Pendapatan Bulanan",
+    "monthlyExpenses": "Pengeluaran Bulanan",
+    "savingsRate": "Rasio Tabungan",
+    "growthTitle": "Proyeksi Pertumbuhan",
+    "estValue": "EST NILAI 5 THN"
   },
   "analyzer": {
     "status": "AI Analyzer Aktif",
@@ -155,8 +165,9 @@
       }
     },
     "saveButton": "Simpan Profil",
-    "saved": "Profil tersimpan",
-    "quickActions": "Aksi Cepat",
+        "saved": "Profil tersimpan",
+        "settingsTitle": "Pengaturan Profil",
+        "quickActions": "Aksi Cepat",
     "actions": {
       "viewAnalyses": "Lihat Analisis",
       "viewAnalysesDesc": "Lihat semua analisis pembelianmu",

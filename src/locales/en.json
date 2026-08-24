@@ -6,6 +6,7 @@
   },
   "nav": {
     "home": "Home",
+    "dashboard": "Dashboard",
     "analyze": "Analyze",
     "profile": "Profile"
   },
@@ -25,7 +26,17 @@
     "recentEmpty": "No analyses yet — your first purchase is waiting.",
     "recentViewAll": "View all",
     "insightLabel": "Axiom Insight",
-    "scrollHint": "Scroll to explore"
+    "scrollHint": "Scroll to explore",
+    "healthTitle": "Financial Health",
+    "liquidity": "Liquidity",
+    "debtToIncome": "Debt-to-Income",
+    "baselineTitle": "Baseline Parameters",
+    "monthlyIncome": "Monthly Income",
+    "monthlyExpenses": "Monthly Expenses",
+    "savingsRate": "Savings Rate",
+    "growthTitle": "Growth Projection",
+    "estValue": "EST 5 YR VALUE",
+    "recentTitle": "Recent Analysis"
   },
   "analyzer": {
     "status": "AI Analyzer Active",
@@ -155,8 +166,9 @@
       }
     },
     "saveButton": "Save Profile",
-    "saved": "Profile saved",
-    "quickActions": "Quick Actions",
+        "saved": "Profile saved",
+        "settingsTitle": "Profile Settings",
+        "quickActions": "Quick Actions",
     "actions": {
       "viewAnalyses": "View Analyses",
       "viewAnalysesDesc": "See all your purchase analyses",
@@ -255,6 +267,13 @@
     "close": "Close",
     "back": "Back",
     "try": "Try:"
+  },
+  "footer": {
+    "tagline": "Sophisticated financial clarity for the modern era.",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "support": "Support",
+    "disclaimer": "Not financial advice. Trading involves risk."
   },
   "errors": {
     "extractionFailed": "Could not understand your scenario. Please include: price, down payment, loan term, and your income.",
