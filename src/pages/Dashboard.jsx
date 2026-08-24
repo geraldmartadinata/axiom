@@ -8,10 +8,7 @@ import ScoreGauge from '../components/score/ScoreGauge'
 import { ArrowRight, Activity, ChevronDown } from 'lucide-react'
 
 /**
- * Dashboard — the overview page.
- * Above fold: hero title + subtitle + neon analyzer input.
- * Below fold: overall health score (from confirmed purchases + profile),
- * recent analyses, and an insight strip.
+ * Dashboard — Stitch-inspired overview with hero card and personalized score.
  */
 export default function Dashboard() {
   const history = useAxiomStore(s => s.history)
@@ -21,30 +18,59 @@ export default function Dashboard() {
   const overall = computeOverallScore(history, profile)
   const recent = history.slice(0, 4)
 
-  const scoreColor =
-    overall.status === 'SAFE' ? 'text-emerald-400' :
-    overall.status === 'WARNING' ? 'text-amber-400' : 'text-red-400'
+  // Build label map for ScoreGauge using i18n keys
+  const gaugeLabels = {
+    perfect: t('gauge.perfect'),
+    veryHealthy: t('gauge.veryHealthy'),
+    healthy: t('gauge.healthy'),
+    prettyGood: t('gauge.prettyGood'),
+    intermediate: t('gauge.intermediate'),
+    fair: t('gauge.fair'),
+    poor: t('gauge.poor'),
+    bad: t('gauge.bad'),
+    veryBad: t('gauge.veryBad'),
+  }
 
-  const overallLabel = t(`gauge.${overall.status === 'SAFE' ? 'safe' : overall.status === 'WARNING' ? 'caution' : 'danger'}`)
+  // Determine score label based on overall score
+  const getScoreLabel = (s) => {
+    if (s >= 97) return gaugeLabels.perfect
+    if (s >= 90) return gaugeLabels.veryHealthy
+    if (s >= 80) return gaugeLabels.healthy
+    if (s >= 67) return gaugeLabels.prettyGood
+    if (s >= 50) return gaugeLabels.intermediate
+    if (s >= 34) return gaugeLabels.fair
+    if (s >= 21) return gaugeLabels.poor
+    if (s >= 11) return gaugeLabels.bad
+    return gaugeLabels.veryBad
+  }
+
+  const overallLabel = getScoreLabel(overall.score)
+
+  // Factor bar colors using new palette
+  const factorColors = {
+    high: '#d4a373',
+    mid: '#e9c46a',
+    low: '#e76f51',
+  }
 
   return (
     <div>
-      {/* ============ HERO (above fold) ============ */}
+      {/* ============ HERO CARD (Stitch-inspired) ============ */}
       <section className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 text-center pt-24 pb-16">
-        <h1 className="font-display text-4xl sm:text-6xl font-bold text-white tracking-tight mb-4 animate-slide-up">
-          {t('dashboard.title')} {t('dashboard.titleAccent')}
-        </h1>
-        <p className="text-zinc-400 text-base sm:text-lg max-w-xl leading-relaxed mb-10 animate-slide-up stagger-2">
-          {t('dashboard.subtitle')}
-        </p>
-
-        <div className="w-full animate-slide-up stagger-3">
-          <CommandCapsule />
-        </div>
-
-        <div className="mt-10 flex items-center gap-2 text-xs text-zinc-600 animate-floaty">
-          {t('dashboard.scrollHint')}
-          <ChevronDown className="h-3.5 w-3.5" />
+        <div className="w-full max-w-3xl rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-8 sm:p-12 shadow-2xl animate-slide-up">
+          <h1 className="font-display text-4xl sm:text-5xl font-light text-white tracking-tight mb-3">
+            {t('dashboard.title')}
+          </h1>
+          <p className="text-zinc-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed mb-8">
+            {t('dashboard.subtitle')}
+          </p>
+          <div className="w-full">
+            <CommandCapsule />
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-zinc-600 animate-floaty">
+            {t('dashboard.scrollHint')}
+            <ChevronDown className="h-3.5 w-3.5" />
+          </div>
         </div>
       </section>
 
@@ -61,6 +87,7 @@ export default function Dashboard() {
             <ScoreGauge
               score={overall.score}
               scoreLabel={overallLabel}
+              labels={gaugeLabels}
               size={180}
             />
 
@@ -72,26 +99,28 @@ export default function Dashboard() {
               </span>
             </div>
 
-            {/* factor mini-bars */}
+            {/* factor mini-bars using natural palette */}
             <div className="w-full mt-6 space-y-2">
               {[
                 { label: t('cards.overall.debtFactor'), score: overall.factors.debt.score },
                 { label: t('cards.overall.emergencyFactor'), score: overall.factors.emergency.score },
                 { label: t('cards.overall.savingsFactor'), score: overall.factors.savings.score },
-              ].map(factor => (
-                <div key={factor.label} className="flex items-center gap-3">
-                  <span className="text-[10px] text-zinc-500 w-24 text-left truncate">{factor.label}</span>
-                  <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${factor.score}%`,
-                        background: factor.score >= 80 ? '#34d399' : factor.score >= 50 ? '#fbbf24' : '#f87171',
-                      }}
-                    />
+              ].map(factor => {
+                let bg = factorColors.low
+                if (factor.score >= 80) bg = factorColors.high
+                else if (factor.score >= 50) bg = factorColors.mid
+                return (
+                  <div key={factor.label} className="flex items-center gap-3">
+                    <span className="text-[10px] text-zinc-500 w-24 text-left truncate">{factor.label}</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${factor.score}%`, background: bg }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -104,7 +133,7 @@ export default function Dashboard() {
               </div>
               <Link
                 to="/analyze"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-sand hover:text-sand-light transition-colors"
               >
                 {t('dashboard.recentViewAll')}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -113,13 +142,13 @@ export default function Dashboard() {
 
             {recent.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-400/10 border border-emerald-400/20 grid place-items-center mb-4">
-                  <Activity className="h-6 w-6 text-emerald-400" />
+                <div className="w-14 h-14 rounded-2xl bg-sand/10 border border-sand/20 grid place-items-center mb-4">
+                  <Activity className="h-6 w-6 text-sand" />
                 </div>
                 <p className="text-sm text-zinc-400 mb-2">{t('dashboard.recentEmpty')}</p>
                 <Link
                   to="/analyze/new"
-                  className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-zinc-950 text-sm font-bold shadow-[0_0_20px_rgba(34,211,238,0.25)] hover:-translate-y-px transition-all"
+                  className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-sand to-sand-light text-zinc-950 text-sm font-bold shadow-[0_0_20px_rgba(212,163,115,0.25)] hover:-translate-y-px transition-all"
                 >
                   {t('analyze.newAnalysis')}
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -139,8 +168,8 @@ export default function Dashboard() {
 
         {/* Insight strip */}
         {profile && (
-          <div className="rounded-3xl border border-emerald-400/15 bg-gradient-to-br from-emerald-400/[0.07] to-emerald-400/[0.04] p-6 sm:p-8 animate-slide-up stagger-3">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-400 mb-2">{t('cards.insight.label')}</p>
+          <div className="rounded-3xl border border-sand/15 bg-gradient-to-br from-sand/[0.07] to-sand/[0.04] p-6 sm:p-8 animate-slide-up stagger-3">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-sand mb-2">{t('cards.insight.label')}</p>
             <p className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl">
               {overall.totalMonthlyDebt > 0
                 ? `${t('dashboard.insightLabel')}: Rp${Math.round(overall.totalMonthlyDebt).toLocaleString('id-ID')}/mo ${t('common.perMonth')} — ${t('cards.overall.confirmed').replace('{count}', overall.confirmedCount)}`

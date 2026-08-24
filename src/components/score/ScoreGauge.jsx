@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react'
 import { cn } from '../../utils/cn'
 
 /**
- * ScoreGauge — circular 0-100 gauge with red→amber→green zone gradation.
+ * ScoreGauge — circular 0-100 gauge with personalized gradient and label.
  *
- * Zones (per design direction):
- *   0-49  red    (danger)
- *   50-79 amber  (caution)
- *   80-100 green (safe)
+ * Score → label mapping (per Stitch design):
+ *   97-100: Perfect  (green)
+ *   90-96:  Very Healthy (green)
+ *   80-89:  Healthy (green)
+ *   67-79:  Pretty Good (yellow-green)
+ *   50-66:  Intermediate (yellow)
+ *   34-49:  Fair (yellow-orange)
+ *   21-33:  Poor (orange)
+ *   11-20:  Bad (orange-red)
+ *   0-10:   Very Bad (red)
  *
- * The active arc renders in the zone color; the zone segments are drawn
- * behind it so the user sees the full red→amber→green scale.
+ * The gradient uses the full red→yellow→green spectrum based on the score.
  */
 export default function ScoreGauge({
   score,
@@ -18,13 +23,28 @@ export default function ScoreGauge({
   strokeWidth = 14,
   isPreliminary = false,
   scoreLabel = '',
+  labels = {}, // optional i18n labels passed from parent
 }) {
   const [animatedScore, setAnimatedScore] = useState(0)
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
 
-  const color = score >= 80 ? '#34d399' : score >= 50 ? '#fbbf24' : '#f87171'
-  const statusLabel = scoreLabel || (score >= 80 ? 'SAFE' : score >= 50 ? 'WARNING' : 'DANGER')
+  // Determine personalized label and color based on score
+  const getScoreMeta = (s) => {
+    if (s >= 97) return { label: labels.perfect || 'Perfect', color: '#4ade80' }
+    if (s >= 90) return { label: labels.veryHealthy || 'Very Healthy', color: '#4ade80' }
+    if (s >= 80) return { label: labels.healthy || 'Healthy', color: '#a3e635' }
+    if (s >= 67) return { label: labels.prettyGood || 'Pretty Good', color: '#c0e635' }
+    if (s >= 50) return { label: labels.intermediate || 'Intermediate', color: '#facc15' }
+    if (s >= 34) return { label: labels.fair || 'Fair', color: '#f59e0b' }
+    if (s >= 21) return { label: labels.poor || 'Poor', color: '#fb923c' }
+    if (s >= 11) return { label: labels.bad || 'Bad', color: '#f87171' }
+    return { label: labels.veryBad || 'Very Bad', color: '#ef4444' }
+  }
+
+  const meta = getScoreMeta(score)
+  const statusLabel = scoreLabel || meta.label
+  const color = meta.color
 
   useEffect(() => {
     const timer = setTimeout(() => setAnimatedScore(score), 100)
@@ -36,31 +56,21 @@ export default function ScoreGauge({
   const gradientId = `score-gradient-${score}`
 
   const renderGradient = () => {
-    if (score <= 33) {
-      return (
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#ef4444" />
-          <stop offset="100%" stopColor="#ef4444" />
-        </linearGradient>
-      )
-    } else if (score <= 66) {
-      return (
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ef4444" />
-          <stop offset="33%" stopColor="#ef4444" />
-          <stop offset="100%" stopColor="#eab308" />
-        </linearGradient>
-      )
-    } else {
-      return (
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ef4444" />
-          <stop offset="33%" stopColor="#ef4444" />
-          <stop offset="66%" stopColor="#eab308" />
-          <stop offset="100%" stopColor="#22c55e" />
-        </linearGradient>
-      )
-    }
+    // Smooth red→yellow→green gradient based on the score
+    const stops = [
+      { offset: '0%', color: '#ef4444' },
+      { offset: '33%', color: '#ef4444' },
+      { offset: '50%', color: '#facc15' },
+      { offset: '66%', color: '#a3e635' },
+      { offset: '100%', color: '#4ade80' },
+    ]
+    return (
+      <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+        {stops.map(stop => (
+          <stop key={stop.offset} offset={stop.offset} stopColor={stop.color} />
+        ))}
+      </linearGradient>
+    )
   }
 
   return (
@@ -69,7 +79,7 @@ export default function ScoreGauge({
         <defs>
           {renderGradient()}
         </defs>
-        {/* Background track (optional, helps visualize full circle) */}
+        {/* Background track */}
         <circle
           cx={size / 2}
           cy={size / 2}
