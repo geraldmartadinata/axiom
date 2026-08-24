@@ -51,7 +51,18 @@
     "catTech": "Pembelian Teknologi",
     "catProperty": "Properti",
     "catOther": "Pembelian",
-    "warnExceeds": "Pengeluaran + tabungan melebihi pendapatan"
+    "warnExceeds": "Pengeluaran + tabungan melebihi pendapatan",
+    "title": "Bisa Beli",
+    "titleAccent": "Nggak?",
+    "liquidity": "Likuiditas",
+    "debtToIncome": "Utang / Pendapatan",
+    "recentViewAll": "Lihat Semua",
+    "recentEmptyNew": "Belum ada analisis — jalankan reality check pertamamu di atas.",
+    "examples": [
+      "cth. Tesla Model Y 2024, kredit 5 tahun...",
+      "cth. Kedai kopi dengan modal awal Rp 50 juta...",
+      "cth. iPhone 17 Pro, cicilan 12 bulan tanpa kartu kredit..."
+    ]
   },
   "analyzer": {
     "status": "AI Analyzer Aktif",

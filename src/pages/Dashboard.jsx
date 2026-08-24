@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAxiomStore } from '../store/useAxiomStore'
 import { useLanguage } from '../store/LanguageContext.jsx'
 import { formatCurrency } from '../utils/format'
-import { computeHealthScore, computeLiquidityGrade } from '../utils/healthScore'
+import { computeHealthScore, computeLiquidityGrade, scoreColor, withAlpha } from '../utils/healthScore'
 import CommandCapsule from '../components/capsule/CommandCapsule'
 import { motion } from 'framer-motion'
 import {
@@ -53,15 +53,56 @@ export default function Dashboard() {
     [income, expenses, rate]
   )
   const rawSavings = (rate / 100) * income
-  const overBudget = income > 0 && expenses + rawSavings > income + 1e-6
-  // Clamp savings rate so savings + expenses ≤ income
-  const maxRate = income > 0 ? Math.max(0, Math.floor(((income - expenses) / income) * 100)) : RATE_MAX
 
-  useEffect(() => {
-    if (!overBudget && rate > maxRate) setRate(maxRate)
-  }, [overBudget, maxRate]) // eslint-disable-line
+  // ---- Per-slider change handlers (pure — each touches ONLY its own state).
+  // Invariant: expenses + savings ≤ income. The slider being dragged yields
+  // (clamps to the nearest valid step) and an amber warning flashes; the
+  // other two sliders are never mutated as a side effect.
+  const [warnVisible, setWarnVisible] = useState(false)
+  const warnTimer = useRef(null)
+
+  const flashClampWarning = useCallback(() => {
+    setWarnVisible(true)
+    clearTimeout(warnTimer.current)
+    warnTimer.current = setTimeout(() => setWarnVisible(false), 2600)
+  }, [])
+
+  useEffect(() => () => clearTimeout(warnTimer.current), [])
+
+  const handleIncomeChange = (e) => {
+    let v = Math.max(0, Math.min(INCOME_MAX, Number(e.target.value) || 0))
+    if (v < expenses + rawSavings) {
+      // dragged income yields: floor to nearest step that fits commitments
+      v = Math.floor(Math.max(0, expenses + rawSavings) / INCOME_STEP) * INCOME_STEP
+      flashClampWarning()
+    }
+    setIncome(v)
+  }
+
+  const handleExpensesChange = (e) => {
+    let v = Math.max(0, Math.min(EXPENSES_MAX, Number(e.target.value) || 0))
+    const headroom = income - rawSavings
+    if (v > headroom) {
+      v = Math.floor(headroom / EXPENSES_STEP) * EXPENSES_STEP
+      flashClampWarning()
+    }
+    setExpenses(Math.max(0, v))
+  }
+
+  const handleRateChange = (e) => {
+    let v = Math.max(0, Math.min(RATE_MAX, Number(e.target.value) || 0))
+    if (income > 0) {
+      const maxAllowed = Math.floor(((income - expenses) / income) * 100)
+      if (v > maxAllowed) {
+        v = Math.max(0, maxAllowed)
+        flashClampWarning()
+      }
+    }
+    setRate(v)
+  }
 
   // ---- Debounced persist (~300ms) to EXISTING profile keys ----
+  // Persisted values are always the exact rendered values — no divergence.
   const persistTimer = useRef(null)
   useEffect(() => {
     if (persistTimer.current) clearTimeout(persistTimer.current)
@@ -99,7 +140,12 @@ export default function Dashboard() {
     return { points, fv }
   }, [hasData, income, expenses, rawSavings, profile])
 
-  const recent = useMemo(() => (history || []).slice(0, 4), [history])
+  // Up to 5 most recent sessions, defensively sorted newest-first
+  const recent = useMemo(() => {
+    const list = Array.isArray(history) ? [...history] : []
+    list.sort((a, b) => (new Date(b?.created_at || 0).getTime() || 0) - (new Date(a?.created_at || 0).getTime() || 0))
+    return list.slice(0, 5)
+  }, [history])
 
   const verdictOf = (s) => {
     const sc = s?.enrichment?.sanggup_score?.score
@@ -124,6 +170,9 @@ export default function Dashboard() {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] },
   })
+
+  // Ring gauge colors follow the score band (red <40 · amber→gold 40–69 · green-gold ≥70)
+  const arcColor = scoreColor(health.score)
 
   return (
     <div className="relative min-h-screen bg-zinc-950 pt-24 pb-20 px-4 sm:px-6 overflow-hidden">
@@ -179,18 +228,24 @@ export default function Dashboard() {
                       <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
                       <motion.circle
                         cx="60" cy="60" r="52" fill="none"
-                        stroke="#e8c47a" strokeWidth="7" strokeLinecap="round"
+                        stroke={arcColor} strokeWidth="7" strokeLinecap="round"
                         strokeDasharray={2 * Math.PI * 52}
                         initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
                         animate={{ strokeDashoffset: 2 * Math.PI * 52 * (1 - health.score / 100) }}
                         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                        style={{ filter: 'drop-shadow(0 0 6px rgba(232,196,122,0.45))' }}
+                        style={{
+                          filter: `drop-shadow(0 0 6px ${withAlpha(arcColor, 0.45)})`,
+                          transition: 'stroke 0.4s ease, filter 0.4s ease',
+                        }}
                       />
                     </svg>
                     <div className="absolute inset-0 grid place-items-center">
                       <div className="text-center">
                         <span className="text-4xl font-semibold text-white tabular-nums">{health.score}</span>
-                        <span className={`block mt-1 font-mono text-[10px] font-bold uppercase tracking-widest ${health.status === 'HEALTHY' ? 'text-sand' : health.status === 'TIGHT' ? 'text-golden' : 'text-terracotta'}`}>
+                        <span
+                          className="block mt-1 font-mono text-[10px] font-bold uppercase tracking-widest"
+                          style={{ color: arcColor, transition: 'color 0.4s ease' }}
+                        >
                           {health.status === 'HEALTHY' ? t('dashboard.statusHealthy') : health.status === 'TIGHT' ? t('dashboard.statusTight') : t('dashboard.statusRisky')}
                         </span>
                       </div>
@@ -228,7 +283,7 @@ export default function Dashboard() {
                   <span className="font-mono text-sm font-bold text-white tabular-nums">{income > 0 ? formatCurrency(income, lang, 'IDR') : '—'}</span>
                 </div>
                 <input id="sl-income" type="range" min="0" max={INCOME_MAX} step={INCOME_STEP} value={income}
-                  onChange={(e) => setIncome(Number(e.target.value))}
+                  onChange={handleIncomeChange}
                   style={{ '--fill': `${(income / INCOME_MAX) * 100}%`, '--range-color': '#e8c47a', '--range-glow': 'rgba(232,196,122,0.55)' }} />
               </div>
 
@@ -239,7 +294,7 @@ export default function Dashboard() {
                   <span className="font-mono text-sm font-bold text-white tabular-nums">{expenses > 0 ? formatCurrency(expenses, lang, 'IDR') : '—'}</span>
                 </div>
                 <input id="sl-expenses" type="range" min="0" max={EXPENSES_MAX} step={EXPENSES_STEP} value={expenses}
-                  onChange={(e) => setExpenses(Number(e.target.value))}
+                  onChange={handleExpensesChange}
                   style={{ '--fill': `${(expenses / EXPENSES_MAX) * 100}%`, '--range-color': '#7a8ba3', '--range-glow': 'rgba(122,139,163,0.5)' }} />
               </div>
 
@@ -249,18 +304,18 @@ export default function Dashboard() {
                   <label htmlFor="sl-rate" className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{t('dashboard.savingsRate')}</label>
                   <span className="font-mono text-sm font-bold text-white tabular-nums">{rate > 0 ? `${rate}%` : '—'}</span>
                 </div>
-                <input id="sl-rate" type="range" min="0" max={maxRate} step={RATE_STEP} value={Math.min(rate, maxRate)}
-                  onChange={(e) => setRate(Number(e.target.value))}
-                  style={{ '--fill': `${(Math.min(rate, maxRate) / RATE_MAX) * 100}%`, '--range-color': '#e8c47a', '--range-glow': 'rgba(232,196,122,0.55)' }} />
+                <input id="sl-rate" type="range" min="0" max={RATE_MAX} step={RATE_STEP} value={rate}
+                  onChange={handleRateChange}
+                  style={{ '--fill': `${(Math.min(rate, RATE_MAX) / RATE_MAX) * 100}%`, '--range-color': '#e8c47a', '--range-glow': 'rgba(232,196,122,0.55)' }} />
               </div>
 
-              {/* Constraint warning */}
-              {overBudget && (
+              {/* Constraint warning — flashes only when a drag was clamped */}
+              {warnVisible && (
                 <motion.p
-                  className="font-mono text-[10px] uppercase tracking-wide text-golden flex items-center gap-2 -mt-2"
+                  className="font-mono text-[10px] uppercase tracking-wide text-amber-400 flex items-center gap-2 -mt-2"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-golden shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 animate-pulse" />
                   {t('dashboard.warnExceeds')}
                 </motion.p>
               )}
@@ -345,7 +400,7 @@ export default function Dashboard() {
                 onClick={focusHeroInput}
                 className="flex-1 min-h-[160px] rounded-xl border border-dashed border-white/[8%] grid place-items-center text-xs text-zinc-600 hover:text-zinc-400 hover:border-white/15 transition-colors"
               >
-                {t('dashboard.recentEmpty')}
+                {t('dashboard.recentEmptyNew')}
               </button>
             ) : (
               <ul className="flex-1 flex flex-col gap-2">
@@ -364,7 +419,7 @@ export default function Dashboard() {
                     <li key={s.id}>
                       <Link
                         to={`/analyze/${s.id}`}
-                        className="group flex items-center gap-4 rounded-xl border border-transparent hover:border-white/[7%] hover:bg-white/[3%] px-3 py-3 transition-all"
+                        className="group flex items-center gap-4 rounded-xl border border-transparent hover:border-amber-400/25 hover:bg-white/[3%] px-3 py-3 transition-all"
                       >
                         <div className="w-10 h-10 rounded-lg bg-zinc-950/70 border border-white/[7%] grid place-items-center shrink-0">
                           <Icon className="h-4.5 w-4.5 text-amber-400" strokeWidth={1.75} />

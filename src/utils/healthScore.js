@@ -57,6 +57,26 @@ export function computeHealthScore({ income = 0, expenses = 0, savingsRate = 0 }
 }
 
 /**
+ * Score-band color for gauges/badges (design-system aligned).
+ * <40 RISKY muted red · 40–69 TIGHT amber→champagne · ≥70 HEALTHY soft green-gold.
+ */
+export function scoreColor(score) {
+  if (typeof score !== 'number' || isNaN(score)) return '#e8c47a'
+  if (score < 40) return '#e06c5a' // muted red
+  if (score < 55) return '#e0a84a' // amber (lower TIGHT)
+  if (score < 70) return '#e8c47a' // champagne gold (upper TIGHT)
+  return '#9fce9f'                 // soft green-gold (HEALTHY)
+}
+
+/** hex (#rgb/#rrggbb) → rgba() string, for glows derived from scoreColor. */
+export function withAlpha(hex, alpha = 1) {
+  const h = String(hex).replace('#', '')
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h
+  const n = parseInt(full, 16)
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
+}
+
+/**
  * Liquidity grade from emergency fund ÷ monthly expenses.
  * ≥12mo A+ · ≥8mo A · ≥6mo A− · ≥4mo B+ · ≥3mo B · ≥2mo B− · ≥1mo C+ · else C−
  */

@@ -51,7 +51,18 @@
     "catTech": "Tech Purchase",
     "catProperty": "Property",
     "catOther": "Purchase",
-    "warnExceeds": "Expenses + savings exceed income"
+    "warnExceeds": "Expenses + savings exceed income",
+    "title": "Can You Afford",
+    "titleAccent": "It?",
+    "liquidity": "Liquidity",
+    "debtToIncome": "Debt-to-Income",
+    "recentViewAll": "View All",
+    "recentEmptyNew": "No analyses yet — run your first reality check above.",
+    "examples": [
+      "e.g. A 2024 Tesla Model Y, on a 5 year loan...",
+      "e.g. A coffee shop with Rp 50 million starting capital...",
+      "e.g. iPhone 17 Pro, 12-month installments, no credit card..."
+    ]
   },
   "analyzer": {
     "status": "AI Analyzer Active",

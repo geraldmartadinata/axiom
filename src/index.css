@@ -106,6 +106,13 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 0 0 3px rgba(232,196,122,0.18), 0 0 12px var(--range-glow, rgba(232,196,122,0.55));
 }
 
+/* Typing caret for the animated placeholder (CommandCapsule hero input) */
+.typing-caret { animation: axiom-caret-blink 1.05s steps(1, end) infinite; }
+@keyframes axiom-caret-blink { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .typing-caret { animation: none; opacity: 0.6; }
+}
+
 /* ============ Liquid glass ============ */
 .glass {
   background: rgba(24, 24, 27, 0.72);

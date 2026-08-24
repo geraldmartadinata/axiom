@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useExtraction } from '../../services/extraction'
 import { useLanguage } from '../../store/LanguageContext.jsx'
@@ -11,7 +11,85 @@ import { Loader2 } from 'lucide-react'
  * Single pill row: [ input ][ CAR | TECH | HOME chips ][ gold ANALYZE ]
  * Chips populate the input (never submit). Submit → Gemini → session →
  * navigate(/analyze/:sessionId) — flow preserved.
+ *
+ * Placeholder runs a typewriter loop (type → hold → delete → next example),
+ * pausing while the input is focused or has text; resumes ~3s after the
+ * field is cleared and blurred. Disabled entirely under
+ * prefers-reduced-motion (static first example instead).
  */
+
+const TYPE_MS = 50
+const HOLD_MS = 2000
+const DELETE_MS = 25
+const GAP_MS = 400
+const RESUME_IDLE_MS = 3000
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(
+    () => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = (e) => setReduced(e.matches)
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
+  }, [])
+  return reduced
+}
+
+/**
+ * Typewriter placeholder. Returns the string to render in the input's
+ * placeholder attribute (including a "|" caret while typing/deleting/holding).
+ * Single interval-chain in a ref; one small setState per character —
+ * contained to this component. Cleans up on unmount/pause.
+ */
+function useTypingPlaceholder(examples, active) {
+  const [frame, setFrame] = useState({ text: '', caret: false })
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    clearTimeout(timerRef.current)
+    if (!active || !Array.isArray(examples) || examples.length === 0) return undefined
+
+    const st = { i: 0, pos: 0, phase: 'typing' }
+
+    const step = () => {
+      const ex = String(examples[st.i] ?? '')
+      let delay = TYPE_MS
+      let caret = true
+
+      if (st.phase === 'typing') {
+        st.pos += 1
+        setFrame({ text: ex.slice(0, st.pos), caret })
+        if (st.pos >= ex.length) { st.phase = 'holding'; delay = HOLD_MS }
+      } else if (st.phase === 'holding') {
+        setFrame({ text: ex, caret: true }) // keep blinking caret during hold
+        st.phase = 'deleting'
+        delay = DELETE_MS
+      } else if (st.phase === 'deleting') {
+        st.pos -= 1
+        if (st.pos <= 0) {
+          setFrame({ text: '', caret: false })
+          st.phase = 'gap'
+          delay = GAP_MS
+        } else {
+          setFrame({ text: ex.slice(0, st.pos), caret })
+        }
+      } else { // gap between examples
+        st.i = (st.i + 1) % examples.length
+        st.phase = 'typing'
+        caret = false
+        delay = TYPE_MS
+      }
+      timerRef.current = setTimeout(step, delay)
+    }
+
+    timerRef.current = setTimeout(step, TYPE_MS)
+    return () => clearTimeout(timerRef.current)
+  }, [active, examples])
+
+  return frame.caret ? `${frame.text}|` : frame.text
+}
 
 const CHIPS = [
   { key: 'car', labelKey: 'dashboard.chipCar', exampleKey: 'dashboard.chipCarExample' },
@@ -25,14 +103,37 @@ export default function CommandCapsule() {
   const { extract, loading: extracting } = useExtraction()
 
   const [input, setInput] = useState('')
+  const [focused, setFocused] = useState(false)
+  const [everTyped, setEverTyped] = useState(false) // stop animation once real input happens
+  const [resumeOk, setResumeOk] = useState(true) // gates the ~3s idle before resuming
   const [activeChip, setActiveChip] = useState(null)
   const [error, setError] = useState(null)
 
   const inputRef = useRef(null)
+  const resumeTimer = useRef(null)
+
+  const reducedMotion = usePrefersReducedMotion()
+  const examples = useMemo(() => {
+    const raw = t('dashboard.examples')
+    return Array.isArray(raw) ? raw.map(String) : []
+  }, [t])
+
+  const hasText = input.trim().length > 0
+  const typingActive = !reducedMotion && !everTyped && !focused && !hasText && resumeOk && examples.length > 0
+  const animatedPlaceholder = useTypingPlaceholder(examples, typingActive)
+
+  const placeholder = hasText
+    ? ''
+    : reducedMotion
+      ? (examples[0] || '')
+      : animatedPlaceholder // frozen frame while focused; empty while waiting to resume
+
+  useEffect(() => () => clearTimeout(resumeTimer.current), [])
 
   // Chip → populate input only (spec: does NOT submit)
   const handleChipClick = (chip) => {
     setInput(t(chip.exampleKey))
+    setEverTyped(false) // chip text is disposable — let the animation come back later
     setActiveChip(chip.key)
     setError(null)
     inputRef.current?.focus()
@@ -40,7 +141,18 @@ export default function CommandCapsule() {
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
-    if (activeChip) setActiveChip(null) // manual typing deselects chip
+    if (e.target.value.trim()) setEverTyped(true) // permanent stop on real typing
+    setActiveChip(null)
+  }
+
+  const handleBlur = () => {
+    setFocused(false)
+    // cleared + blurred → resume the loop after ~3s idle
+    if (!input.trim() && everTyped) {
+      clearTimeout(resumeTimer.current)
+      setResumeOk(false)
+      resumeTimer.current = setTimeout(() => setResumeOk(true), RESUME_IDLE_MS)
+    }
   }
 
   const handleSubmit = async () => {
@@ -75,7 +187,9 @@ export default function CommandCapsule() {
           value={input}
           onChange={handleInputChange}
           onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }}
-          placeholder={t('analyzer.placeholder')}
+          onFocus={() => setFocused(true)}
+          onBlur={handleBlur}
+          placeholder={placeholder}
           disabled={extracting}
           className="flex-1 min-w-0 bg-transparent text-sm sm:text-base text-white placeholder:text-zinc-600 focus:outline-none disabled:opacity-60 py-3 lg:py-0"
           aria-label={t('analyzer.placeholder')}
