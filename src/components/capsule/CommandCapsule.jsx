@@ -15,9 +15,9 @@ const CATEGORY_META = {
 
 /**
  * The neon AI analyzer input.
- * - emerald left border + focus glow (v0 style)
- * - category chips with Lucide icons (NO emojis)
- * - typing-effect recommendations while idle
+ * - sand left border (replacing emerald)
+ * - category chips with Lucide icons
+ * - typing-effect recommendations with smooth intro/outro
  */
 export default function CommandCapsule({ autoFocus = false }) {
   const [text, setText] = useState('')
@@ -37,7 +37,7 @@ export default function CommandCapsule({ autoFocus = false }) {
     t('dashboard.example3'),
   ]
 
-  // Typing effect: cycles through examples, type → pause → erase
+  // Typing effect: cycles through examples with intro/outro, no overlap
   useEffect(() => {
     if (text) {
       setTyping('')
@@ -50,8 +50,8 @@ export default function CommandCapsule({ autoFocus = false }) {
     const step = () => {
       if (cancelled) return
 
-      const totalTypingTime = 1000 // 1 second total typing
-      const speed = Math.max(20, totalTypingTime / current.length)
+      // Smooth typing: 40ms per char for intro, 30ms for outro
+      const speed = isDeleting ? 30 : 40
 
       if (!isDeleting) {
         if (charIndex < current.length) {
@@ -59,10 +59,10 @@ export default function CommandCapsule({ autoFocus = false }) {
           setCharIndex(c => c + 1)
           typingRef.current = setTimeout(step, speed)
         } else {
-          // Finished typing, wait 3 seconds before deleting
+          // Pause before deleting
           typingRef.current = setTimeout(() => {
             setIsDeleting(true)
-          }, 3000)
+          }, 2500)
         }
       } else {
         if (charIndex > 0) {
@@ -70,11 +70,11 @@ export default function CommandCapsule({ autoFocus = false }) {
           setCharIndex(c => c - 1)
           typingRef.current = setTimeout(step, speed)
         } else {
-          // Finished deleting, wait 1 second before next prompt
+          // Wait before next prompt
           setIsDeleting(false)
           typingRef.current = setTimeout(() => {
             setTypingIndex(i => i + 1)
-          }, 1000)
+          }, 800)
         }
       }
     }
@@ -89,7 +89,6 @@ export default function CommandCapsule({ autoFocus = false }) {
   const handleSubmit = async () => {
     if (!text.trim() || isAnalyzing) return
     const ok = await analyzePrompt(text.trim())
-    // navigate to the session page on success
     const state = useAxiomStore.getState()
     if (!state.analyzeError && state.currentScenario?.id) {
       navigate(`/analyze/${state.currentScenario.id}`)
@@ -102,31 +101,39 @@ export default function CommandCapsule({ autoFocus = false }) {
 
   const hasText = text.trim().length > 0
 
+  // Auto-grow textarea
+  const handleTextChange = (e) => {
+    const target = e.target
+    target.style.height = 'auto'
+    target.style.height = target.scrollHeight + 'px'
+    setText(target.value)
+  }
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div
         className={cn(
-          'relative rounded-2xl border border-white/10 border-l-2 border-l-emerald-400',
+          'relative rounded-2xl border border-white/10 border-l-2 border-l-sand',
           'bg-zinc-900/70 backdrop-blur-xl saturate-150 p-5 shadow-2xl shadow-black/40',
           'transition-all duration-300',
-          hasText && 'shadow-[0_0_40px_rgba(34,211,238,0.08)]'
+          hasText && 'shadow-[0_0_40px_rgba(212,163,115,0.08)]'
         )}
       >
         {/* input */}
         <div className="relative min-h-[72px]">
           <textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={handleTextChange}
             onKeyDown={handleKeyDown}
             placeholder={t('analyzer.placeholder')}
             rows={2}
             autoFocus={autoFocus}
-            className="w-full bg-transparent border-none outline-none resize-none text-[15px] leading-relaxed text-white placeholder:text-zinc-600"
+            className="w-full bg-transparent border-none outline-none resize-none text-[15px] leading-relaxed text-white placeholder:text-zinc-600 overflow-hidden"
           />
           {/* typing-effect ghost text (only when idle) */}
           {!hasText && !isAnalyzing && (
             <div className="absolute inset-0 pointer-events-none flex items-start pt-0">
-              <span className="text-[15px] leading-relaxed text-zinc-700">{typing}<span className="inline-block w-[2px] h-[1.1em] bg-emerald-400/70 ml-0.5 align-middle animate-pulse" /></span>
+              <span className="text-[15px] leading-relaxed text-zinc-700">{typing}<span className="inline-block w-[2px] h-[1.1em] bg-sand/70 ml-0.5 align-middle animate-pulse" /></span>
             </div>
           )}
         </div>
@@ -145,7 +152,7 @@ export default function CommandCapsule({ autoFocus = false }) {
                   className={cn(
                     'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all',
                     active
-                      ? 'bg-emerald-400 text-zinc-950 shadow-[0_0_16px_rgba(34,211,238,0.35)]'
+                      ? 'bg-sand text-zinc-950 shadow-[0_0_16px_rgba(212,163,115,0.35)]'
                       : 'bg-white/5 text-zinc-400 border border-white/10 hover:text-white hover:border-white/20'
                   )}
                 >
@@ -162,7 +169,7 @@ export default function CommandCapsule({ autoFocus = false }) {
             className={cn(
               'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all',
               hasText && !isAnalyzing
-                ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-zinc-950 shadow-[0_0_24px_rgba(34,211,238,0.3)] hover:shadow-[0_0_36px_rgba(34,211,238,0.45)] hover:-translate-y-px active:translate-y-0'
+                ? 'bg-gradient-to-br from-sand to-sand-light text-zinc-950 shadow-[0_0_24px_rgba(212,163,115,0.3)] hover:shadow-[0_0_36px_rgba(212,163,115,0.45)] hover:-translate-y-px active:translate-y-0'
                 : 'bg-white/5 text-zinc-600 cursor-not-allowed'
             )}
           >
@@ -173,7 +180,7 @@ export default function CommandCapsule({ autoFocus = false }) {
       </div>
 
       {analyzeError && (
-        <p className="mt-3 text-sm text-red-400 animate-fade-in">{analyzeError}</p>
+        <p className="mt-3 text-sm text-terracotta animate-fade-in">{analyzeError}</p>
       )}
 
     </div>
