@@ -8,10 +8,10 @@ import ScenarioCard from '../components/cards/ScenarioCard'
 import ScoreGauge from '../components/score/ScoreGauge'
 import { ArrowRight, Activity, ChevronDown, TrendingUp, BarChart3, Wallet, TrendingDown, Zap, Menu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '../utils/cn'
 
 /**
- * Dashboard — Stitch-inspired exact match for SanggupsGak design
+ * Dashboard — Redesigned with near-black background, champagne-gold accent,
+ * numbered sections (hero, health, baseline, growth) and proper empty states.
  */
 export default function Dashboard() {
   const history = useAxiomStore(s => s.history)
@@ -49,11 +49,15 @@ export default function Dashboard() {
 
   const overallLabel = getScoreLabel(overall.score)
 
-  // Mock data for sliders (in real app would come from profile/settings)
+  // Baseline sliders — use profile defaults when available
+  const defaultIncome = profile?.monthly_income || 15000000
+  const defaultExpenses = profile?.monthly_expenses || 9000000
+  const defaultSavings = profile?.savings_rate || 20
+
   const [sliders, setSliders] = useState({
-    monthlyIncome: profile?.monthly_income || 8500,
-    monthlyExpenses: profile?.monthly_expenses || 4200,
-    savingsRate: profile?.savings_rate || 24,
+    monthlyIncome: defaultIncome,
+    monthlyExpenses: defaultExpenses,
+    savingsRate: defaultSavings,
   })
 
   const containerVariants = {
@@ -66,17 +70,24 @@ export default function Dashboard() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
   }
 
-  // Growth projection mock data
+  // Growth projection mock (will be dynamic later)
   const growthData = [0, 15, 32, 55, 78, 100, 124]
+
+  // Format IDR with dots
+  const formatIDR = (val) => {
+    return `Rp ${Number(val).toLocaleString('id-ID')}`
+  }
+
+  const hasData = history.length > 0 && overall.score > 0
 
   return (
     <motion.div 
-      className="min-h-screen"
+      className="min-h-screen bg-zinc-950"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      {/* ============ HERO CARD (Stitch-inspired) ============ */}
+      {/* ============ HERO SECTION ============ */}
       <section className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 text-center pt-24 pb-16">
         <motion.div 
           className="w-full max-w-3xl rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-8 sm:p-12 shadow-2xl"
@@ -123,13 +134,12 @@ export default function Dashboard() {
         className="max-w-6xl mx-auto px-4 sm:px-6 pb-24 space-y-6"
         variants={containerVariants}
       >
-
-        {/* Overall health + recent analyses */}
+        {/* Row: Health Gauge + Recent Analyses */}
         <motion.div 
           className="grid grid-cols-1 lg:grid-cols-3 gap-6"
           variants={itemVariants}
         >
-          {/* Overall health card */}
+          {/* Health Gauge Card */}
           <motion.div 
             className="rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-8 flex flex-col items-center justify-center"
             variants={itemVariants}
@@ -140,8 +150,8 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <div className="w-10 h-10 rounded-xl bg-sand/10 border border-sand/20 grid place-items-center">
-                <BarChart3 className="h-5 w-5 text-sand" />
+              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
+                <BarChart3 className="h-5 w-5 text-amber-400" />
               </div>
               <motion.h2 
                 className="font-display text-lg font-semibold text-white"
@@ -149,68 +159,76 @@ export default function Dashboard() {
             </motion.div>
 
             <motion.div
-              className="flex flex-col items-center space-y-4"
+              className="flex flex-col items-center space-y-4 w-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
             >
-              <ScoreGauge
-                score={overall.score}
-                scoreLabel={overallLabel}
-                labels={gaugeLabels}
-                size={180}
-                showArcLabels
-              />
-
-              <motion.div className="flex items-center gap-6 text-center">
-                <div>
-                  <p className="font-display text-2xl font-bold text-white">{overall.factors.liquidity?.grade || 'A-'}</p>
-                  <p className="text-xs text-zinc-500">{t('dashboard.liquidity')}</p>
-                </div>
-                <div className="w-px h-8 bg-white/[10%]" />
-                <div>
-                  <p className="font-display text-2xl font-bold text-white">{overall.factors.debt?.score || 28}%</p>
-                  <p className="text-xs text-zinc-500">{t('dashboard.debtToIncome')}</p>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            {/* factor mini-bars using natural palette */}
-            <motion.div 
-              className="w-full mt-6 space-y-2"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              {[
-                { key: 'debt', label: t('cards.overall.debtFactor'), score: overall.factors.debt?.score || 72 },
-                { key: 'emergency', label: t('cards.overall.emergencyFactor'), score: overall.factors.emergency?.score || 65 },
-                { key: 'savings', label: t('cards.overall.savingsFactor'), score: overall.factors.savings?.score || 78 },
-                { key: 'dp', label: t('cards.overall.dpFactor'), score: overall.factors.dp?.score || 85 },
-              ].map(factor => {
-                let color = '#e76f51'
-                if (factor.score >= 80) color = '#d4a373'
-                else if (factor.score >= 50) color = '#e9c46a'
-                return (
-                  <motion.div key={factor.key} className="flex items-center gap-3">
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 w-28 text-left truncate">{factor.label}</span>
-                    <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                      <motion.div
-                        className="h-full rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${factor.score}%` }}
-                        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                        style={{ background: color }}
-                      />
+              {hasData ? (
+                <>
+                  <ScoreGauge
+                    score={overall.score}
+                    scoreLabel={overallLabel}
+                    labels={gaugeLabels}
+                    size={180}
+                    showArcLabels
+                  />
+                  <div className="flex items-center gap-6 text-center">
+                    <div>
+                      <p className="font-display text-2xl font-bold text-white">{overall.factors.liquidity?.grade || 'A-'}</p>
+                      <p className="text-xs text-zinc-500">{t('dashboard.liquidity')}</p>
                     </div>
-                    <span className="text-xs font-bold text-white w-10 text-right">{factor.score}%</span>
-                  </motion.div>
-                )
-              })}
+                    <div className="w-px h-8 bg-white/[10%]" />
+                    <div>
+                      <p className="font-display text-2xl font-bold text-white">{overall.factors.debt?.score || 28}%</p>
+                      <p className="text-xs text-zinc-500">{t('dashboard.debtToIncome')}</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="py-8 flex flex-col items-center">
+                  <div className="w-36 h-36 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center">
+                    <span className="text-4xl text-zinc-600 font-mono">—</span>
+                  </div>
+                  <p className="mt-4 text-sm text-zinc-500">{t('dashboard.overallEmpty')}</p>
+                </div>
+              )}
+
+              {/* Factor mini-bars */}
+              <motion.div 
+                className="w-full mt-4 space-y-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                {[
+                  { key: 'debt', label: t('cards.overall.debtFactor'), score: hasData ? overall.factors.debt?.score || 72 : 0 },
+                  { key: 'emergency', label: t('cards.overall.emergencyFactor'), score: hasData ? overall.factors.emergency?.score || 65 : 0 },
+                  { key: 'savings', label: t('cards.overall.savingsFactor'), score: hasData ? overall.factors.savings?.score || 78 : 0 },
+                  { key: 'dp', label: t('cards.overall.dpFactor'), score: hasData ? overall.factors.dp?.score || 85 : 0 },
+                ].map(factor => {
+                  const color = factor.score >= 80 ? '#d4a373' : factor.score >= 50 ? '#e9c46a' : '#e76f51'
+                  return (
+                    <motion.div key={factor.key} className="flex items-center gap-3">
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 w-28 text-left truncate">{factor.label}</span>
+                      <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: hasData ? `${factor.score}%` : '0%' }}
+                          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                          style={{ background: color }}
+                        />
+                      </div>
+                      <span className="text-xs font-bold text-white w-10 text-right">{hasData ? `${factor.score}%` : '—'}</span>
+                    </motion.div>
+                  )
+                })}
+              </motion.div>
             </motion.div>
           </motion.div>
 
-          {/* Recent analyses */}
+          {/* Recent Analyses */}
           <motion.div 
             className="lg:col-span-2 rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-8"
             variants={itemVariants}
@@ -222,8 +240,8 @@ export default function Dashboard() {
               transition={{ delay: 0.1 }}
             >
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-sand/10 border border-sand/20 grid place-items-center">
-                  <BarChart3 className="h-5 w-5 text-sand" />
+                <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
+                  <BarChart3 className="h-5 w-5 text-amber-400" />
                 </div>
                 <motion.h2 
                   className="font-display text-lg font-semibold text-white"
@@ -231,7 +249,7 @@ export default function Dashboard() {
               </div>
               <Link
                 to="/analyze"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-sand hover:text-sand-light transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
                 whileHover={{ x: 4 }}
               >
                 {t('dashboard.recentViewAll')}
@@ -250,12 +268,12 @@ export default function Dashboard() {
                   transition={{ delay: 0.3 }}
                 >
                   <motion.div
-                    className="w-14 h-14 rounded-2xl bg-sand/10 border border-sand/20 grid place-items-center mb-4"
+                    className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/20 grid place-items-center mb-4"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                   >
-                    <BarChart3 className="h-6 w-6 text-sand" />
+                    <BarChart3 className="h-6 w-6 text-amber-400" />
                   </motion.div>
                   <motion.p
                     className="text-sm text-zinc-400 mb-2"
@@ -264,8 +282,8 @@ export default function Dashboard() {
                     transition={{ delay: 0.2 }}
                   >{t('dashboard.recentEmpty')}</motion.p>
                   <motion.Link
-                    to="/analyze/new"
-                    className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-br from-sand to-sand-light text-zinc-950 text-sm font-bold shadow-[0_0_20px_rgba(212,163,115,0.25)] hover:-translate-y-px transition-all"
+                    to="/"
+                    className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 text-zinc-950 text-sm font-bold shadow-[0_0_20px_rgba(212,163,115,0.25)] hover:-translate-y-px transition-all"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     initial={{ opacity: 0, y: 10 }}
@@ -296,12 +314,12 @@ export default function Dashboard() {
           </motion.div>
         </motion.div>
 
-        {/* Baseline Parameters + Growth Projection row */}
+        {/* Row: Baseline Parameters + Growth Projection */}
         <motion.div 
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
           variants={containerVariants}
         >
-          {/* --- BASELINE PARAMETERS CARD --- */}
+          {/* Baseline Parameters */}
           <motion.div
             className="rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-8"
             variants={itemVariants}
@@ -312,8 +330,8 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <div className="w-10 h-10 rounded-xl bg-sand/10 border border-sand/20 grid place-items-center">
-                <Wallet className="h-5 w-5 text-sand" />
+              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
+                <Wallet className="h-5 w-5 text-amber-400" />
               </div>
               <motion.h2 
                 className="font-display text-lg font-semibold text-white"
@@ -331,21 +349,21 @@ export default function Dashboard() {
                   key: 'income', 
                   label: t('dashboard.monthlyIncome'), 
                   value: sliders.monthlyIncome, 
-                  max: 20000, 
-                  step: 100,
+                  max: 50000000, 
+                  step: 100000,
                   color: '#d4a373',
                   icon: Wallet,
-                  format: (v) => `$${v.toLocaleString()}`
+                  format: (v) => formatIDR(v)
                 },
                 { 
                   key: 'expenses', 
                   label: t('dashboard.monthlyExpenses'), 
                   value: sliders.monthlyExpenses, 
-                  max: 15000, 
-                  step: 100,
-                  color: '#4a90e2',
+                  max: 30000000, 
+                  step: 100000,
+                  color: '#e76f51',
                   icon: TrendingDown,
-                  format: (v) => `$${v.toLocaleString()}`
+                  format: (v) => formatIDR(v)
                 },
                 { 
                   key: 'savings', 
@@ -364,7 +382,7 @@ export default function Dashboard() {
                       <Icon className="h-3 w-3" style={{ color }} />
                       {label}
                     </motion.span>
-                    <motion.span className="font-display text-sm font-bold text-white tabular-nums">{format(value)}</motion.span>
+                    <motion.span className="font-mono text-sm font-bold text-white tabular-nums">{format(value)}</motion.span>
                   </div>
                   <input
                     type="range"
@@ -372,7 +390,7 @@ export default function Dashboard() {
                     max={max}
                     step={step}
                     value={value}
-                    onChange={(e) => setSliders(prev => ({ ...prev, [key]: parseInt(e.target.value) }))}
+                    onChange={(e) => setSliders(prev => ({ ...prev, [key]: parseFloat(e.target.value) }))}
                     className="w-full h-2 appearance-none bg-white/[0.06] rounded-full cursor-pointer"
                     style={{
                       background: `linear-gradient(to right, ${color} ${(value / max) * 100}%, transparent ${(value / max) * 100}%)`
@@ -383,7 +401,7 @@ export default function Dashboard() {
             </motion.div>
           </motion.div>
 
-          {/* --- GROWTH PROJECTION CARD --- */}
+          {/* Growth Projection */}
           <motion.div
             className="rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-8 relative overflow-hidden"
             variants={itemVariants}
@@ -395,14 +413,18 @@ export default function Dashboard() {
               transition={{ delay: 0.1 }}
             >
               <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-sand/10 border border-sand/20 grid place-items-center">
-                  <TrendingUp className="h-5 w-5 text-sand" />
+                <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
+                  <TrendingUp className="h-5 w-5 text-amber-400" />
                 </div>
                 <motion.h2 
                   className="font-display text-lg font-semibold text-white"
                 >{t('dashboard.growthTitle')}</motion.h2>
               </div>
-              <motion.button className="p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/[4%] transition-colors" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <motion.button 
+                className="p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/[4%] transition-colors" 
+                whileHover={{ scale: 1.1 }} 
+                whileTap={{ scale: 0.9 }}
+              >
                 <Menu className="h-4 w-4" />
               </motion.button>
             </motion.div>
@@ -413,7 +435,6 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.6 }}
             >
-              {/* SVG Line Chart */}
               <svg className="w-full h-full" viewBox="0 0 400 256" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="growthGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -467,21 +488,21 @@ export default function Dashboard() {
                 transition={{ delay: 0.5 }}
               >
                 <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t('dashboard.estValue')}</p>
-                <p className="font-display text-3xl font-bold text-sand">$124,000</p>
+                <p className="font-mono text-3xl font-bold text-amber-400">Rp 124.000.000</p>
               </motion.div>
             </motion.div>
           </motion.div>
         </motion.div>
 
         {/* Insight strip */}
-        {profile && (
+        {profile && history.length > 0 && (
           <motion.div 
-            className="rounded-3xl border border-sand/15 bg-gradient-to-br from-sand/[0.07] to-sand/[0.04] p-6 sm:p-8"
+            className="rounded-3xl border border-amber-400/15 bg-gradient-to-br from-amber-400/[0.07] to-amber-400/[0.04] p-6 sm:p-8"
             variants={itemVariants}
             whileHover={{ scale: 1.005 }}
           >
             <motion.p 
-              className="text-[11px] font-bold uppercase tracking-widest text-sand mb-2"
+              className="text-[11px] font-bold uppercase tracking-widest text-amber-400 mb-2"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
@@ -493,45 +514,12 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
             >
               {overall.totalMonthlyDebt > 0
-                ? `${t('dashboard.insightLabel')}: Rp${Math.round(overall.totalMonthlyDebt).toLocaleString('id-ID')}/mo {t('common.perMonth')} — {t('cards.overall.confirmed').replace('{count}', overall.confirmedCount)}`
+                ? `${t('dashboard.insightLabel')}: ${formatIDR(Math.round(overall.totalMonthlyDebt))}/mo — ${t('cards.overall.confirmed').replace('{count}', overall.confirmedCount)}`
                 : t('dashboard.overallEmpty')}
             </motion.p>
           </motion.div>
         )}
       </motion.section>
-
-      {/* ============ FOOTER ============ */}
-      <motion.footer
-        className="border-t border-white/[6%] bg-zinc-950/50 backdrop-blur-xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Link to="/" className="font-display text-lg font-bold text-white">Axiom</Link>
-              <span className="text-sand font-medium">0</span>
-            </div>
-            <p className="text-sm text-zinc-500 text-center sm:text-left">
-              {t('footer.tagline')}
-            </p>
-            <div className="flex items-center gap-6 text-xs text-zinc-500">
-              <Link to="/terms" className="hover:text-white transition-colors">{t('footer.terms')}</Link>
-              <Link to="/privacy" className="hover:text-white transition-colors">{t('footer.privacy')}</Link>
-              <Link to="/support" className="hover:text-white transition-colors">{t('footer.support')}</Link>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-white/[6%] flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-[10px] text-zinc-600 text-center sm:text-left">
-              {t('footer.disclaimer')}
-            </p>
-            <div className="flex items-center gap-4 text-[10px] text-zinc-600">
-              <span>© 2026 Axiom</span>
-            </div>
-          </div>
-        </div>
-      </motion.footer>
     </motion.div>
   )
 }
