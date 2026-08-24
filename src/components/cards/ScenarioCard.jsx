@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
+import { Trash2, CheckCircle2 } from 'lucide-react'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
 import { useLanguage } from '../../store/LanguageContext.jsx'
-import { formatCurrency } from '../../utils/format'
+import { formatCurrency, formatDate } from '../../utils/format'
 import { cn } from '../../utils/cn'
 
 const categoryColors = {
