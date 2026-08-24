@@ -139,6 +139,19 @@ export default function AnalyzeSession() {
           </div>
         </motion.div>
 
+        {/* Fallback notice — Gemini unavailable, result is a demo/mock extraction */}
+        {session.fallback && (
+          <motion.div
+            className="mb-6 rounded-2xl border border-amber-400/25 bg-amber-400/[7%] px-4 py-3"
+            variants={itemVariants}
+          >
+            <p className="text-xs font-mono uppercase tracking-wide text-amber-300">
+              {t('analyze.fallbackNoticeTitle')}
+            </p>
+            <p className="mt-1 text-[11px] text-zinc-400">{t('analyze.fallbackNoticeBody')}</p>
+          </motion.div>
+        )}
+
         {/* Verdict Card + Score Breakdown row */}
         <motion.div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6" variants={itemVariants}>
           <div className="lg:col-span-2 rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-8 flex flex-col items-center justify-center">

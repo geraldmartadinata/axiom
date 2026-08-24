@@ -1,122 +1,37 @@
 import { enrichScenario } from '../utils/calculations'
 import { useAxiomStore } from '../store/useAxiomStore'
-import mockCar from '../mocks/mock-car.json'
-import mockGadget from '../mocks/mock-gadget.json'
-import mockProperty from '../mocks/mock-property.json'
-import mockBad from '../mocks/mock-bad.json'
+import { matchMock } from './mockMatcher'
 
-// Mock mode is opt-in ONLY via env flag (default OFF): real prompts always hit Gemini.
+// Mock mode is opt-in ONLY via env flag (default OFF): real prompts go through the
+// /api/gemini serverless proxy — the API key never exists in client code.
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
-
-function detectLanguage(prompt) {
-  const idWords = ['bisa', 'beli', 'nggak', 'gak', 'cicil', 'dp', 'gaji', 'jt', 'miliar', 'triliun', 'bln', 'thn', 'tahun', 'bulan', 'rumah', 'apartemen', 'mobil', 'motor', 'hp', 'ponsel', 'laptop', 'cicilan', 'tenor', 'bunga', 'angsuran']
-  const words = prompt.toLowerCase().split(/\s+/)
-  const idCount = words.filter(w => idWords.some(iw => w.includes(iw))).length
-  return idCount >= 2 ? 'id' : 'en'
-}
-
-function matchMock(prompt) {
-  const p = prompt.toLowerCase()
-  const lang = detectLanguage(prompt)
-  
-  // Indonesian vehicle keywords
-  const vehicleKeywords = [
-    'civic', 'avanza', 'veloz', 'honda', 'toyota', 'mobil', 'motor', 'car', 'vehicle',
-    'tesla', 'bmw', 'm5', 'bmw m5', 'innova', 'fortuner', 'cr-v', 'hr-v', 'brio', 'jazz',
-    'city', 'mobilio', 'xpander', 'pajero', 'triton', 'ranger', 'everest'
-  ]
-  
-  // Indonesian tech keywords
-  const techKeywords = [
-    'iphone', 'samsung', 'xiaomi', 'oppo', 'vivo', 'realme', 'hp', 'ponsel', 'phone',
-    'laptop', 'macbook', 'ipad', 'tablet', 'gadget', 'mac', 'galaxy', 'redmi', 'poco',
-    'iphone 16', 'iphone 15', 'ipad pro', 'airpods', 'apple watch'
-  ]
-  
-  // Indonesian property keywords
-  const propertyKeywords = [
-    'rumah', 'apartemen', 'apartment', 'property', 'house', 'home', 'studio',
-    'jakarta', 'bekasi', 'depok', 'tangerang', 'bogor', 'bandung', 'surabaya',
-    'kpr', 'cicilan rumah', 'dp rumah', 'sertifikat', 'shm', 'shgb'
-  ]
-
-  const isVehicle = vehicleKeywords.some(kw => p.includes(kw))
-  const isTech = techKeywords.some(kw => p.includes(kw))
-  const isProperty = propertyKeywords.some(kw => p.includes(kw))
-
-  // Check for bad scenario (low income, high price)
-  const isBad = (p.includes('avanza') || p.includes('veloz') || p.includes('bmw') || p.includes('m5') || p.includes('110')) &&
-                (p.includes('5jt') || p.includes('5 juta') || p.includes('2jt') || p.includes('2 juta') || p.includes('2k'))
-
-  if (isBad) return mockBad
-  if (isVehicle) return mockCar
-  if (isTech) return mockGadget
-  if (isProperty) return mockProperty
-  
-  // Default based on language
-  return lang === 'id' ? mockCar : mockCar
-}
-
-const SYSTEM_PROMPT = `You are a financial data extraction assistant. Your ONLY job is to extract financial variables from a user's natural-language scenario and return them as a JSON object.
-
-CRITICAL RULES:
-1. Do NOT calculate anything. Only extract numbers the user mentioned.
-2. Do NOT add advice, opinions, or commentary.
-3. If a value is not mentioned, use null (do NOT guess or estimate).
-4. For hidden_costs: estimate REALISTIC costs based on the item category (e.g., cars have insurance, registration, maintenance; phones have insurance, accessories, AppleCare). These are estimates, not exact quotes.
-5. Return ONLY a valid JSON object. No markdown, no explanation, no code fences.
-6. Handle both English and Indonesian input. Currency can be USD ($) or IDR (Rp/jt/miliar).
-
-Return this exact JSON structure:
-{
-  "scenario": {
-    "raw_prompt": "<the user's original text>",
-    "item_name": "<short item name>",
-    "category": "<one of: tech, vehicle, property>"
-  },
-  "financials": {
-    "monthly_income": <number or null>,
-    "base_price": <number or null>,
-    "down_payment": <number or null>,
-    "tenor_months": <number or null>,
-    "interest_rate_assumed": <number or null>,
-    "calculated_monthly_installment": null
-  },
-  "hidden_costs": [
-    {
-      "name": "<cost description>",
-      "amount_per_year": <number or null>,
-      "amount_upfront": <number or null>,
-      "type": "<one of: mandatory, upfront, optional, tax, maintenance>"
-    }
-  ]
-}`
-
-async function geminiExtract(prompt) {
-  const response = await fetch(GEMINI_URL, {
+// Calls the SERVERLESS PROXY (/api/gemini). The Gemini key lives only server-side;
+// this function holds no reference to any VITE_GEMINI* variable by design.
+// Server returns { fallback: true } + mock payload when Gemini is unavailable
+// (Zense-style), so the app always gets a result.
+async function extractViaProxy(prompt) {
+  const response = await fetch('/api/gemini', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nUser scenario: "${prompt}"` }] }],
-      generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
-    })
+    body: JSON.stringify({ prompt }),
   })
-  if (!response.ok) throw new Error(`Gemini API error: ${response.status}`)
-  const data = await response.json()
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!text) throw new Error('Empty response from Gemini')
-  // Gemini may wrap JSON in markdown fences — strip them before parsing.
-  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
-  let parsed
+  let payload = null
   try {
-    parsed = JSON.parse(cleaned)
+    payload = await response.json()
   } catch {
-    throw new Error('Gemini returned malformed JSON')
+    // non-JSON error body — handled below via status
   }
-  return validateRawScenario(parsed, prompt)
+  if (!response.ok) {
+    // Network/deploy failure with no fallback payload → local mock as last resort.
+    console.warn('[extraction] proxy error, using local mock:', response.status)
+    return { ...matchMock(prompt), fallback: true }
+  }
+  if (payload?.fallback) {
+    console.warn('[extraction] server returned mock fallback (Gemini unavailable)')
+    return { ...payload, scenario: { ...payload.scenario, raw_prompt: payload.scenario?.raw_prompt || prompt } }
+  }
+  return validateRawScenario(payload, prompt)
 }
 
 function validateRawScenario(data, originalPrompt) {
@@ -139,16 +54,14 @@ function validateRawScenario(data, originalPrompt) {
 
 export async function extractAndEnrich(prompt) {
   if (!prompt || !prompt.trim()) throw new Error('Prompt is empty')
-
-  if (USE_MOCK) return enrichScenario({ ...matchMock(prompt), scenario: { ...matchMock(prompt).scenario, raw_prompt: prompt } }, useAxiomStore.getState().profile)
-
-  // Real pipeline: no silent fallback — failures must surface to the caller.
-  if (!GEMINI_API_KEY) {
-    throw new Error('Gemini API key is not configured (VITE_GEMINI_API_KEY)')
-  }
-  const rawScenario = await geminiExtract(prompt)
   const profile = useAxiomStore.getState().profile
+
+  if (USE_MOCK) return enrichScenario({ ...matchMock(prompt), scenario: { ...matchMock(prompt).scenario, raw_prompt: prompt } }, profile)
+
+  // Real pipeline: proxy fails gracefully into mock fallback (never a hard error).
+  const rawScenario = await extractViaProxy(prompt.trim())
   const enriched = enrichScenario(rawScenario, profile)
+  if (rawScenario.fallback) enriched.fallback = true
   return enriched
 }
 

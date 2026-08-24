@@ -5,10 +5,11 @@ import { useLanguage } from '../store/LanguageContext.jsx'
 import { formatCurrency } from '../utils/format'
 import { computeHealthScore, computeLiquidityGrade, scoreColor, withAlpha } from '../utils/healthScore'
 import CommandCapsule from '../components/capsule/CommandCapsule'
+import GrowthProjection from '../components/dashboard/GrowthProjection'
 import { motion } from 'framer-motion'
 import {
   Activity, BarChart3, Wallet, TrendingUp, Car, Smartphone,
-  Home, Package, ChevronRight, MoreHorizontal,
+  Home, Package, ChevronRight,
 } from 'lucide-react'
 
 /**
@@ -123,22 +124,6 @@ export default function Dashboard() {
     return computeLiquidityGrade(fund, expenses)
   }, [profile, expenses])
 
-  // ---- Growth projection (5y, monthly compounding) ----
-  const growth = useMemo(() => {
-    if (!hasData) return null
-    const annual = (Number(profile?.investment_return) || 7) / 100
-    const i = annual / 12
-    const contrib = Math.max(0, income - expenses - Math.min(rawSavings, Math.max(0, income - expenses)))
-    const points = []
-    let bal = 0, spent = 0
-    for (let m = 0; m <= 60; m++) {
-      points.push({ month: m, savings: Math.round(bal), spending: Math.round(spent) })
-      bal = bal * (1 + i) + contrib
-      spent += expenses
-    }
-    const fv = points[60].savings
-    return { points, fv }
-  }, [hasData, income, expenses, rawSavings, profile])
 
   // Up to 5 most recent sessions, defensively sorted newest-first
   const recent = useMemo(() => {
@@ -326,62 +311,8 @@ export default function Dashboard() {
         {/* ================= ROW 3 ================= */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
 
-          {/* ---- GROWTH PROJECTION ---- */}
-          <motion.section {...fadeUp(0.2)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
-            <header className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-white">{t('dashboard.growthTitle')}</h2>
-              <MoreHorizontal className="h-4 w-4 text-zinc-600" strokeWidth={2} />
-            </header>
-
-            <div className="relative h-[240px]">
-              {!growth ? (
-                /* EMPTY — axes/grid only */
-                <>
-                  <svg viewBox="0 0 400 200" preserveAspectRatio="none" className="w-full h-full">
-                    {[40, 80, 120, 160].map(y => <line key={y} x1="28" y1={y} x2="396" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />)}
-                    <line x1="28" y1="8" x2="28" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
-                    <line x1="28" y1="188" x2="396" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
-                  </svg>
-                  <div className="absolute bottom-2 left-8">
-                    <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">{t('dashboard.estValue')}</p>
-                    <p className="font-mono text-2xl font-bold text-zinc-600">—</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <svg viewBox="0 0 400 200" preserveAspectRatio="none" className="w-full h-full">
-                    {[40, 80, 120, 160].map(y => <line key={y} x1="28" y1={y} x2="396" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />)}
-                    <line x1="28" y1="8" x2="28" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
-                    <line x1="28" y1="188" x2="396" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
-                    {(() => {
-                      const maxY = Math.max(growth.points[60].savings, growth.points[60].spending, 1)
-                      const X = m => 28 + (m / 60) * 368
-                      const Y = v => 188 - (v / maxY) * 172
-                      const line = key => growth.points.map((p, idx) => `${idx === 0 ? 'M' : 'L'}${X(p.month).toFixed(1)},${Y(p[key]).toFixed(1)}`).join(' ')
-                      const area = `${line('savings')} L396,188 L28,188 Z`
-                      return (
-                        <>
-                          <defs>
-                            <linearGradient id="goldFill" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="rgba(232,196,122,0.22)" />
-                              <stop offset="100%" stopColor="rgba(232,196,122,0)" />
-                            </linearGradient>
-                          </defs>
-                          <path d={area} fill="url(#goldFill)" style={{ transition: 'd 0.6s ease' }} />
-                          <path d={line('spending')} fill="none" stroke="#7a8ba3" strokeWidth="1.5" strokeDasharray="5 5" opacity="0.75" style={{ transition: 'd 0.6s ease' }} />
-                          <path d={line('savings')} fill="none" stroke="#e8c47a" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 4px rgba(232,196,122,0.35))', transition: 'd 0.6s ease' }} />
-                        </>
-                      )
-                    })()}
-                  </svg>
-                  <div className="absolute bottom-2 left-8 pointer-events-none">
-                    <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">{t('dashboard.estValue')}</p>
-                    <p className="font-mono text-2xl font-bold text-amber-300 tabular-nums drop-shadow-[0_0_12px_rgba(232,196,122,0.3)]">{formatCurrency(growth.fv, lang, 'IDR')}</p>
-                  </div>
-                </>
-              )}
-            </div>
-          </motion.section>
+          {/* ---- GROWTH PROJECTION (asset timeline) ---- */}
+          <GrowthProjection />
 
           {/* ---- RECENT ANALYSIS ---- */}
           <motion.section {...fadeUp(0.26)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
