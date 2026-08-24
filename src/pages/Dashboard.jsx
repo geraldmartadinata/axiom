@@ -1,525 +1,398 @@
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { useState, useMemo } from 'react'
 import { useAxiomStore } from '../store/useAxiomStore'
 import { useLanguage } from '../store/LanguageContext.jsx'
-import { computeOverallScore } from '../utils/overallScore'
+import { formatCurrency } from '../utils/format'
+import { computeHealthScore, computeLiquidityGrade } from '../utils/healthScore'
 import CommandCapsule from '../components/capsule/CommandCapsule'
-import ScenarioCard from '../components/cards/ScenarioCard'
-import ScoreGauge from '../components/score/ScoreGauge'
-import { ArrowRight, Activity, ChevronDown, TrendingUp, BarChart3, Wallet, TrendingDown, Zap, Menu } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import {
+  Activity, BarChart3, Wallet, TrendingUp, Car, Smartphone,
+  Home, Package, ChevronRight, MoreHorizontal,
+} from 'lucide-react'
 
 /**
- * Dashboard — Redesigned with near-black background, champagne-gold accent,
- * numbered sections (hero, health, baseline, growth) and proper empty states.
+ * Dashboard — prototype match.
+ * Row 1: hero card (headline + pill input bar)
+ * Row 2: Financial Health (38%) | Baseline Parameters (62%)
+ * Row 3: Growth Projection (50%) | Recent Analysis (50%)
+ * All numbers derive live from baseline sliders; empty states never fabricate.
  */
+
+const INCOME_MAX = 50_000_000, INCOME_STEP = 500_000
+const EXPENSES_MAX = 30_000_000, EXPENSES_STEP = 250_000
+const RATE_MAX = 100, RATE_STEP = 1
+
+const CAT_ICON = { vehicle: Car, tech: Smartphone, property: Home }
+const CAT_KEY = { vehicle: 'catVehicle', tech: 'catTech', property: 'catProperty' }
+
 export default function Dashboard() {
   const history = useAxiomStore(s => s.history)
   const profile = useAxiomStore(s => s.profile)
+  const saveProfile = useAxiomStore(s => s.saveProfile)
   const { t, lang } = useLanguage()
 
-  const overall = useMemo(() => computeOverallScore(history, profile), [history, profile])
-  const recent = useMemo(() => history.slice(0, 4), [history])
-
-  const gaugeLabels = useMemo(() => ({
-    perfect: t('gauge.perfect'),
-    veryHealthy: t('gauge.veryHealthy'),
-    healthy: t('gauge.healthy'),
-    prettyGood: t('gauge.prettyGood'),
-    intermediate: t('gauge.intermediate'),
-    fair: t('gauge.fair'),
-    poor: t('gauge.poor'),
-    bad: t('gauge.bad'),
-    veryBad: t('gauge.veryBad'),
-    noPurchase: t('gauge.noPurchase'),
-  }), [t])
-
-  const getScoreLabel = (s) => {
-    if (s === 0) return gaugeLabels.noPurchase
-    if (s <= 10) return gaugeLabels.veryBad
-    if (s <= 20) return gaugeLabels.bad
-    if (s <= 33) return gaugeLabels.poor
-    if (s <= 49) return gaugeLabels.fair
-    if (s <= 66) return gaugeLabels.intermediate
-    if (s <= 79) return gaugeLabels.good
-    if (s <= 89) return gaugeLabels.prettyGood
-    if (s <= 96) return gaugeLabels.healthy
-    return gaugeLabels.perfect
-  }
-
-  const overallLabel = getScoreLabel(overall.score)
-
-  // Baseline sliders — use profile defaults when available
-  const defaultIncome = profile?.monthly_income || 15000000
-  const defaultExpenses = profile?.monthly_expenses || 9000000
-  const defaultSavings = profile?.savings_rate || 20
-
-  const [sliders, setSliders] = useState({
-    monthlyIncome: defaultIncome,
-    monthlyExpenses: defaultExpenses,
-    savingsRate: defaultSavings,
+  // ---- Baseline state, initialized from EXISTING profile keys ----
+  const [income, setIncome] = useState(() => Math.min(INCOME_MAX, Number(profile?.monthly_income) || 0))
+  const [expenses, setExpenses] = useState(() => Math.min(EXPENSES_MAX, Number(profile?.monthly_expenses) || 0))
+  const [rate, setRate] = useState(() => {
+    const inc = Number(profile?.monthly_income) || 0
+    const sav = Number(profile?.monthly_savings) || 0
+    return inc > 0 ? Math.max(0, Math.min(RATE_MAX, Math.round((sav / inc) * 100))) : 0
   })
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  const hasData = income > 0 || expenses > 0 || rate > 0
+  const hasAnyProfile = Boolean(
+    Number(profile?.monthly_income) || Number(profile?.monthly_expenses) ||
+    Number(profile?.monthly_savings) || Number(profile?.emergency_fund)
+  )
+
+  // ---- Health score (live, shared util) ----
+  const health = useMemo(
+    () => computeHealthScore({ income, expenses, savingsRate: rate }),
+    [income, expenses, rate]
+  )
+  const rawSavings = (rate / 100) * income
+  const overBudget = income > 0 && expenses + rawSavings > income + 1e-6
+  // Clamp savings rate so savings + expenses ≤ income
+  const maxRate = income > 0 ? Math.max(0, Math.floor(((income - expenses) / income) * 100)) : RATE_MAX
+
+  useEffect(() => {
+    if (!overBudget && rate > maxRate) setRate(maxRate)
+  }, [overBudget, maxRate]) // eslint-disable-line
+
+  // ---- Debounced persist (~300ms) to EXISTING profile keys ----
+  const persistTimer = useRef(null)
+  useEffect(() => {
+    if (persistTimer.current) clearTimeout(persistTimer.current)
+    persistTimer.current = setTimeout(() => {
+      if (!hasData && !profile) return // nothing to save yet
+      saveProfile({
+        ...profile,
+        monthly_income: income,
+        monthly_expenses: expenses, // NEW optional field (no existing key existed)
+        monthly_savings: Math.round((rate / 100) * income),
+      })
+    }, 300)
+    return () => clearTimeout(persistTimer.current)
+  }, [income, expenses, rate]) // eslint-disable-line
+
+  const liquidityGrade = useMemo(() => {
+    const fund = Number(profile?.emergency_fund) || 0
+    return computeLiquidityGrade(fund, expenses)
+  }, [profile, expenses])
+
+  // ---- Growth projection (5y, monthly compounding) ----
+  const growth = useMemo(() => {
+    if (!hasData) return null
+    const annual = (Number(profile?.investment_return) || 7) / 100
+    const i = annual / 12
+    const contrib = Math.max(0, income - expenses - Math.min(rawSavings, Math.max(0, income - expenses)))
+    const points = []
+    let bal = 0, spent = 0
+    for (let m = 0; m <= 60; m++) {
+      points.push({ month: m, savings: Math.round(bal), spending: Math.round(spent) })
+      bal = bal * (1 + i) + contrib
+      spent += expenses
+    }
+    const fv = points[60].savings
+    return { points, fv }
+  }, [hasData, income, expenses, rawSavings, profile])
+
+  const recent = useMemo(() => (history || []).slice(0, 4), [history])
+
+  const verdictOf = (s) => {
+    const sc = s?.enrichment?.sanggup_score?.score
+    if (typeof sc !== 'number' || isNaN(sc)) return 'MODERATE'
+    return sc >= 80 ? 'SAFE' : sc >= 50 ? 'MODERATE' : 'HIGH_RISK'
   }
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+  const fmtDateShort = (iso) => {
+    if (!iso) return '—'
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return '—'
+    return d.toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { month: 'short', day: 'numeric' }).toUpperCase()
   }
 
-  // Growth projection mock (will be dynamic later)
-  const growthData = [0, 15, 32, 55, 78, 100, 124]
-
-  // Format IDR with dots
-  const formatIDR = (val) => {
-    return `Rp ${Number(val).toLocaleString('id-ID')}`
+  const focusHeroInput = () => {
+    document.querySelector('input[type="text"][aria-label]')?.focus()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const hasData = history.length > 0 && overall.score > 0
+  const fadeUp = (delay = 0) => ({
+    initial: { opacity: 0, y: 24 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] },
+  })
 
   return (
-    <motion.div 
-      className="min-h-screen bg-zinc-950"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      {/* ============ HERO SECTION ============ */}
-      <section className="min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 text-center pt-24 pb-16">
-        <motion.div 
-          className="w-full max-w-3xl rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-8 sm:p-12 shadow-2xl"
-          variants={itemVariants}
-        >
-          <motion.h1 
-            className="font-display text-4xl sm:text-5xl font-light text-white tracking-tight mb-3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-          >
-            {t('dashboard.title')}
-          </motion.h1>
-          <motion.p 
-            className="text-zinc-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-          >
-            {t('dashboard.subtitle')}
-          </motion.p>
-          <motion.div 
-            className="w-full"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
+    <div className="relative min-h-screen bg-zinc-950 pt-24 pb-20 px-4 sm:px-6 overflow-hidden">
+      {/* Subtle warm radial glow behind hero */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-[480px] pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse 70% 55% at 50% -10%, rgba(212,163,115,0.07), transparent 70%)' }}
+      />
+
+      <div className="relative max-w-[1200px] mx-auto flex flex-col gap-6">
+
+        {/* ================= ROW 1 — HERO CARD ================= */}
+        <motion.section {...fadeUp(0)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl px-6 py-10 sm:px-10 sm:py-14">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
+            {t('dashboard.title')}{' '}<span className="text-amber-300">{t('dashboard.titleAccent')}</span>
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-zinc-500">{t('dashboard.heroSubtitle')}</p>
+          <div className="mt-8">
             <CommandCapsule />
-          </motion.div>
-          <motion.div 
-            className="mt-6 flex items-center justify-center gap-2 text-xs text-zinc-600"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-          >
-            {t('dashboard.scrollHint')}
-            <ChevronDown className="h-3.5 w-3.5" />
-          </motion.div>
-        </motion.div>
-      </section>
+          </div>
+        </motion.section>
 
-      {/* ============ BELOW FOLD ============ */}
-      <motion.section 
-        className="max-w-6xl mx-auto px-4 sm:px-6 pb-24 space-y-6"
-        variants={containerVariants}
-      >
-        {/* Row: Health Gauge + Recent Analyses */}
-        <motion.div 
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-          variants={itemVariants}
-        >
-          {/* Health Gauge Card */}
-          <motion.div 
-            className="rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-8 flex flex-col items-center justify-center"
-            variants={itemVariants}
-          >
-            <motion.div
-              className="flex items-center gap-2 mb-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
-                <BarChart3 className="h-5 w-5 text-amber-400" />
+        {/* ================= ROW 2 ================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-[38fr_62fr] gap-6 items-stretch">
+
+          {/* ---- FINANCIAL HEALTH ---- */}
+          <motion.section {...fadeUp(0.08)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
+            <header className="flex items-center justify-between mb-6">
+              <h2 className="text-base font-semibold text-white">{t('dashboard.healthTitle')}</h2>
+              <BarChart3 className="h-4 w-4 text-amber-400" strokeWidth={2} />
+            </header>
+
+            {!hasAnyProfile ? (
+              /* EMPTY STATE — dashed track, no fake numbers */
+              <div className="flex-1 flex flex-col items-center justify-center py-6">
+                <div className="relative w-[180px] h-[180px]">
+                  <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+                    <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="7" strokeLinecap="round" strokeDasharray="4 7" />
+                  </svg>
+                  <div className="absolute inset-0 grid place-items-center">
+                    <span className="text-3xl font-semibold text-zinc-600">—</span>
+                  </div>
+                </div>
+                <p className="mt-5 text-xs text-zinc-600 text-center max-w-[220px] leading-relaxed">{t('dashboard.overallEmpty')}</p>
               </div>
-              <motion.h2 
-                className="font-display text-lg font-semibold text-white"
-              >{t('dashboard.healthTitle')}</motion.h2>
-            </motion.div>
+            ) : (
+              <>
+                {/* Ring gauge */}
+                <div className="flex-1 flex flex-col items-center justify-center py-2">
+                  <div className="relative w-[180px] h-[180px]">
+                    <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+                      <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="7" />
+                      <motion.circle
+                        cx="60" cy="60" r="52" fill="none"
+                        stroke="#e8c47a" strokeWidth="7" strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 52}
+                        initial={{ strokeDashoffset: 2 * Math.PI * 52 }}
+                        animate={{ strokeDashoffset: 2 * Math.PI * 52 * (1 - health.score / 100) }}
+                        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ filter: 'drop-shadow(0 0 6px rgba(232,196,122,0.45))' }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 grid place-items-center">
+                      <div className="text-center">
+                        <span className="text-4xl font-semibold text-white tabular-nums">{health.score}</span>
+                        <span className={`block mt-1 font-mono text-[10px] font-bold uppercase tracking-widest ${health.status === 'HEALTHY' ? 'text-sand' : health.status === 'TIGHT' ? 'text-golden' : 'text-terracotta'}`}>
+                          {health.status === 'HEALTHY' ? t('dashboard.statusHealthy') : health.status === 'TIGHT' ? t('dashboard.statusTight') : t('dashboard.statusRisky')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
-            <motion.div
-              className="flex flex-col items-center space-y-4 w-full"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              {hasData ? (
+            {/* Mini stat tiles */}
+            <div className="grid grid-cols-2 gap-3 mt-6">
+              <div className="rounded-xl border border-white/[7%] bg-zinc-950/60 px-4 py-3.5">
+                <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">{t('dashboard.liquidity')}</p>
+                <p className="mt-1 font-mono text-lg font-bold text-white tabular-nums">{liquidityGrade || '—'}</p>
+              </div>
+              <div className="rounded-xl border border-white/[7%] bg-zinc-950/60 px-4 py-3.5">
+                <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">{t('dashboard.debtToIncome')}</p>
+                <p className="mt-1 font-mono text-lg font-bold text-white tabular-nums">{health.dtiPercent != null ? `${health.dtiPercent}%` : '—'}</p>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* ---- BASELINE PARAMETERS ---- */}
+          <motion.section {...fadeUp(0.14)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
+            <header className="flex items-center justify-between mb-8">
+              <h2 className="text-base font-semibold text-white">{t('dashboard.baselineTitle')}</h2>
+              <Wallet className="h-4 w-4 text-amber-400" strokeWidth={2} />
+            </header>
+
+            <div className="flex-1 flex flex-col justify-center gap-9">
+              {/* MONTHLY INCOME */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label htmlFor="sl-income" className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{t('dashboard.monthlyIncome')}</label>
+                  <span className="font-mono text-sm font-bold text-white tabular-nums">{income > 0 ? formatCurrency(income, lang, 'IDR') : '—'}</span>
+                </div>
+                <input id="sl-income" type="range" min="0" max={INCOME_MAX} step={INCOME_STEP} value={income}
+                  onChange={(e) => setIncome(Number(e.target.value))}
+                  style={{ '--fill': `${(income / INCOME_MAX) * 100}%`, '--range-color': '#e8c47a', '--range-glow': 'rgba(232,196,122,0.55)' }} />
+              </div>
+
+              {/* MONTHLY EXPENSES */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label htmlFor="sl-expenses" className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{t('dashboard.monthlyExpenses')}</label>
+                  <span className="font-mono text-sm font-bold text-white tabular-nums">{expenses > 0 ? formatCurrency(expenses, lang, 'IDR') : '—'}</span>
+                </div>
+                <input id="sl-expenses" type="range" min="0" max={EXPENSES_MAX} step={EXPENSES_STEP} value={expenses}
+                  onChange={(e) => setExpenses(Number(e.target.value))}
+                  style={{ '--fill': `${(expenses / EXPENSES_MAX) * 100}%`, '--range-color': '#7a8ba3', '--range-glow': 'rgba(122,139,163,0.5)' }} />
+              </div>
+
+              {/* SAVINGS RATE */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label htmlFor="sl-rate" className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{t('dashboard.savingsRate')}</label>
+                  <span className="font-mono text-sm font-bold text-white tabular-nums">{rate > 0 ? `${rate}%` : '—'}</span>
+                </div>
+                <input id="sl-rate" type="range" min="0" max={maxRate} step={RATE_STEP} value={Math.min(rate, maxRate)}
+                  onChange={(e) => setRate(Number(e.target.value))}
+                  style={{ '--fill': `${(Math.min(rate, maxRate) / RATE_MAX) * 100}%`, '--range-color': '#e8c47a', '--range-glow': 'rgba(232,196,122,0.55)' }} />
+              </div>
+
+              {/* Constraint warning */}
+              {overBudget && (
+                <motion.p
+                  className="font-mono text-[10px] uppercase tracking-wide text-golden flex items-center gap-2 -mt-2"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-golden shrink-0" />
+                  {t('dashboard.warnExceeds')}
+                </motion.p>
+              )}
+            </div>
+          </motion.section>
+        </div>
+
+        {/* ================= ROW 3 ================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+
+          {/* ---- GROWTH PROJECTION ---- */}
+          <motion.section {...fadeUp(0.2)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
+            <header className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-white">{t('dashboard.growthTitle')}</h2>
+              <MoreHorizontal className="h-4 w-4 text-zinc-600" strokeWidth={2} />
+            </header>
+
+            <div className="relative h-[240px]">
+              {!growth ? (
+                /* EMPTY — axes/grid only */
                 <>
-                  <ScoreGauge
-                    score={overall.score}
-                    scoreLabel={overallLabel}
-                    labels={gaugeLabels}
-                    size={180}
-                    showArcLabels
-                  />
-                  <div className="flex items-center gap-6 text-center">
-                    <div>
-                      <p className="font-display text-2xl font-bold text-white">{overall.factors.liquidity?.grade || 'A-'}</p>
-                      <p className="text-xs text-zinc-500">{t('dashboard.liquidity')}</p>
-                    </div>
-                    <div className="w-px h-8 bg-white/[10%]" />
-                    <div>
-                      <p className="font-display text-2xl font-bold text-white">{overall.factors.debt?.score || 28}%</p>
-                      <p className="text-xs text-zinc-500">{t('dashboard.debtToIncome')}</p>
-                    </div>
+                  <svg viewBox="0 0 400 200" preserveAspectRatio="none" className="w-full h-full">
+                    {[40, 80, 120, 160].map(y => <line key={y} x1="28" y1={y} x2="396" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />)}
+                    <line x1="28" y1="8" x2="28" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
+                    <line x1="28" y1="188" x2="396" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
+                  </svg>
+                  <div className="absolute bottom-2 left-8">
+                    <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-600">{t('dashboard.estValue')}</p>
+                    <p className="font-mono text-2xl font-bold text-zinc-600">—</p>
                   </div>
                 </>
               ) : (
-                <div className="py-8 flex flex-col items-center">
-                  <div className="w-36 h-36 rounded-full border-2 border-dashed border-white/10 flex items-center justify-center">
-                    <span className="text-4xl text-zinc-600 font-mono">—</span>
+                <>
+                  <svg viewBox="0 0 400 200" preserveAspectRatio="none" className="w-full h-full">
+                    {[40, 80, 120, 160].map(y => <line key={y} x1="28" y1={y} x2="396" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" />)}
+                    <line x1="28" y1="8" x2="28" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
+                    <line x1="28" y1="188" x2="396" y2="188" stroke="rgba(255,255,255,0.09)" strokeWidth="1" />
+                    {(() => {
+                      const maxY = Math.max(growth.points[60].savings, growth.points[60].spending, 1)
+                      const X = m => 28 + (m / 60) * 368
+                      const Y = v => 188 - (v / maxY) * 172
+                      const line = key => growth.points.map((p, idx) => `${idx === 0 ? 'M' : 'L'}${X(p.month).toFixed(1)},${Y(p[key]).toFixed(1)}`).join(' ')
+                      const area = `${line('savings')} L396,188 L28,188 Z`
+                      return (
+                        <>
+                          <defs>
+                            <linearGradient id="goldFill" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="rgba(232,196,122,0.22)" />
+                              <stop offset="100%" stopColor="rgba(232,196,122,0)" />
+                            </linearGradient>
+                          </defs>
+                          <path d={area} fill="url(#goldFill)" style={{ transition: 'd 0.6s ease' }} />
+                          <path d={line('spending')} fill="none" stroke="#7a8ba3" strokeWidth="1.5" strokeDasharray="5 5" opacity="0.75" style={{ transition: 'd 0.6s ease' }} />
+                          <path d={line('savings')} fill="none" stroke="#e8c47a" strokeWidth="2.5" strokeLinecap="round" style={{ filter: 'drop-shadow(0 0 4px rgba(232,196,122,0.35))', transition: 'd 0.6s ease' }} />
+                        </>
+                      )
+                    })()}
+                  </svg>
+                  <div className="absolute bottom-2 left-8 pointer-events-none">
+                    <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">{t('dashboard.estValue')}</p>
+                    <p className="font-mono text-2xl font-bold text-amber-300 tabular-nums drop-shadow-[0_0_12px_rgba(232,196,122,0.3)]">{formatCurrency(growth.fv, lang, 'IDR')}</p>
                   </div>
-                  <p className="mt-4 text-sm text-zinc-500">{t('dashboard.overallEmpty')}</p>
-                </div>
+                </>
               )}
+            </div>
+          </motion.section>
 
-              {/* Factor mini-bars */}
-              <motion.div 
-                className="w-full mt-4 space-y-2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+          {/* ---- RECENT ANALYSIS ---- */}
+          <motion.section {...fadeUp(0.26)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
+            <header className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-semibold text-white">{t('dashboard.recentTitle')}</h2>
+              {recent.length > 0 && (
+                <Link to="/analyze" className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-widest text-amber-400 hover:text-amber-300">
+                  {t('dashboard.recentViewAll')}
+                  <ChevronRight className="h-3 w-3" />
+                </Link>
+              )}
+            </header>
+
+            {recent.length === 0 ? (
+              <button
+                onClick={focusHeroInput}
+                className="flex-1 min-h-[160px] rounded-xl border border-dashed border-white/[8%] grid place-items-center text-xs text-zinc-600 hover:text-zinc-400 hover:border-white/15 transition-colors"
               >
-                {[
-                  { key: 'debt', label: t('cards.overall.debtFactor'), score: hasData ? overall.factors.debt?.score || 72 : 0 },
-                  { key: 'emergency', label: t('cards.overall.emergencyFactor'), score: hasData ? overall.factors.emergency?.score || 65 : 0 },
-                  { key: 'savings', label: t('cards.overall.savingsFactor'), score: hasData ? overall.factors.savings?.score || 78 : 0 },
-                  { key: 'dp', label: t('cards.overall.dpFactor'), score: hasData ? overall.factors.dp?.score || 85 : 0 },
-                ].map(factor => {
-                  const color = factor.score >= 80 ? '#d4a373' : factor.score >= 50 ? '#e9c46a' : '#e76f51'
+                {t('dashboard.recentEmpty')}
+              </button>
+            ) : (
+              <ul className="flex-1 flex flex-col gap-2">
+                {recent.map(s => {
+                  const Icon = CAT_ICON[s?.scenario?.category] || Package
+                  const price = Number(s?.financials?.base_price)
+                  const verdict = verdictOf(s)
+                  const badgeCls = verdict === 'SAFE' ? 'bg-sand/10 text-sand border-sand/25'
+                    : verdict === 'MODERATE' ? 'bg-golden/10 text-golden border-golden/25'
+                    : 'bg-terracotta/10 text-terracotta border-terracotta/25'
+                  const badgeLabel = verdict === 'SAFE' ? t('analyze.filterSafe')
+                    : verdict === 'HIGH_RISK' ? t('analyze.filterHighRisk')
+                    : verdict === 'MODERATE' ? t('analyze.filterModerate')
+                    : t('analyze.filterWarning')
                   return (
-                    <motion.div key={factor.key} className="flex items-center gap-3">
-                      <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500 w-28 text-left truncate">{factor.label}</span>
-                      <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full"
-                          initial={{ width: 0 }}
-                          animate={{ width: hasData ? `${factor.score}%` : '0%' }}
-                          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                          style={{ background: color }}
-                        />
-                      </div>
-                      <span className="text-xs font-bold text-white w-10 text-right">{hasData ? `${factor.score}%` : '—'}</span>
-                    </motion.div>
+                    <li key={s.id}>
+                      <Link
+                        to={`/analyze/${s.id}`}
+                        className="group flex items-center gap-4 rounded-xl border border-transparent hover:border-white/[7%] hover:bg-white/[3%] px-3 py-3 transition-all"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-zinc-950/70 border border-white/[7%] grid place-items-center shrink-0">
+                          <Icon className="h-4.5 w-4.5 text-amber-400" strokeWidth={1.75} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-semibold text-white truncate group-hover:text-amber-100">{s?.scenario?.item_name || '—'}</h3>
+                          <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-600 mt-0.5 truncate">
+                            {fmtDateShort(s?.created_at)} · {t(`dashboard.${CAT_KEY[s?.scenario?.category] || 'catOther'}`)}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-mono text-sm font-bold text-white tabular-nums">
+                            {Number.isFinite(price) ? formatCurrency(price, lang, s?.currency || 'IDR') : '—'}
+                          </p>
+                          <span className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full border font-mono text-[8px] font-bold uppercase tracking-wider ${badgeCls}`}>
+                            <span className={`w-1 h-1 rounded-full ${verdict === 'SAFE' ? 'bg-sand' : verdict === 'MODERATE' ? 'bg-golden' : 'bg-terracotta'}`} />
+                            {badgeLabel}
+                          </span>
+                        </div>
+                      </Link>
+                    </li>
                   )
                 })}
-              </motion.div>
-            </motion.div>
-          </motion.div>
-
-          {/* Recent Analyses */}
-          <motion.div 
-            className="lg:col-span-2 rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-8"
-            variants={itemVariants}
-          >
-            <motion.div 
-              className="flex items-center justify-between mb-6"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
-                  <BarChart3 className="h-5 w-5 text-amber-400" />
-                </div>
-                <motion.h2 
-                  className="font-display text-lg font-semibold text-white"
-                >{t('dashboard.recentTitle')}</motion.h2>
-              </div>
-              <Link
-                to="/analyze"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
-                whileHover={{ x: 4 }}
-              >
-                {t('dashboard.recentViewAll')}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </motion.div>
-
-            <AnimatePresence mode="wait">
-              {recent.length === 0 ? (
-                <motion.div
-                  key="empty"
-                  className="flex flex-col items-center justify-center py-16 text-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <motion.div
-                    className="w-14 h-14 rounded-2xl bg-amber-400/10 border border-amber-400/20 grid place-items-center mb-4"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                  >
-                    <BarChart3 className="h-6 w-6 text-amber-400" />
-                  </motion.div>
-                  <motion.p
-                    className="text-sm text-zinc-400 mb-2"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >{t('dashboard.recentEmpty')}</motion.p>
-                  <motion.Link
-                    to="/"
-                    className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 text-zinc-950 text-sm font-bold shadow-[0_0_20px_rgba(212,163,115,0.25)] hover:-translate-y-px transition-all"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    {t('analyze.newAnalysis')}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </motion.Link>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="list"
-                  className="flex flex-col gap-3"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.3, staggerChildren: 0.08 }}
-                >
-                  {recent.map((s, i) => (
-                    <motion.div key={s.id} variants={itemVariants}>
-                      <ScenarioCard scenario={s} to={`/analyze/${s.id}`} compact lang={lang} listMode />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
-
-        {/* Row: Baseline Parameters + Growth Projection */}
-        <motion.div 
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-          variants={containerVariants}
-        >
-          {/* Baseline Parameters */}
-          <motion.div
-            className="rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-8"
-            variants={itemVariants}
-          >
-            <motion.div
-              className="flex items-center gap-2 mb-6"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
-                <Wallet className="h-5 w-5 text-amber-400" />
-              </div>
-              <motion.h2 
-                className="font-display text-lg font-semibold text-white"
-              >{t('dashboard.baselineTitle')}</motion.h2>
-            </motion.div>
-
-            <motion.div
-              className="space-y-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              {[
-                { 
-                  key: 'income', 
-                  label: t('dashboard.monthlyIncome'), 
-                  value: sliders.monthlyIncome, 
-                  max: 50000000, 
-                  step: 100000,
-                  color: '#d4a373',
-                  icon: Wallet,
-                  format: (v) => formatIDR(v)
-                },
-                { 
-                  key: 'expenses', 
-                  label: t('dashboard.monthlyExpenses'), 
-                  value: sliders.monthlyExpenses, 
-                  max: 30000000, 
-                  step: 100000,
-                  color: '#e76f51',
-                  icon: TrendingDown,
-                  format: (v) => formatIDR(v)
-                },
-                { 
-                  key: 'savings', 
-                  label: t('dashboard.savingsRate'), 
-                  value: sliders.savingsRate, 
-                  max: 100, 
-                  step: 1,
-                  color: '#d4a373',
-                  icon: Zap,
-                  format: (v) => `${v}%`
-                },
-              ].map(({ key, label, value, max, step, color, icon: Icon, format }) => (
-                <motion.div key={key} className="space-y-2" variants={itemVariants}>
-                  <div className="flex items-center justify-between">
-                    <motion.span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-1.5">
-                      <Icon className="h-3 w-3" style={{ color }} />
-                      {label}
-                    </motion.span>
-                    <motion.span className="font-mono text-sm font-bold text-white tabular-nums">{format(value)}</motion.span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={max}
-                    step={step}
-                    value={value}
-                    onChange={(e) => setSliders(prev => ({ ...prev, [key]: parseFloat(e.target.value) }))}
-                    className="w-full h-2 appearance-none bg-white/[0.06] rounded-full cursor-pointer"
-                    style={{
-                      background: `linear-gradient(to right, ${color} ${(value / max) * 100}%, transparent ${(value / max) * 100}%)`
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          {/* Growth Projection */}
-          <motion.div
-            className="rounded-3xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-8 relative overflow-hidden"
-            variants={itemVariants}
-          >
-            <motion.div
-              className="flex items-center justify-between mb-6"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/20 grid place-items-center">
-                  <TrendingUp className="h-5 w-5 text-amber-400" />
-                </div>
-                <motion.h2 
-                  className="font-display text-lg font-semibold text-white"
-                >{t('dashboard.growthTitle')}</motion.h2>
-              </div>
-              <motion.button 
-                className="p-2 rounded-xl text-zinc-500 hover:text-white hover:bg-white/[4%] transition-colors" 
-                whileHover={{ scale: 1.1 }} 
-                whileTap={{ scale: 0.9 }}
-              >
-                <Menu className="h-4 w-4" />
-              </motion.button>
-            </motion.div>
-
-            <motion.div
-              className="relative h-64"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
-              <svg className="w-full h-full" viewBox="0 0 400 256" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="growthGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#d4a373" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#d4a373" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                
-                {/* Grid lines */}
-                <g stroke="white" strokeOpacity="0.04" strokeWidth="0.5">
-                  {[0, 64, 128, 192, 256].map(y => (
-                    <line key={y} x1="0" y1={y} x2="400" y2={y} />
-                  ))}
-                  {[0, 80, 160, 240, 320, 400].map(x => (
-                    <line key={x} x1={x} y1="0" x2={x} y2="256" />
-                  ))}
-                </g>
-
-                {/* Area fill */}
-                <path
-                  d={`M0,256 ${growthData.map((v, i) => `${(i / (growthData.length - 1)) * 400},${256 - (v / 124) * 200}`).join(' ')} 400,256 Z`}
-                  fill="url(#growthGradient)"
-                />
-
-                {/* Solid line */}
-                <path
-                  d={`M${growthData.map((v, i) => `${(i / (growthData.length - 1)) * 400},${256 - (v / 124) * 200}`).join(' ')}`}
-                  stroke="#d4a373"
-                  strokeWidth="2.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-
-                {/* Dotted projection line */}
-                <path
-                  d="M285.7,56 400,132"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  strokeDasharray="6,6"
-                  fill="none"
-                  strokeOpacity="0.4"
-                />
-              </svg>
-
-              {/* Estimated value overlay */}
-              <motion.div
-                className="absolute bottom-6 right-6 text-right"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">{t('dashboard.estValue')}</p>
-                <p className="font-mono text-3xl font-bold text-amber-400">Rp 124.000.000</p>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </motion.div>
-
-        {/* Insight strip */}
-        {profile && history.length > 0 && (
-          <motion.div 
-            className="rounded-3xl border border-amber-400/15 bg-gradient-to-br from-amber-400/[0.07] to-amber-400/[0.04] p-6 sm:p-8"
-            variants={itemVariants}
-            whileHover={{ scale: 1.005 }}
-          >
-            <motion.p 
-              className="text-[11px] font-bold uppercase tracking-widest text-amber-400 mb-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-            >{t('cards.insight.label')}</motion.p>
-            <motion.p 
-              className="text-sm sm:text-base text-zinc-300 leading-relaxed max-w-3xl"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              {overall.totalMonthlyDebt > 0
-                ? `${t('dashboard.insightLabel')}: ${formatIDR(Math.round(overall.totalMonthlyDebt))}/mo — ${t('cards.overall.confirmed').replace('{count}', overall.confirmedCount)}`
-                : t('dashboard.overallEmpty')}
-            </motion.p>
-          </motion.div>
-        )}
-      </motion.section>
-    </motion.div>
+              </ul>
+            )}
+          </motion.section>
+        </div>
+      </div>
+    </div>
   )
 }

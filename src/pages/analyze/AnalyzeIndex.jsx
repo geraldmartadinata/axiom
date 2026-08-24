@@ -226,7 +226,7 @@ export default function AnalyzeIndex() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
           {/* ---------------- MAIN COLUMN (~65%) ---------------- */}
-          <div className="lg:col-span-2 min-w-0">
+          <div className="lg:col-span-2 min-w-0 order-2 lg:order-1">
 
             {/* Page header */}
             <motion.div
