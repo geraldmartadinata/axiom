@@ -4,6 +4,7 @@ import mockCar from '../mocks/mock-car.json'
 import mockGadget from '../mocks/mock-gadget.json'
 import mockProperty from '../mocks/mock-property.json'
 import mockBad from '../mocks/mock-bad.json'
+import { useState, useCallback } from 'react'
 
 const USE_MOCK = true
 
@@ -154,4 +155,27 @@ export async function extractAndEnrich(prompt) {
   const profile = useAxiomStore.getState().profile
   const enriched = enrichScenario(rawScenario, profile)
   return enriched
+}
+
+export function useExtraction() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [result, setResult] = useState(null)
+
+  const extract = useCallback(async (prompt) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const enriched = await extractAndEnrich(prompt)
+      setResult(enriched)
+      setLoading(false)
+      return enriched
+    } catch (err) {
+      setError(err.message)
+      setLoading(false)
+      throw err
+    }
+  }, [])
+
+  return { extract, loading, error, result }
 }

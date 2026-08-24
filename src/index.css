@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Custom color palette — warm natural tones */
-:root {
+@theme {
   --color-sand: #d4a373;
   --color-terracotta: #e76f51;
   --color-golden: #e9c46a;
@@ -10,34 +10,25 @@
   --color-golden-light: #f4e3a0;
 }
 
-.bg-sand { background: var(--color-sand); }
-.text-sand { color: var(--color-sand); }
-.border-sand { border-color: var(--color-sand); }
-.bg-sand\\/10 { background: color-mix(in srgb, var(--color-sand) 10%, transparent); }
-.bg-sand\\/20 { background: color-mix(in srgb, var(--color-sand) 20%, transparent); }
-.hover\\:bg-sand\\/20:hover { background: color-mix(in srgb, var(--color-sand) 20%, transparent); }
-.text-sand-light { color: var(--color-sand-light); }
+/* Utility classes for opacity variants */
+.bg-sand\/10 { background: color-mix(in srgb, var(--color-sand) 10%, transparent); }
+.bg-sand\/20 { background: color-mix(in srgb, var(--color-sand) 20%, transparent); }
+.hover\:bg-sand\/20:hover { background: color-mix(in srgb, var(--color-sand) 20%, transparent); }
 
-.bg-terracotta { background: var(--color-terracotta); }
-.text-terracotta { color: var(--color-terracotta); }
-.border-terracotta { border-color: var(--color-terracotta); }
-.bg-terracotta\\/10 { background: color-mix(in srgb, var(--color-terracotta) 10%, transparent); }
-.bg-terracotta\\/20 { background: color-mix(in srgb, var(--color-terracotta) 20%, transparent); }
+.bg-terracotta\/10 { background: color-mix(in srgb, var(--color-terracotta) 10%, transparent); }
+.bg-terracotta\/20 { background: color-mix(in srgb, var(--color-terracotta) 20%, transparent); }
 
-.bg-golden { background: var(--color-golden); }
-.text-golden { color: var(--color-golden); }
-.border-golden { border-color: var(--color-golden); }
-.bg-golden\\/10 { background: color-mix(in srgb, var(--color-golden) 10%, transparent); }
-.bg-golden\\/20 { background: color-mix(in srgb, var(--color-golden) 20%, transparent); }
+.bg-golden\/10 { background: color-mix(in srgb, var(--color-golden) 10%, transparent); }
+.bg-golden\/20 { background: color-mix(in srgb, var(--color-golden) 20%, transparent); }
 
 /* Safe/Warning/Danger aliases */
 .text-safe { color: var(--color-sand); }
-.bg-safe\\/10 { background: color-mix(in srgb, var(--color-sand) 10%, transparent); }
+.bg-safe\/10 { background: color-mix(in srgb, var(--color-sand) 10%, transparent); }
 .border-safe { border-color: var(--color-sand); }
 .text-warning { color: var(--color-golden); }
-.bg-warning\\/10 { background: color-mix(in srgb, var(--color-golden) 10%, transparent); }
+.bg-warning\/10 { background: color-mix(in srgb, var(--color-golden) 10%, transparent); }
 .text-danger { color: var(--color-terracotta); }
-.bg-danger\\/10 { background: color-mix(in srgb, var(--color-terracotta) 10%, transparent); }
+.bg-danger\/10 { background: color-mix(in srgb, var(--color-terracotta) 10%, transparent); }
 
 * {
   scrollbar-width: thin;

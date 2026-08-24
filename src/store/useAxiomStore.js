@@ -76,6 +76,8 @@ export const useAxiomStore = create(
         const profile = { ...data, updated_at: new Date().toISOString() }
         set({ profile })
       },
+
+      setCurrentScenario: (scenario) => set({ currentScenario: scenario }),
     }),
     {
       name: 'axiom-storage',

@@ -1,4 +1,4 @@
-import { useLanguage } from '../../store/LanguageContext.jsx'
+import { useLanguage } from '../store/LanguageContext.jsx'
 
 export default function Profile() {
   const { t, lang } = useLanguage()
