@@ -319,6 +319,7 @@
   },
   "errors": {
     "extractionFailed": "Tidak bisa memahami skenariomu. Sertakan: harga, DP, tenor, dan penghasilan.",
+    "analysisFailed": "Analisis gagal — silakan coba lagi",
     "missingNumbers": "Sertakan angka spesifik: harga, DP, durasi pinjaman, dan penghasilan bulanan.",
     "apiError": "Layanan analisis tidak tersedia. Memakai mode offline.",
     "invalidInput": "Input tidak valid. Periksa angkamu dan coba lagi."

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useExtraction } from '../../services/extraction'
 import { useLanguage } from '../../store/LanguageContext.jsx'
 import { useAxiomStore } from '../../store/useAxiomStore'
 import { motion } from 'framer-motion'
@@ -100,7 +99,6 @@ const CHIPS = [
 export default function CommandCapsule() {
   const navigate = useNavigate()
   const { t } = useLanguage()
-  const { extract, loading: extracting } = useExtraction()
 
   const [input, setInput] = useState('')
   const [focused, setFocused] = useState(false)
@@ -108,6 +106,7 @@ export default function CommandCapsule() {
   const [resumeOk, setResumeOk] = useState(true) // gates the ~3s idle before resuming
   const [activeChip, setActiveChip] = useState(null)
   const [error, setError] = useState(null)
+  const [extracting, setExtracting] = useState(false)
 
   const inputRef = useRef(null)
   const resumeTimer = useRef(null)
@@ -158,16 +157,19 @@ export default function CommandCapsule() {
   const handleSubmit = async () => {
     if (!input.trim() || extracting) return
     setError(null)
+    setExtracting(true)
     try {
-      const result = await extract(input) // await Gemini API
-      if (result?.id) {
-        useAxiomStore.getState().setCurrentScenario(result)
-        useAxiomStore.getState().analyzePrompt(input)
-        navigate(`/analyze/${result.id}`)
-      }
+      // SINGLE pipeline run: extract → enrich → store (with unique ID) → returns the stored session.
+      const session = await useAxiomStore.getState().analyzePrompt(input)
+      if (!session?.id) throw new Error('Session was not created')
+      setInput('') // success → clear input; typewriter resumes after idle
+      navigate(`/analyze/${session.id}`)
     } catch (err) {
-      console.error('Extraction failed:', err)
+      console.error('Analysis failed:', err)
       setError(err.message || t('errors.extractionFailed'))
+      // No navigation, no broken session — stays on page with inline error.
+    } finally {
+      setExtracting(false)
     }
   }
 
@@ -221,17 +223,21 @@ export default function CommandCapsule() {
         </div>
       </motion.div>
 
-      {/* Inline error under the bar */}
+      {/* Inline error under the bar — never navigate, never leave a broken session */}
       {error && (
-        <motion.p
-          className="mt-3 px-2 text-xs text-terracotta font-mono uppercase tracking-wide"
+        <motion.div
+          className="mt-3 mx-2 rounded-xl border border-terracotta/30 bg-terracotta/10 px-4 py-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          {error}
-          {' — '}
-          <button onClick={() => setError(null)} className="underline hover:text-white">{t('common.retry')}</button>
-        </motion.p>
+          <p className="text-xs font-mono uppercase tracking-wide text-terracotta">
+            {t('errors.analysisFailed')}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-400 break-words">{error}</p>
+          <button onClick={() => setError(null)} className="mt-1.5 text-[11px] underline text-zinc-500 hover:text-white">
+            {t('common.retry')}
+          </button>
+        </motion.div>
       )}
     </div>
   )

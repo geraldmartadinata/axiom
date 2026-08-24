@@ -17,9 +17,10 @@ export const useAxiomStore = create(
 
       // --- actions ---
       analyzePrompt: async (prompt) => {
-        if (!prompt || !prompt.trim()) return
+        if (!prompt || !prompt.trim()) return null
         set({ isAnalyzing: true, analyzeError: null })
         try {
+          // Single pipeline run: extract → enrich → stamp unique ID → store → return.
           const enriched = await extractAndEnrich(prompt.trim())
           enriched.currency = get().currency
           enriched.status = 'ANALYZED'
@@ -28,8 +29,10 @@ export const useAxiomStore = create(
             isAnalyzing: false,
             history: [enriched, ...get().history].slice(0, MAX_HISTORY),
           })
+          return enriched
         } catch (err) {
           set({ isAnalyzing: false, analyzeError: err.message })
+          throw err
         }
       },
 

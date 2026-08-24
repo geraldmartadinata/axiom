@@ -326,6 +326,7 @@
   },
   "errors": {
     "extractionFailed": "Could not understand your scenario. Please include: price, down payment, loan term, and your income.",
+    "analysisFailed": "Analysis failed — please try again",
     "missingNumbers": "Please include specific numbers: price, down payment, loan duration, and monthly income.",
     "apiError": "Analysis service unavailable. Using offline mode.",
     "invalidInput": "Invalid input. Check your numbers and try again."

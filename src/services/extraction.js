@@ -4,9 +4,9 @@ import mockCar from '../mocks/mock-car.json'
 import mockGadget from '../mocks/mock-gadget.json'
 import mockProperty from '../mocks/mock-property.json'
 import mockBad from '../mocks/mock-bad.json'
-import { useState, useCallback } from 'react'
 
-const USE_MOCK = true
+// Mock mode is opt-in ONLY via env flag (default OFF): real prompts always hit Gemini.
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
@@ -60,16 +60,6 @@ function matchMock(prompt) {
   return lang === 'id' ? mockCar : mockCar
 }
 
-async function mockExtract(prompt) {
-  const delay = 600 + Math.random() * 600
-  await new Promise(resolve => setTimeout(resolve, delay))
-  const matched = matchMock(prompt)
-  return {
-    ...matched,
-    scenario: { ...matched.scenario, raw_prompt: prompt }
-  }
-}
-
 const SYSTEM_PROMPT = `You are a financial data extraction assistant. Your ONLY job is to extract financial variables from a user's natural-language scenario and return them as a JSON object.
 
 CRITICAL RULES:
@@ -118,7 +108,14 @@ async function geminiExtract(prompt) {
   const data = await response.json()
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text
   if (!text) throw new Error('Empty response from Gemini')
-  const parsed = JSON.parse(text)
+  // Gemini may wrap JSON in markdown fences — strip them before parsing.
+  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
+  let parsed
+  try {
+    parsed = JSON.parse(cleaned)
+  } catch {
+    throw new Error('Gemini returned malformed JSON')
+  }
   return validateRawScenario(parsed, prompt)
 }
 
@@ -141,41 +138,20 @@ function validateRawScenario(data, originalPrompt) {
 }
 
 export async function extractAndEnrich(prompt) {
-  let rawScenario
-  if (USE_MOCK || !GEMINI_API_KEY) {
-    rawScenario = await mockExtract(prompt)
-  } else {
-    try {
-      rawScenario = await geminiExtract(prompt)
-    } catch (error) {
-      console.warn('Gemini extraction failed, falling back to mock:', error.message)
-      rawScenario = await mockExtract(prompt)
-    }
+  if (!prompt || !prompt.trim()) throw new Error('Prompt is empty')
+
+  if (USE_MOCK) return enrichScenario({ ...matchMock(prompt), scenario: { ...matchMock(prompt).scenario, raw_prompt: prompt } }, useAxiomStore.getState().profile)
+
+  // Real pipeline: no silent fallback — failures must surface to the caller.
+  if (!GEMINI_API_KEY) {
+    throw new Error('Gemini API key is not configured (VITE_GEMINI_API_KEY)')
   }
+  const rawScenario = await geminiExtract(prompt)
   const profile = useAxiomStore.getState().profile
   const enriched = enrichScenario(rawScenario, profile)
   return enriched
 }
 
 export function useExtraction() {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [result, setResult] = useState(null)
-
-  const extract = useCallback(async (prompt) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const enriched = await extractAndEnrich(prompt)
-      setResult(enriched)
-      setLoading(false)
-      return enriched
-    } catch (err) {
-      setError(err.message)
-      setLoading(false)
-      throw err
-    }
-  }, [])
-
-  return { extract, loading, error, result }
+  return { extract: extractAndEnrich, loading: false, error: null, result: null }
 }
