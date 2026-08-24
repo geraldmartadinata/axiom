@@ -1,9 +1,7 @@
-import { Link } from 'react-router-dom'
 import Card from '../ui/Card'
 import Badge from '../ui/Badge'
-import { formatCurrency, formatDate } from '../../utils/format'
 import { useLanguage } from '../../store/LanguageContext.jsx'
-import { Trash2, CheckCircle2 } from 'lucide-react'
+import { formatCurrency } from '../../utils/format'
 import { cn } from '../../utils/cn'
 
 const categoryColors = {
@@ -41,9 +39,9 @@ export default function ScenarioCard({ scenario, to, onClick, onDelete, compact 
           {score ? (
             <span className={cn(
               'px-2 py-0.5 rounded-full text-[10px] font-bold',
-              scoreStatus === 'safe' ? 'bg-emerald-500/10 text-emerald-400' :
-              scoreStatus === 'warning' ? 'bg-amber-500/10 text-amber-400' :
-              'bg-red-500/10 text-red-400'
+              scoreStatus === 'safe' ? 'bg-sand/10 text-sand' :
+              scoreStatus === 'warning' ? 'bg-golden/10 text-golden' :
+              'bg-terracotta/10 text-terracotta'
             )}>
               {score.score}
             </span>
@@ -57,7 +55,7 @@ export default function ScenarioCard({ scenario, to, onClick, onDelete, compact 
         {onDelete && (
           <button
             onClick={(e) => { e.stopPropagation(); onDelete() }}
-            className="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+            className="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-600 hover:text-terracotta hover:bg-terracotta/10 transition-all opacity-0 group-hover:opacity-100"
             aria-label={t('common.delete')}
           >
             <Trash2 className="h-4 w-4" />
@@ -68,7 +66,7 @@ export default function ScenarioCard({ scenario, to, onClick, onDelete, compact 
           <Badge status={catBadge}>{scenario?.scenario?.category}</Badge>
           {score && <Badge status={scoreStatus}>{score.score}</Badge>}
           {confirmed && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400">
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-sand">
               <CheckCircle2 className="h-3 w-3" />
               {t('analyze.confirmed')}
             </span>

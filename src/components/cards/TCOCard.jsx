@@ -1,4 +1,5 @@
 import Card from '../ui/Card'
+import Badge from '../ui/Badge'
 import { useLanguage } from '../../store/LanguageContext.jsx'
 import { formatCurrency } from '../../utils/format'
 

@@ -79,7 +79,18 @@
     "prelim": "Preliminary",
     "safe": "Safe Zone",
     "caution": "Caution Zone",
-    "danger": "Danger Zone"
+    "danger": "Danger Zone",
+    "perfect": "Perfect",
+    "veryHealthy": "Very Healthy",
+    "healthy": "Healthy",
+    "prettyGood": "Pretty Good",
+    "intermediate": "Intermediate",
+    "fair": "Fair",
+    "poor": "Poor",
+    "bad": "Bad",
+    "veryBad": "Very Bad",
+    "noPurchase": "No purchase made",
+    "good": "Good"
   },
   "projections": {
     "title": "The \"What If\" Scenario",
@@ -136,10 +147,26 @@
         "label": "Expected Investment Return (%/year)",
         "placeholder": "e.g., 7",
         "help": "Conservative annual return for opportunity cost calc"
+      },
+      "dependents": {
+        "label": "Dependents",
+        "placeholder": "e.g., 0",
+        "help": "Number of people financially dependent on you"
       }
     },
     "saveButton": "Save Profile",
-    "saved": "Profile saved"
+    "saved": "Profile saved",
+    "quickActions": "Quick Actions",
+    "actions": {
+      "viewAnalyses": "View Analyses",
+      "viewAnalysesDesc": "See all your purchase analyses",
+      "exportData": "Export Data",
+      "exportDataDesc": "Download your financial data",
+      "resetProfile": "Reset Profile",
+      "resetProfileDesc": "Clear all profile data",
+      "settings": "Settings",
+      "settingsDesc": "App preferences"
+    }
   },
   "cards": {
     "dti": {
@@ -174,7 +201,8 @@
         "emergency": "Emergency Fund",
         "savings": "Savings Rate",
         "existingDebt": "Existing Debt",
-        "affordability": "Affordability"
+        "affordability": "Affordability",
+        "downPayment": "Down Payment"
       }
     },
     "params": {
@@ -225,7 +253,8 @@
     "delete": "Delete",
     "confirm": "Confirm",
     "close": "Close",
-    "back": "Back"
+    "back": "Back",
+    "try": "Try:"
   },
   "errors": {
     "extractionFailed": "Could not understand your scenario. Please include: price, down payment, loan term, and your income.",

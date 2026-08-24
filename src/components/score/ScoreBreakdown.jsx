@@ -8,9 +8,9 @@ const componentConfigs = [
 ]
 
 function getColor(score) {
-  if (score >= 80) return 'bg-emerald-500'
-  if (score >= 50) return 'bg-amber-500'
-  return 'bg-red-500'
+  if (score >= 80) return 'bg-sand'
+  if (score >= 50) return 'bg-golden'
+  return 'bg-terracotta'
 }
 
 export default function ScoreBreakdown({ components: data, isPreliminary }) {

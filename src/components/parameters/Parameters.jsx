@@ -10,7 +10,7 @@ import { formatCurrency } from '../../utils/format'
 import { cn } from '../../utils/cn'
 
 /**
- * Parameters — live "what if" sliders (green, per design feedback).
+ * Parameters — live "what if" sliders (sand accent, per design).
  *
  * Adjusting a slider recomputes the Sanggup Score THROUGH the frozen engine
  * (never around it). The result is a derived preview; it does not mutate the
@@ -55,8 +55,8 @@ export default function Parameters({ scenario }) {
   const score = sanggup.score
 
   const scoreColor =
-    score >= 80 ? 'text-emerald-400' :
-    score >= 50 ? 'text-amber-400' : 'text-red-400'
+    score >= 80 ? 'text-sand' :
+    score >= 50 ? 'text-golden' : 'text-terracotta'
 
   const scoreStatus =
     score >= 80 ? t('gauge.safe') :
@@ -133,7 +133,7 @@ export default function Parameters({ scenario }) {
       <div className="mt-5 pt-4 border-t border-white/[6%] grid grid-cols-2 gap-3">
         <div className="rounded-xl bg-white/[0.04] border border-white/[6%] px-4 py-3">
           <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1">{t('cards.health.post')}</p>
-          <p className={cn('font-display text-lg font-bold tabular-nums', dti > 30 ? 'text-red-400' : dti > 20 ? 'text-amber-400' : 'text-emerald-400')}>
+          <p className={cn('font-display text-lg font-bold tabular-nums', dti > 30 ? 'text-terracotta' : dti > 20 ? 'text-golden' : 'text-sand')}>
             {dti.toFixed(1)}%
           </p>
         </div>

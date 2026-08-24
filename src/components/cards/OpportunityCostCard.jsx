@@ -14,7 +14,7 @@ export default function OpportunityCostCard({ opportunity, purchasePrice, lang, 
 
       <div className="mb-6">
         <p className="text-xs text-zinc-600 uppercase tracking-wider mb-2">{t('projections.stats.investmentValue').replace(' (10yr)', '').replace(' (Tahun 10)', '')}</p>
-        <p className="text-4xl font-extrabold text-emerald-400 tracking-tighter">{formatCurrency(opportunity.total, uiLang, currency)}</p>
+        <p className="text-4xl font-extrabold text-sand tracking-tighter">{formatCurrency(opportunity.total, uiLang, currency)}</p>
         <p className="text-sm text-zinc-400 mt-2">
           That's <span className="text-white font-bold">{opportunity.multiple}x</span> what you'd spend on the purchase
         </p>

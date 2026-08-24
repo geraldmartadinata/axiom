@@ -79,7 +79,18 @@
     "prelim": "Perkiraan",
     "safe": "Zona Aman",
     "caution": "Zona Waspada",
-    "danger": "Zona Bahaya"
+    "danger": "Zona Bahaya",
+    "perfect": "Sempurna",
+    "veryHealthy": "Sangat Sehat",
+    "healthy": "Sehat",
+    "prettyGood": "Cukup Baik",
+    "intermediate": "Menengah",
+    "fair": "Cukup",
+    "poor": "Kurang",
+    "bad": "Buruk",
+    "veryBad": "Sangat Buruk",
+    "noPurchase": "Belum ada pembelian",
+    "good": "Baik"
   },
   "projections": {
     "title": "Skenario \"Bagaimana Kalau\"",
@@ -136,10 +147,26 @@
         "label": "Ekspektasi Return Investasi (%/tahun)",
         "placeholder": "cth: 7",
         "help": "Return tahunan konservatif untuk hitung biaya peluang"
+      },
+      "dependents": {
+        "label": "Tanggungan",
+        "placeholder": "cth: 0",
+        "help": "Jumlah orang yang bergantung finansial pada kamu"
       }
     },
     "saveButton": "Simpan Profil",
-    "saved": "Profil tersimpan"
+    "saved": "Profil tersimpan",
+    "quickActions": "Aksi Cepat",
+    "actions": {
+      "viewAnalyses": "Lihat Analisis",
+      "viewAnalysesDesc": "Lihat semua analisis pembelianmu",
+      "exportData": "Ekspor Data",
+      "exportDataDesc": "Unduh data finansialmu",
+      "resetProfile": "Reset Profil",
+      "resetProfileDesc": "Hapus semua data profil",
+      "settings": "Pengaturan",
+      "settingsDesc": "Preferensi aplikasi"
+    }
   },
   "cards": {
     "dti": {
@@ -174,7 +201,8 @@
         "emergency": "Dana Darurat",
         "savings": "Rasio Tabungan",
         "existingDebt": "Hutang yang Ada",
-        "affordability": "Keterjangkauan"
+        "affordability": "Keterjangkauan",
+        "downPayment": "Uang Muka"
       }
     },
     "params": {
@@ -225,7 +253,8 @@
     "delete": "Hapus",
     "confirm": "Konfirmasi",
     "close": "Tutup",
-    "back": "Kembali"
+    "back": "Kembali",
+    "try": "Coba:"
   },
   "errors": {
     "extractionFailed": "Tidak bisa memahami skenariomu. Sertakan: harga, DP, tenor, dan penghasilan.",

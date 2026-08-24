@@ -26,11 +26,11 @@ export default function DTICard({ dti, status, newInstallment, existingDebt, inc
         <span className="text-4xl font-extrabold text-white tracking-tighter">{dti}%</span>
       </div>
 
-      {/* DTI Bar */}
+      {/* DTI Bar with new palette */}
       <div className="relative h-3 rounded-full overflow-hidden bg-white/5 mb-2">
-        <div className="absolute inset-y-0 left-0 w-[30%] bg-emerald-500/30" />
-        <div className="absolute inset-y-0 left-[30%] w-[15%] bg-amber-500/30" />
-        <div className="absolute inset-y-0 left-[45%] right-0 bg-red-500/30" />
+        <div className="absolute inset-y-0 left-0 w-[30%] bg-sand/30" />
+        <div className="absolute inset-y-0 left-[30%] w-[15%] bg-golden/30" />
+        <div className="absolute inset-y-0 left-[45%] right-0 bg-terracotta/30" />
         {/* Marker */}
         <div
           className="absolute top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-full shadow-lg transition-all duration-500"
