@@ -6,6 +6,7 @@ import { formatCurrency } from '../utils/format'
 import { computeHealthScore, computeLiquidityGrade, scoreColor, withAlpha } from '../utils/healthScore'
 import CommandCapsule from '../components/capsule/CommandCapsule'
 import GrowthProjection from '../components/dashboard/GrowthProjection'
+import HealthBreakdown from '../components/dashboard/HealthBreakdown'
 import { motion } from 'framer-motion'
 import {
   Activity, BarChart3, Wallet, TrendingUp, Car, Smartphone,
@@ -321,6 +322,9 @@ export default function Dashboard() {
             </div>
           </motion.section>
         </div>
+
+        {/* Health score transparency + actionable steps */}
+        {showHealth && <HealthBreakdown health={health} />}
 
         {/* ================= ROW 3 ================= */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">

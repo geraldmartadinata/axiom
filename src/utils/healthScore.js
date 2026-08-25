@@ -78,6 +78,20 @@ export function computeHealthScore(profile, sessions = [], opts = {}) {
     monthlyDebt: Math.round(totalDebt),
     confirmedInstallments: Math.round(confirmedInstallments),
     overBudget,
+    // Component-level transparency (REAL weights used in the formula above).
+    components: {
+      savings: { score: Math.round(savingsPoints), weight: 0.30 },
+      emergency: { score: emergencyPoints, weight: 0.25 },
+      dti: { score: Math.round(dtiPoints), weight: 0.30 },
+      fcf: { score: fcfPoints, weight: 0.15 },
+    },
+    detail: {
+      income: Math.round(income),
+      expenses: Math.round(expenses),
+      emergencyFund,
+      savingsRatePct: Math.round(savingsRate),
+      emergencyMonthsRaw: emergencyMonths,
+    },
   }
 }
 
