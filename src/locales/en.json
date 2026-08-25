@@ -13,7 +13,7 @@
   "dashboard": {
     "title": "Can You Afford",
     "titleAccent": "It?",
-    "subtitle": "Describe a purchase in plain language. Axiom extracts the numbers, calculates the real cost, and tells you if it fits your life â€” no judgment, just math.",
+    "subtitle": "Describe a purchase in plain language. Axiom extracts the numbers, calculates the real cost, and tells you if it fits your life — no judgment, just math.",
     "analyzeButton": "Analyze",
     "analyzingButton": "Analyzing...",
     "example1": "Can I afford a $40k Tesla Model 3 with $5k down over 60 months, earning $8k/month?",
@@ -23,7 +23,7 @@
     "overallSub": "Based on confirmed purchases and your profile",
     "overallEmpty": "Confirm a purchase to track your post-purchase health",
     "recentTitle": "Recent Analysis",
-    "recentEmpty": "No analyses yet â€” your first purchase is waiting.",
+    "recentEmpty": "No analyses yet — your first purchase is waiting.",
     "recentViewAll": "View All",
     "insightLabel": "Axiom Insight",
     "scrollHint": "Scroll to explore",
@@ -80,17 +80,17 @@
       "savingsLabel": "Savings Rate",
       "savingsLine": "You save {{pct}}% of your income.",
       "emergencyLabel": "Emergency Fund",
-      "emergencyLine": "{{fund}} = {{months}}x monthly expenses. Ideal: 3â€“6x ({{min}}â€“{{max}}).",
+      "emergencyLine": "{{fund}} = {{months}}x monthly expenses. Ideal: 3–6x ({{min}}–{{max}}).",
       "dtiLabel": "Debt-to-Income (DTI)",
       "dtiLine": "Installments are {{pct}}% of your income.",
       "fcfLabel": "Liquidity / Cash Flow",
       "fcfLine": "Cash left after expenses & savings: {{amount}}/mo.",
-      "stepSavings": "Your savings rate is {{pct}}%. Aim for 20% â€” automate it at the start of the month, or add side income to close the gap.",
-      "stepEmergency": "Your emergency fund is {{fund}} ({{months}} months of expenses). Prioritize building it to {{target}} (3x expenses) â€” it's the biggest factor holding your score down.",
-      "stepDti": "Installments are {{pct}}% of income. Don't add new obligations yet â€” reduce or pay off before the next commitment.",
+      "stepSavings": "Your savings rate is {{pct}}%. Aim for 20% — automate it at the start of the month, or add side income to close the gap.",
+      "stepEmergency": "Your emergency fund is {{fund}} ({{months}} months of expenses). Prioritize building it to {{target}} (3x expenses) — it's the biggest factor holding your score down.",
+      "stepDti": "Installments are {{pct}}% of income. Don't add new obligations yet — reduce or pay off before the next commitment.",
       "stepIncome": "Income is the limiting factor. A side hustle or skill upgrade lifts every ratio at once."
     },
-    "recentEmptyNew": "No analyses yet â€” run your first reality check above.",
+    "recentEmptyNew": "No analyses yet — run your first reality check above.",
     "examples": [
       "Honda Civic 2025, 5-year loan...",
       "Avanza Rp 250 juta, DP 50 juta...",
@@ -142,7 +142,7 @@
     "recalcBadge": "Recalculated with latest profile",
     "recalcButton": "Recalculate",
     "recalcDone": "Updated with your latest profile.",
-    "recalcNoProfile": "Profile is empty â€” keeping the session snapshot.",
+    "recalcNoProfile": "Profile is empty — keeping the session snapshot.",
     "incompleteData": "Incomplete data",
     "prelimBanner": "Complete your profile for an accurate analysis.",
     "reco": {
@@ -158,16 +158,16 @@
         "moderate": "bonds + index funds",
         "aggressive": "stocks / index funds"
       },
-      "incomeInsight": "If your income rose to {income}/mo â€” or expenses dropped {cut}/mo â€” this purchase would fit within 18 months.",
+      "incomeInsight": "If your income rose to {income}/mo — or expenses dropped {cut}/mo — this purchase would fit within 18 months.",
       "alternative": "Consider a more affordable alternative",
       "genericAlt": "look for options with installments â‰¤ {amount}/mo (30% of income)",
       "noIncome": "Add your income in Profile to compute affordability.",
-      "emergency": "Your emergency fund covers less than 6 months of expenses â€” prioritize it before new obligations.",
+      "emergency": "Your emergency fund covers less than 6 months of expenses — prioritize it before new obligations.",
       "dependents": "With {count} dependent(s), keep total monthly debt below 30% of income."
     },
-    "fallbackNoticeTitle": "Demo mode â€” AI unavailable",
+    "fallbackNoticeTitle": "Demo mode — AI unavailable",
     "fallbackNoticeBody": "Gemini couldn't be reached, so this analysis uses a sample scenario. Numbers are illustrative, not a real quote.",
-    "priceEstimated": "Price is an estimate â€” edit the parameters for the exact model you mean.",
+    "priceEstimated": "Price is an estimate — edit the parameters for the exact model you mean.",
     "opp": {
       "sub": "The opportunity cost of this purchase",
       "valueAfter": "Investment value after {years} years:",
@@ -257,7 +257,7 @@
     "title": "Financial Profile",
     "subtitle": "Your baseline for accurate scoring",
     "why": "Why we need this",
-    "whyDesc": "Your profile makes the score ~40% more accurate. Without it, scores use conservative defaults and show a \"Preliminary\" badge. We never share this data â€” it stays in your browser.",
+    "whyDesc": "Your profile makes the score ~40% more accurate. Without it, scores use conservative defaults and show a \"Preliminary\" badge. We never share this data — it stays in your browser.",
     "currencyToggle": "Currency",
     "fields": {
       "monthlyIncome": {
@@ -372,7 +372,7 @@
     },
     "tco": {
       "title": "Total Cost of Ownership",
-      "desc": "DP + principal + interest + all fees â€” never the price twice.",
+      "desc": "DP + principal + interest + all fees — never the price twice.",
       "dp": "Down Payment",
       "principal": "Loan Principal",
       "interest": "Loan Interest",
@@ -414,16 +414,16 @@
     },
     "params": {
       "title": "Parameters",
-      "sub": "Adjust to see how your score changes â€” find your real ceiling",
+      "sub": "Adjust to see how your score changes — find your real ceiling",
       "dp": "Down Payment",
       "term": "Term Length",
       "income": "Monthly Income",
       "dpHint": "DP â‰¥ 20% unlocks better rates",
-      "termHint": "0 = cash purchase Â· shorter term = less interest",
+      "termHint": "0 = cash purchase · shorter term = less interest",
       "cash": "Cash",
       "incomeHint": "After tax",
       "interest": "Flat Interest (%/yr)",
-      "interestHint": "Flat on the full principal â€” HP/paylater often 18â€“36%/yr",
+      "interestHint": "Flat on the full principal — HP/paylater often 18–36%/yr",
       "totalInterest": "Total Interest",
       "reset": "Reset to initial values"
     },
@@ -483,12 +483,12 @@
   "menu": {
     "label": "Menu",
     "currency": "Display currency",
-    "currencyHint": "Display only â€” inputs stay in rupiah.",
+    "currencyHint": "Display only — inputs stay in rupiah.",
     "contact": "Contact"
   },
   "contact": {
     "title": "Contact",
-    "sub": "Questions, feedback, or bug reports â€” reach me here.",
+    "sub": "Questions, feedback, or bug reports — reach me here.",
     "github": {
       "label": "GitHub",
       "value": "github.com/geraldmartadinata"
@@ -531,7 +531,7 @@
         {
           "h": "4. Your rights",
           "body": [
-            "You can delete any analysis, reset your profile, or clear localStorage at any time â€” full control stays with you.",
+            "You can delete any analysis, reset your profile, or clear localStorage at any time — full control stays with you.",
             "For data questions, use the Contact page."
           ]
         }
@@ -571,7 +571,7 @@
   },
   "errors": {
     "extractionFailed": "Could not understand your scenario. Please include: price, down payment, loan term, and your income.",
-    "analysisFailed": "Analysis failed â€” please try again",
+    "analysisFailed": "Analysis failed — please try again",
     "missingNumbers": "Please include specific numbers: price, down payment, loan duration, and monthly income.",
     "apiError": "Analysis service unavailable. Using offline mode.",
     "invalidInput": "Invalid input. Check your numbers and try again."
