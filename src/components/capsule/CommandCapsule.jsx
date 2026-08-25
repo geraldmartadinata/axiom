@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../../store/LanguageContext.jsx'
 import { useAxiomStore } from '../../store/useAxiomStore'
@@ -201,17 +202,29 @@ export default function CommandCapsule() {
         />
 
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          {/* Category chips */}
-          {CHIPS.map((chip) => (
-            <button
-              key={chip.key}
-              type="button"
-              onClick={() => handleChipClick(chip)}
-              className={`px-3.5 py-1.5 rounded-full border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${activeChip === chip.key ? 'border-amber-400 text-amber-300 bg-amber-400/10' : 'border-white/[9%] text-zinc-500 hover:text-white hover:border-white/20'}`}
-            >
-              {t(chip.labelKey)}
-            </button>
-          ))}
+          {/* Prompt suggestion chips — hidden (faded out) while the user types */}
+          <AnimatePresence initial={false}>
+            {!hasText && !extracting && (
+              <motion.div
+                className="flex items-center gap-2 flex-wrap"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+              >
+                {CHIPS.map((chip) => (
+                  <button
+                    key={chip.key}
+                    type="button"
+                    onClick={() => handleChipClick(chip)}
+                    className={`px-3.5 py-1.5 rounded-full border font-mono text-[10px] font-bold uppercase tracking-widest transition-all ${activeChip === chip.key ? 'border-amber-400 text-amber-300 bg-amber-400/10' : 'border-white/[9%] text-zinc-500 hover:text-white hover:border-white/20'}`}
+                  >
+                    {t(chip.labelKey)}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* ANALYZE button */}
           <button

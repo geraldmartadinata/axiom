@@ -1,9 +1,16 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Background from './Background'
 import DynamicIsland from './DynamicIsland'
 import Footer from './Footer'
+import { useAxiomStore } from '../../store/useAxiomStore'
+import { setActiveCurrency } from '../../utils/format'
 
 export default function Layout() {
+  // Display-currency setting (navbar dropdown) — decoupled from UI language.
+  const currency = useAxiomStore(s => s.currency)
+  useEffect(() => { setActiveCurrency(currency) }, [currency])
+
   return (
     <div className="min-h-screen relative flex flex-col">
       <Background />

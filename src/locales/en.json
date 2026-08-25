@@ -77,14 +77,14 @@
     "recentViewAll": "View All",
     "recentEmptyNew": "No analyses yet — run your first reality check above.",
     "examples": [
-      "e.g. A 2024 Tesla Model Y, on a 5 year loan...",
-      "e.g. A coffee shop with Rp 50 million starting capital...",
-      "e.g. iPhone 17 Pro, 12-month installments, no credit card..."
+      "e.g. Honda Civic 2025, 5-year loan...",
+      "e.g. Avanza Rp 250 juta, DP 50 juta...",
+      "e.g. iPhone 17 Pro, 12-month installments..."
     ]
   },
   "analyzer": {
     "status": "AI Analyzer Active",
-    "placeholder": "Can I afford a 2024 Honda Civic for $45k, putting $8k down over 60 months?",
+    "placeholder": "e.g. Honda Civic 2025, 5-year loan",
     "cta": "Analyze"
   },
   "cat": {
@@ -130,9 +130,17 @@
     "reco": {
       "title": "Recommendations",
       "sub": "Ways to make this purchase make sense",
-      "postpone": "Delay the purchase by ~{months} months",
+      "postpone": "Delay ~{months} months until the DP is saved",
+      "postponeSaving": "saving {amount}/mo",
       "postponeTarget": "Until a 30% DP ({amount}) is saved",
-      "postponeFcf": "saving {amount}/mo",
+      "notRealistic": "Not realistic within the next 1.5 years.",
+      "investRoutine": "Or start routine investing for your risk profile ({instruments}) and re-evaluate every 6 months.",
+      "instruments": {
+        "conservative": "bonds / RDN",
+        "moderate": "bonds + index funds",
+        "aggressive": "stocks / index funds"
+      },
+      "incomeInsight": "If your income rose to {income}/mo — or expenses dropped {cut}/mo — this purchase would fit within 18 months.",
       "alternative": "Consider a more affordable alternative",
       "genericAlt": "look for options with installments ≤ {amount}/mo (30% of income)",
       "noIncome": "Add your income in Profile to compute affordability.",
@@ -141,6 +149,17 @@
     },
     "fallbackNoticeTitle": "Demo mode — AI unavailable",
     "fallbackNoticeBody": "Gemini couldn't be reached, so this analysis uses a sample scenario. Numbers are illustrative, not a real quote.",
+    "priceEstimated": "Price is an estimate — edit the parameters for the exact model you mean.",
+    "opp": {
+      "sub": "The opportunity cost of this purchase",
+      "valueAfter": "Investment value after {years} years:",
+      "ofTotalCost": "of the total purchase cost",
+      "breakdownTitle": "Where the number comes from:",
+      "dpLine": "Down payment {dp} invested up front grows to {fv}.",
+      "monthlyLine": "The {monthly}/mo installment redirected into investing grows to {fv}.",
+      "assumption": "Assumes an 8%/yr return (S&P 500 historical average).",
+      "disclaimer": "Hypothetical scenario: returns are uncertain and fluctuate, inflation is not accounted for, and consistent monthly investing is assumed. Past performance does not guarantee future results."
+    },
     "backToAnalyses": "Back to analyses",
     "scoreBreakdown": "Score Breakdown",
     "debtToIncome": "Debt-to-Income Ratio",
@@ -351,6 +370,11 @@
     },
     "hiddenCosts": {
       "title": "Hidden Costs",
+      "empty": "No hidden costs detected for this scenario.",
+      "colItem": "Item",
+      "colCost": "Cost",
+      "colType": "Type",
+      "totalLabel": "total",
       "mandatory": "Mandatory",
       "upfront": "Upfront",
       "optional": "Optional",
@@ -432,6 +456,41 @@
     "privacy": "Privacy",
     "support": "Support",
     "disclaimer": "Not financial advice. Trading involves risk."
+  },
+  "menu": {
+    "label": "Menu",
+    "currency": "Display currency",
+    "currencyHint": "Display only — inputs stay in rupiah.",
+    "contact": "Contact"
+  },
+  "contact": {
+    "title": "Contact",
+    "sub": "Questions, feedback, or bug reports — reach me here.",
+    "github": { "label": "GitHub", "value": "github.com/geraldmartadinata" },
+    "email": { "label": "Email", "value": "geraldbinus@gmail.com" },
+    "instagram": { "label": "Instagram", "value": "@gerald404_" }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "updated": "Last updated: August 2026",
+      "sections": [
+        { "h": "1. Data we collect", "body": ["The financial inputs you type (income, savings, debts, purchase scenarios) and your analysis sessions are stored to power the calculations.", "We do not collect your name, email, or any identity data unless you contact us directly."] },
+        { "h": "2. Local storage, not servers", "body": ["Your profile and session history are stored locally in your browser (localStorage). We do not operate a user database and there is no account system.", "Clearing your browser data or using Reset Profile permanently removes everything."] },
+        { "h": "3. Third parties", "body": ["We never sell or share your data. Purchase prompts are processed by our AI extraction proxy solely to return structured numbers; prompts are not stored.", "No analytics or tracking scripts are used."] },
+        { "h": "4. Your rights", "body": ["You can delete any analysis, reset your profile, or clear localStorage at any time — full control stays with you.", "For data questions, use the Contact page."] }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "updated": "Last updated: August 2026",
+      "sections": [
+        { "h": "1. Educational tool, not financial advice", "body": ["Axiom is a simulation and education tool. It is NOT a licensed financial advisor, and nothing here constitutes financial, investment, or credit advice."] },
+        { "h": "2. No accuracy guarantee", "body": ["Calculations follow fixed formulas, but inputs may be estimates (including AI-extracted or estimated prices). Always verify numbers with your bank or dealer before deciding.", "Every financial decision remains your own responsibility."] },
+        { "h": "3. Hypothetical assumptions", "body": ["Investment return assumptions (e.g. 8%/yr) are hypothetical historical averages. Real returns fluctuate and can be negative; inflation is not modeled."] },
+        { "h": "4. Limitation of liability", "body": ["Axiom is provided 'as is'. To the maximum extent permitted by law, we are not liable for any loss arising from decisions made using this app."] }
+      ]
+    }
   },
   "errors": {
     "extractionFailed": "Could not understand your scenario. Please include: price, down payment, loan term, and your income.",

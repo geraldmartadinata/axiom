@@ -202,6 +202,13 @@ export default function AnalyzeSession() {
           </div>
         </motion.div>
 
+        {/* Estimated-price notice — never blocks the user */}
+        {session.priceEstimated && (
+          <motion.div className="mb-6 rounded-2xl border border-white/10 bg-white/[3%] px-4 py-3" variants={itemVariants}>
+            <p className="text-[11px] text-zinc-400">{t('analyze.priceEstimated')}</p>
+          </motion.div>
+        )}
+
         {/* Recalculated-with-latest-profile badge */}
         {recalculated && (
           <motion.div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sand/25 bg-sand/[7%] px-3 py-1.5" variants={itemVariants}>
@@ -279,7 +286,8 @@ export default function AnalyzeSession() {
           <HiddenCostsCard hiddenCosts={session.hidden_costs} tenorMonths={tenor} currency={currency} lang={lang} />
           <OpportunityCostCard
             opportunity={sim.opportunity}
-            purchasePrice={sim.credit.breakdown.downPayment + sim.credit.installment * tenor}
+            downPayment={dp}
+            installment={sim.credit.installment}
             currency={currency}
             lang={lang}
           />

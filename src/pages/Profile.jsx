@@ -4,6 +4,7 @@ import { useLanguage } from '../store/LanguageContext.jsx'
 import { useAxiomStore } from '../store/useAxiomStore'
 import { formatCurrency, formatNumber } from '../utils/format'
 import { PORTFOLIO_YIELDS } from '../utils/calculations'
+import PageTransition, { PageItem } from '../components/ui/PageTransition'
 import { Shield, Lock, TrendingUp, AlertTriangle, CheckCircle, Users, DollarSign, Wallet, PiggyBank, BarChart3, Download, RotateCcw, Settings, ChevronRight, Plus, Minus } from 'lucide-react'
 
 /**
@@ -147,16 +148,16 @@ export default function Profile() {
   const missingLabel = nextMissing ? t(`profile.fields.${FIELD_LABEL_KEYS[nextMissing]}.label`) : null
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-24 pb-16 px-4 sm:px-6">
+    <PageTransition className="min-h-screen bg-zinc-950 pt-24 pb-16 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[62%_38%] gap-8">
           {/* ── LEFT COLUMN: FORM ── */}
-          <div className="space-y-8">
+          <PageItem className="space-y-8">
             {/* Header */}
-            <div>
+            <PageItem>
               <h1 className="text-3xl font-bold text-white tracking-tight">{t('profile.title')}</h1>
               <p className="text-zinc-400 mt-1">{t('profile.subtitle')}</p>
-            </div>
+            </PageItem>
 
             {/* Why we need this — callout */}
             <div className="rounded-2xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-5 flex items-start gap-4">
@@ -426,10 +427,10 @@ export default function Profile() {
                 ))}
               </div>
             </div>
-          </div>
+          </PageItem>
 
           {/* ── RIGHT COLUMN: SIDEBAR ── */}
-          <div className="space-y-6 sticky top-24 self-start">
+          <PageItem className="space-y-6 sticky top-24 self-start">
             {/* Profile Status */}
             <div className="rounded-2xl border border-white/[6%] bg-zinc-900/60 backdrop-blur-xl p-6">
               <div className="flex justify-between items-center mb-3">
@@ -506,9 +507,9 @@ export default function Profile() {
                 <p className="text-sm text-zinc-400 mt-0.5">Data never leaves your browser.</p>
               </div>
             </div>
-          </div>
+          </PageItem>
         </div>
       </div>
-    </div>
+    </PageTransition>
   )
 }

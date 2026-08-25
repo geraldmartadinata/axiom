@@ -77,14 +77,14 @@
     "recentViewAll": "Lihat Semua",
     "recentEmptyNew": "Belum ada analisis — jalankan reality check pertamamu di atas.",
     "examples": [
-      "cth. Tesla Model Y 2024, kredit 5 tahun...",
-      "cth. Kedai kopi dengan modal awal Rp 50 juta...",
-      "cth. iPhone 17 Pro, cicilan 12 bulan tanpa kartu kredit..."
+      "cth: Honda Civic 2025, cicilan 5 tahun...",
+      "cth: Avanza Rp 250 juta, DP 50 juta...",
+      "cth: iPhone 17 Pro, dicicil 12 bulan..."
     ]
   },
   "analyzer": {
     "status": "AI Analyzer Aktif",
-    "placeholder": "Bisa beli Honda Civic 2024 Rp450jt, DP Rp80jt cicil 60 bln?",
+    "placeholder": "cth: Honda Civic 2025, cicilan 5 tahun",
     "cta": "Analisis"
   },
   "cat": {
@@ -130,9 +130,17 @@
     "reco": {
       "title": "Rekomendasi",
       "sub": "Cara membuat pembelian ini masuk akal",
-      "postpone": "Tunda pembelian ±{months} bulan",
+      "postpone": "Tunda ±{months} bulan sampai DP terkumpul",
+      "postponeSaving": "menabung {amount}/bln",
       "postponeTarget": "Sampai DP 30% ({amount}) terkumpul",
-      "postponeFcf": "menabung {amount}/bln",
+      "notRealistic": "Belum realistis dalam 1,5 tahun ke depan.",
+      "investRoutine": "Atau mulai invest rutin sesuai profil risikomu ({instruments}), evaluasi ulang tiap 6 bulan.",
+      "instruments": {
+        "conservative": "obligasi / RDN",
+        "moderate": "obligasi + reksa dana indeks",
+        "aggressive": "saham / indeks"
+      },
+      "incomeInsight": "Kalau pendapatan naik ke {income}/bln — atau pengeluaran turun {cut}/bln — mobil ini bisa dibeli dalam ≤18 bulan.",
       "alternative": "Pertimbangkan alternatif lebih terjangkau",
       "genericAlt": "cari opsi dengan cicilan ≤ {amount}/bln (30% penghasilan)",
       "noIncome": "Isi penghasilan di Profil agar keterjangkauan bisa dihitung.",
@@ -141,6 +149,17 @@
     },
     "fallbackNoticeTitle": "Mode demo — AI tidak tersedia",
     "fallbackNoticeBody": "Gemini tidak bisa dihubungi, jadi analisis ini memakai skenario contoh. Angka bersifat ilustratif, bukan penawaran asli.",
+    "priceEstimated": "Harga adalah estimasi — sesuaikan parameter untuk model yang kamu maksud.",
+    "opp": {
+      "sub": "Biaya peluang dari pembelian ini",
+      "valueAfter": "Nilai investasi setelah {years} tahun:",
+      "ofTotalCost": "dari total biaya pembelian",
+      "breakdownTitle": "Dari mana angkanya:",
+      "dpLine": "DP {dp} diinvestasikan di awal tumbuh menjadi {fv}.",
+      "monthlyLine": "Cicilan {monthly}/bln yang dialihkan ke investasi tumbuh menjadi {fv}.",
+      "assumption": "Asumsi return 8%/tahun (rata-rata historis S&P 500).",
+      "disclaimer": "Skenario hipotetis: return tidak pasti & berfluktuasi, inflasi belum diperhitungkan, dan mengasumsikan konsistensi menabung/invest tiap bulan. Performa masa lalu tidak menjamin hasil masa depan."
+    },
     "backToAnalyses": "Kembali ke analisis",
     "scoreBreakdown": "Rincian Skor",
     "debtToIncome": "Rasio Hutang ke Penghasilan",
@@ -351,6 +370,11 @@
     },
     "hiddenCosts": {
       "title": "Biaya Tersembunyi",
+      "empty": "Tidak ada biaya tersembunyi untuk skenario ini.",
+      "colItem": "Item",
+      "colCost": "Biaya",
+      "colType": "Tipe",
+      "totalLabel": "total",
       "mandatory": "Wajib",
       "upfront": "Awal",
       "optional": "Opsional",
@@ -425,6 +449,48 @@
     "close": "Tutup",
     "back": "Kembali",
     "try": "Coba:"
+  },
+  "footer": {
+    "tagline": "Kejelasan finansial yang canggih untuk era modern.",
+    "terms": "Syarat & Ketentuan",
+    "privacy": "Privasi",
+    "support": "Kontak",
+    "disclaimer": "Bukan nasihat keuangan. Investasi mengandung risiko."
+  },
+  "menu": {
+    "label": "Menu",
+    "currency": "Mata uang tampilan",
+    "currencyHint": "Hanya tampilan — input tetap rupiah.",
+    "contact": "Kontak"
+  },
+  "contact": {
+    "title": "Kontak",
+    "sub": "Pertanyaan, masukan, atau laporan bug — hubungi saya di sini.",
+    "github": { "label": "GitHub", "value": "github.com/geraldmartadinata" },
+    "email": { "label": "Email", "value": "geraldbinus@gmail.com" },
+    "instagram": { "label": "Instagram", "value": "@gerald404_" }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Kebijakan Privasi",
+      "updated": "Terakhir diperbarui: Agustus 2026",
+      "sections": [
+        { "h": "1. Data yang kami kumpulkan", "body": ["Input finansial yang kamu ketik (penghasilan, tabungan, hutang, skenario pembelian) dan sesi analisis disimpan untuk menjalankan perhitungan.", "Kami tidak mengumpulkan nama, email, atau data identitas apa pun kecuali kamu menghubungi kami langsung."] },
+        { "h": "2. Penyimpanan lokal, bukan server", "body": ["Profil dan riwayat analisis disimpan secara lokal di browser-mu (localStorage). Kami tidak memiliki database pengguna dan tidak ada sistem akun.", "Menghapus data browser atau menekan Reset Profil menghapus semuanya secara permanen."] },
+        { "h": "3. Pihak ketiga", "body": ["Kami tidak pernah menjual atau membagikan datamu. Prompt pembelian diproses oleh proxy AI semata untuk mengembalikan angka terstruktur; prompt tidak disimpan.", "Tidak ada skrip analitik atau pelacakan."] },
+        { "h": "4. Hak kamu", "body": ["Kamu bisa menghapus analisis apa pun, mereset profil, atau membersihkan localStorage kapan saja — kendali penuh ada padamu.", "Untuk pertanyaan data, gunakan halaman Kontak."] }
+      ]
+    },
+    "terms": {
+      "title": "Syarat & Ketentuan",
+      "updated": "Terakhir diperbarui: Agustus 2026",
+      "sections": [
+        { "h": "1. Alat edukasi, bukan nasihat keuangan", "body": ["Axiom adalah alat simulasi dan edukasi. BUKAN penasihat keuangan berlisensi, dan tidak ada di sini yang merupakan nasihat keuangan, investasi, atau kredit."] },
+        { "h": "2. Tanpa jaminan akurasi", "body": ["Perhitungan mengikuti rumus tetap, namun input bisa berupa estimasi (termasuk harga hasil ekstraksi AI atau estimasi). Selalu verifikasi angka dengan bank atau dealer sebelum memutuskan.", "Setiap keputusan finansial tetap menjadi tanggung jawabmu."] },
+        { "h": "3. Asumsi hipotetis", "body": ["Asumsi return investasi (mis. 8%/thn) adalah rata-rata historis hipotetis. Return nyata berfluktuasi dan bisa negatif; inflasi tidak dimodelkan."] },
+        { "h": "4. Batasan tanggung jawab", "body": ["Axiom disediakan 'sebagaimana adanya'. Sejauh diizinkan hukum, kami tidak bertanggung jawab atas kerugian apa pun dari keputusan yang dibuat menggunakan aplikasi ini."] }
+      ]
+    }
   },
   "errors": {
     "extractionFailed": "Tidak bisa memahami skenariomu. Sertakan: harga, DP, tenor, dan penghasilan.",
