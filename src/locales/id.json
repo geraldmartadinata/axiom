@@ -1,4 +1,4 @@
-{
+﻿{
   "app": {
     "name": "Axiom",
     "tagline": "Bisa beli nggak?",
@@ -13,7 +13,7 @@
   "dashboard": {
     "title": "Bisa beli",
     "titleAccent": "nggak?",
-    "subtitle": "Tulis pembelian dalam bahasa sehari-hari. Axiom mengekstrak angkanya, menghitung biaya aslinya, dan memberi tahu kamu apakah itu pas dengan hidupmu — tanpa menghakimi, murni matematika.",
+    "subtitle": "Tulis pembelian dalam bahasa sehari-hari. Axiom mengekstrak angkanya, menghitung biaya aslinya, dan memberi tahu kamu apakah itu pas dengan hidupmu â€” tanpa menghakimi, murni matematika.",
     "analyzeButton": "Analisis",
     "analyzingButton": "Menganalisis...",
     "example1": "Bisa beli Honda Civic RS Rp550jt DP Rp100jt cicil 60 bln, gaji Rp12jt/bln?",
@@ -23,7 +23,7 @@
     "overallSub": "Berdasarkan pembelian terkonfirmasi dan profilmu",
     "overallEmpty": "Konfirmasi pembelian untuk melacak kesehatan pasca-pembelian",
     "recentTitle": "Analisis Terakhir",
-    "recentEmpty": "Belum ada analisis — pembelian pertamamu menunggu.",
+    "recentEmpty": "Belum ada analisis â€” pembelian pertamamu menunggu.",
     "recentViewAll": "Lihat semua",
     "insightLabel": "Insight Axiom",
     "scrollHint": "Scroll untuk eksplorasi",
@@ -81,14 +81,14 @@
       "savingsLabel": "Rasio Tabungan",
       "savingsLine": "Saving kamu {{pct}}% dari income.",
       "emergencyLabel": "Dana Darurat",
-      "emergencyLine": "{{fund}} = {{months}}x pengeluaran bulanan. Ideal: 3–6x ({{min}}–{{max}}).",
+      "emergencyLine": "{{fund}} = {{months}}x pengeluaran bulanan. Ideal: 3â€“6x ({{min}}â€“{{max}}).",
       "dtiLabel": "Rasio Hutang (DTI)",
       "dtiLine": "Cicilan {{pct}}% dari income.",
       "fcfLabel": "Likuiditas / Arus Kas",
       "fcfLine": "Sisa kas setelah pengeluaran & tabungan: {{amount}}/bln.",
-      "stepSavings": "Saving rate kamu {{pct}}%. Targetkan 20% — sisihkan otomatis di awal bulan, atau cari side income untuk menutup gap.",
-      "stepEmergency": "Dana daruratmu {{fund}} ({{months}} bulan pengeluaran). Prioritaskan kumpulkan hingga {{target}} (3x pengeluaran) — ini komponen terbesar yang menahan skormu saat ini.",
-      "stepDti": "Cicilan {{pct}}% dari income. Jangan tambah kewajiban baru dulu — pertimbangkan turunkan atau lunasi sebelum komitmen berikutnya.",
+      "stepSavings": "Saving rate kamu {{pct}}%. Targetkan 20% â€” sisihkan otomatis di awal bulan, atau cari side income untuk menutup gap.",
+      "stepEmergency": "Dana daruratmu {{fund}} ({{months}} bulan pengeluaran). Prioritaskan kumpulkan hingga {{target}} (3x pengeluaran) â€” ini komponen terbesar yang menahan skormu saat ini.",
+      "stepDti": "Cicilan {{pct}}% dari income. Jangan tambah kewajiban baru dulu â€” pertimbangkan turunkan atau lunasi sebelum komitmen berikutnya.",
       "stepIncome": "Pendapatan menjadi faktor pembatas. Side hustle atau peningkatan skill bisa menaikkan seluruh rasio sekaligus."
     },
     "title": "Bisa Beli",
@@ -96,16 +96,16 @@
     "liquidity": "Likuiditas",
     "debtToIncome": "Utang / Pendapatan",
     "recentViewAll": "Lihat Semua",
-    "recentEmptyNew": "Belum ada analisis — jalankan reality check pertamamu di atas.",
+    "recentEmptyNew": "Belum ada analisis â€” jalankan reality check pertamamu di atas.",
     "examples": [
-      "cth: Honda Civic 2025, cicilan 5 tahun...",
-      "cth: Avanza Rp 250 juta, DP 50 juta...",
-      "cth: iPhone 17 Pro, dicicil 12 bulan..."
+      "Honda Civic 2025, cicilan 5 tahun...",
+      "Avanza Rp 250 juta, DP 50 juta...",
+      "iPhone 17 Pro, dicicil 12 bulan..."
     ]
   },
   "analyzer": {
     "status": "AI Analyzer Aktif",
-    "placeholder": "cth: Honda Civic 2025, cicilan 5 tahun",
+    "placeholder": "Honda Civic 2025, cicilan 5 tahun",
     "cta": "Analisis"
   },
   "cat": {
@@ -135,11 +135,11 @@
     "noResults": "Tidak ada sesi yang cocok dengan pencarian atau filtermu.",
     "assessedValue": "Nilai Penilaian",
     "loadMore": "Muat Lebih Banyak",
-    "resumeLatest": "⟳ Lanjutkan Terakhir",
+    "resumeLatest": "âŸ³ Lanjutkan Terakhir",
     "inProgress": "Sedang Proses",
     "dataCollection": "Pengumpulan Data",
     "complete": "Selesai",
-    "resumeButton": "Lanjutkan Analisis →",
+    "resumeButton": "Lanjutkan Analisis â†’",
     "totalSessions": "Total Sesi",
     "confirmedSessions": "Terkonfirmasi",
     "averageScore": "Rata-rata Skor",
@@ -148,13 +148,13 @@
     "recalcBadge": "Dihitung ulang dengan profil terbaru",
     "recalcButton": "Hitung Ulang",
     "recalcDone": "Diperbarui dengan profil terbarumu.",
-    "recalcNoProfile": "Profil masih kosong — memakai snapshot sesi.",
+    "recalcNoProfile": "Profil masih kosong â€” memakai snapshot sesi.",
     "incompleteData": "Data belum lengkap",
     "prelimBanner": "Lengkapi profilmu untuk analisis yang akurat.",
     "reco": {
       "title": "Rekomendasi",
       "sub": "Cara membuat pembelian ini masuk akal",
-      "postpone": "Tunda ±{months} bulan sampai DP terkumpul",
+      "postpone": "Tunda Â±{months} bulan sampai DP terkumpul",
       "postponeSaving": "menabung {amount}/bln",
       "postponeTarget": "Sampai DP 30% ({amount}) terkumpul",
       "notRealistic": "Belum realistis dalam 1,5 tahun ke depan.",
@@ -164,16 +164,16 @@
         "moderate": "obligasi + reksa dana indeks",
         "aggressive": "saham / indeks"
       },
-      "incomeInsight": "Kalau pendapatan naik ke {income}/bln — atau pengeluaran turun {cut}/bln — mobil ini bisa dibeli dalam ≤18 bulan.",
+      "incomeInsight": "Kalau pendapatan naik ke {income}/bln â€” atau pengeluaran turun {cut}/bln â€” mobil ini bisa dibeli dalam â‰¤18 bulan.",
       "alternative": "Pertimbangkan alternatif lebih terjangkau",
-      "genericAlt": "cari opsi dengan cicilan ≤ {amount}/bln (30% penghasilan)",
+      "genericAlt": "cari opsi dengan cicilan â‰¤ {amount}/bln (30% penghasilan)",
       "noIncome": "Isi penghasilan di Profil agar keterjangkauan bisa dihitung.",
-      "emergency": "Dana daruratmu kurang dari 6 bulan pengeluaran — prioritaskan sebelum tambah kewajiban.",
+      "emergency": "Dana daruratmu kurang dari 6 bulan pengeluaran â€” prioritaskan sebelum tambah kewajiban.",
       "dependents": "Dengan {count} tanggungan, jaga total cicilan bulanan di bawah 30% penghasilan."
     },
-    "fallbackNoticeTitle": "Mode demo — AI tidak tersedia",
+    "fallbackNoticeTitle": "Mode demo â€” AI tidak tersedia",
     "fallbackNoticeBody": "Gemini tidak bisa dihubungi, jadi analisis ini memakai skenario contoh. Angka bersifat ilustratif, bukan penawaran asli.",
-    "priceEstimated": "Harga adalah estimasi — sesuaikan parameter untuk model yang kamu maksud.",
+    "priceEstimated": "Harga adalah estimasi â€” sesuaikan parameter untuk model yang kamu maksud.",
     "opp": {
       "sub": "Biaya peluang dari pembelian ini",
       "valueAfter": "Nilai investasi setelah {years} tahun:",
@@ -263,52 +263,52 @@
     "title": "Profil Finansial",
     "subtitle": "Dasar untuk skor yang akurat",
     "why": "Kenapa kami butuh ini",
-    "whyDesc": "Profilmu membuat skor ~40% lebih akurat. Tanpa itu, skor memakai asumsi konservatif dan menampilkan badge \"Perkiraan\". Data ini tidak pernah dibagikan — tersimpan di browser-mu.",
+    "whyDesc": "Profilmu membuat skor ~40% lebih akurat. Tanpa itu, skor memakai asumsi konservatif dan menampilkan badge \"Perkiraan\". Data ini tidak pernah dibagikan â€” tersimpan di browser-mu.",
     "currencyToggle": "Mata Uang",
     "fields": {
       "monthlyIncome": {
         "label": "Gaji Bersih Bulanan",
-        "placeholder": "cth: 15.000.000",
+        "placeholder": "15.000.000",
         "help": "Setelah pajak, yang masuk rekening"
       },
       "monthlyExpenses": {
         "label": "Pengeluaran Bulanan",
-        "placeholder": "cth: 6.000.000",
+        "placeholder": "6.000.000",
         "help": "Sewa, makan, transport, tagihan"
       },
       "stocks": {
         "label": "Saham (IHSG)",
-        "placeholder": "cth: 25.000.000",
+        "placeholder": "25.000.000",
         "help": "Total nilai saat ini; dimodelkan dengan rata-rata jangka panjang IHSG"
       },
       "crypto": {
         "label": "Kripto (Top 100)",
-        "placeholder": "cth: 10.000.000",
+        "placeholder": "10.000.000",
         "help": "Total nilai saat ini; dimodelkan dengan rata-rata jangka panjang top 100"
       },
       "emergencyFund": {
         "label": "Dana Darurat",
-        "placeholder": "cth: 30.000.000",
+        "placeholder": "30.000.000",
         "help": "Uang tunai yang bisa diakses dalam 24 jam"
       },
       "monthlySavings": {
         "label": "Tabungan Bulanan",
-        "placeholder": "cth: 2.000.000",
+        "placeholder": "2.000.000",
         "help": "Yang benar-benar kamu tabung tiap bulan"
       },
       "existingDebt": {
         "label": "Cicilan Bulanan yang Ada",
-        "placeholder": "cth: 500.000",
+        "placeholder": "500.000",
         "help": "Kredit mahasiswa, mobil, kartu kredit"
       },
       "investmentReturn": {
         "label": "Ekspektasi Return Investasi (%/tahun)",
-        "placeholder": "cth: 7",
+        "placeholder": "7",
         "help": "Return tahunan konservatif untuk hitung biaya peluang"
       },
       "dependents": {
         "label": "Tanggungan",
-        "placeholder": "cth: 0",
+        "placeholder": "0",
         "help": "Jumlah orang yang bergantung finansial pada kamu"
       }
     },
@@ -378,7 +378,7 @@
     },
     "tco": {
       "title": "Total Biaya Kepemilikan",
-      "desc": "DP + pokok + bunga + semua biaya — harga tidak dihitung dua kali.",
+      "desc": "DP + pokok + bunga + semua biaya â€” harga tidak dihitung dua kali.",
       "dp": "Uang Muka",
       "principal": "Pokok Kredit",
       "interest": "Bunga Kredit",
@@ -420,16 +420,16 @@
     },
     "params": {
       "title": "Parameter",
-      "sub": "Geser untuk lihat skor berubah — temukan batas amanmu",
+      "sub": "Geser untuk lihat skor berubah â€” temukan batas amanmu",
       "dp": "Uang Muka",
       "term": "Tenor",
       "income": "Gaji Bulanan",
-      "dpHint": "DP ≥ 20% dapat bunga lebih baik",
-      "termHint": "0 = beli cash · tenor pendek = bunga lebih sedikit",
+      "dpHint": "DP â‰¥ 20% dapat bunga lebih baik",
+      "termHint": "0 = beli cash Â· tenor pendek = bunga lebih sedikit",
       "cash": "Cash",
       "incomeHint": "Setelah pajak",
       "interest": "Bunga Flat (%/thn)",
-      "interestHint": "Flat dari pokok penuh — HP/paylater umumnya 18–36%/th",
+      "interestHint": "Flat dari pokok penuh â€” HP/paylater umumnya 18â€“36%/th",
       "totalInterest": "Total Bunga",
       "reset": "Reset ke nilai awal"
     },
@@ -484,12 +484,12 @@
   "menu": {
     "label": "Menu",
     "currency": "Mata uang tampilan",
-    "currencyHint": "Hanya tampilan — input tetap rupiah.",
+    "currencyHint": "Hanya tampilan â€” input tetap rupiah.",
     "contact": "Kontak"
   },
   "contact": {
     "title": "Kontak",
-    "sub": "Pertanyaan, masukan, atau laporan bug — hubungi saya di sini.",
+    "sub": "Pertanyaan, masukan, atau laporan bug â€” hubungi saya di sini.",
     "github": { "label": "GitHub", "value": "github.com/geraldmartadinata" },
     "email": { "label": "Email", "value": "geraldbinus@gmail.com" },
     "instagram": { "label": "Instagram", "value": "@gerald404_" }
@@ -502,7 +502,7 @@
         { "h": "1. Data yang kami kumpulkan", "body": ["Input finansial yang kamu ketik (penghasilan, tabungan, hutang, skenario pembelian) dan sesi analisis disimpan untuk menjalankan perhitungan.", "Kami tidak mengumpulkan nama, email, atau data identitas apa pun kecuali kamu menghubungi kami langsung."] },
         { "h": "2. Penyimpanan lokal, bukan server", "body": ["Profil dan riwayat analisis disimpan secara lokal di browser-mu (localStorage). Kami tidak memiliki database pengguna dan tidak ada sistem akun.", "Menghapus data browser atau menekan Reset Profil menghapus semuanya secara permanen."] },
         { "h": "3. Pihak ketiga", "body": ["Kami tidak pernah menjual atau membagikan datamu. Prompt pembelian diproses oleh proxy AI semata untuk mengembalikan angka terstruktur; prompt tidak disimpan.", "Tidak ada skrip analitik atau pelacakan."] },
-        { "h": "4. Hak kamu", "body": ["Kamu bisa menghapus analisis apa pun, mereset profil, atau membersihkan localStorage kapan saja — kendali penuh ada padamu.", "Untuk pertanyaan data, gunakan halaman Kontak."] }
+        { "h": "4. Hak kamu", "body": ["Kamu bisa menghapus analisis apa pun, mereset profil, atau membersihkan localStorage kapan saja â€” kendali penuh ada padamu.", "Untuk pertanyaan data, gunakan halaman Kontak."] }
       ]
     },
     "terms": {
@@ -518,7 +518,7 @@
   },
   "errors": {
     "extractionFailed": "Tidak bisa memahami skenariomu. Sertakan: harga, DP, tenor, dan penghasilan.",
-    "analysisFailed": "Analisis gagal — silakan coba lagi",
+    "analysisFailed": "Analisis gagal â€” silakan coba lagi",
     "missingNumbers": "Sertakan angka spesifik: harga, DP, durasi pinjaman, dan penghasilan bulanan.",
     "apiError": "Layanan analisis tidak tersedia. Memakai mode offline.",
     "invalidInput": "Input tidak valid. Periksa angkamu dan coba lagi."

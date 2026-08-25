@@ -373,7 +373,7 @@ export default function Profile() {
                     max="30"
                     value={form.investment_return}
                     onChange={handleChange('investment_return')}
-                    placeholder="e.g. 7"
+                    placeholder={t('profile.fields.investmentReturn.placeholder')}
                     className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
                   />
                 </div>

@@ -123,11 +123,13 @@ export default function CommandCapsule() {
   const typingActive = !reducedMotion && !focused && !hasText && resumeOk && examples.length > 0
   const animatedPlaceholder = useTypingPlaceholder(examples, typingActive)
 
-  const placeholder = hasText
+  // Hidden entirely while focused (clean bar) or typing; the typewriter state
+  // lives in a ref, so on blur it reappears mid-animation — never resets.
+  const placeholder = hasText || focused
     ? ''
     : reducedMotion
       ? (examples[0] || '')
-      : animatedPlaceholder // frozen frame while focused; empty while waiting to resume
+      : animatedPlaceholder
 
   useEffect(() => () => clearTimeout(resumeTimer.current), [])
 
