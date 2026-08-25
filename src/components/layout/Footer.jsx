@@ -51,9 +51,7 @@ export default function Footer() {
               <span className="font-display text-2xl font-bold text-white tracking-tight">Axiom</span>
             </Link>
             <p className="mt-3 text-sm text-zinc-500 leading-relaxed max-w-xs">{t('footer.tagline')}</p>
-            <span className="inline-flex items-center gap-1.5 mt-5 px-2.5 py-1 rounded-full border border-white/10 bg-white/[3%] font-mono text-[9px] font-bold uppercase tracking-widest text-zinc-500">
-              {t('footer.madeIn')}
-            </span>
+            <p className="mt-4 text-sm text-zinc-500/80 leading-relaxed max-w-xs">{t('footer.about')}</p>
           </div>
 
           <nav aria-label={t('footer.product')}>
