@@ -146,6 +146,9 @@
     "sessionNotFound": "Session not found",
     "sessionNotFoundSub": "This analysis may have been deleted. Pick another one below.",
     "recalcBadge": "Recalculated with latest profile",
+    "recalcButton": "Recalculate",
+    "recalcDone": "Updated with your latest profile.",
+    "recalcNoProfile": "Profile is empty — keeping the session snapshot.",
     "incompleteData": "Incomplete data",
     "prelimBanner": "Complete your profile for an accurate analysis.",
     "reco": {

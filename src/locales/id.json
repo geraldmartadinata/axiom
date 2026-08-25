@@ -146,6 +146,9 @@
     "sessionNotFound": "Sesi tidak ditemukan",
     "sessionNotFoundSub": "Analisis ini mungkin sudah dihapus. Pilih yang lain di bawah.",
     "recalcBadge": "Dihitung ulang dengan profil terbaru",
+    "recalcButton": "Hitung Ulang",
+    "recalcDone": "Diperbarui dengan profil terbarumu.",
+    "recalcNoProfile": "Profil masih kosong — memakai snapshot sesi.",
     "incompleteData": "Data belum lengkap",
     "prelimBanner": "Lengkapi profilmu untuk analisis yang akurat.",
     "reco": {

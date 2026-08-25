@@ -43,11 +43,13 @@ export default function AnalyzeSession() {
   const confirmPurchase = useAxiomStore(s => s.confirmPurchase)
   const unconfirmPurchase = useAxiomStore(s => s.unconfirmPurchase)
   const deleteFromHistory = useAxiomStore(s => s.deleteFromHistory)
+  const recalculateSession = useAxiomStore(s => s.recalculateSession)
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [finalPrice, setFinalPrice] = useState('')
   const [finalDp, setFinalDp] = useState('')
   const [finalTerm, setFinalTerm] = useState('')
+  const [recalcState, setRecalcState] = useState(null) // null | 'done' | 'noprofile'
 
   const session = history.find(s => s.id === sessionId)
 
@@ -138,6 +140,15 @@ export default function AnalyzeSession() {
     }
   }
 
+  // Recalculate: re-run the analysis with the LATEST profile baseline
+  // (income), keeping session-specific fields (price, DP, tenor). Persisted.
+  const handleRecalculate = () => {
+    const ok = recalculateSession(sessionId, profile)
+    setRecalcState(ok ? 'done' : 'noprofile')
+    clearTimeout(handleRecalculate._t)
+    handleRecalculate._t = setTimeout(() => setRecalcState(null), 2600)
+  }
+
   const handleConfirm = () => {
     confirmPurchase(sessionId, {
       final_price: finalPrice ? Number(finalPrice) : undefined,
@@ -172,6 +183,14 @@ export default function AnalyzeSession() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleRecalculate}
+              title={t('analyze.recalcButton')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-zinc-900/60 text-zinc-300 text-sm font-semibold hover:text-white hover:bg-white/10 transition-all"
+            >
+              <RefreshCw className="h-4 w-4" />
+              {t('analyze.recalcButton')}
+            </button>
             {confirmed ? (
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-sm font-semibold">
                 <CheckCircle2 className="h-4 w-4" />
@@ -206,6 +225,15 @@ export default function AnalyzeSession() {
         {session.priceEstimated && (
           <motion.div className="mb-6 rounded-2xl border border-white/10 bg-white/[3%] px-4 py-3" variants={itemVariants}>
             <p className="text-[11px] text-zinc-400">{t('analyze.priceEstimated')}</p>
+          </motion.div>
+        )}
+
+        {/* Recalculate feedback */}
+        {recalcState && (
+          <motion.div className="mb-4" variants={itemVariants}>
+            <p className={`text-xs font-medium ${recalcState === 'done' ? 'text-emerald-400' : 'text-amber-300'}`}>
+              {recalcState === 'done' ? t('analyze.recalcDone') : t('analyze.recalcNoProfile')}
+            </p>
           </motion.div>
         )}
 

@@ -7,10 +7,12 @@ import AnalyzeSession from './pages/analyze/AnalyzeSession'
 import Profile from './pages/Profile'
 import LegalPage from './pages/LegalPage'
 import Contact from './pages/Contact'
+import ScrollToTop from './components/ui/ScrollToTop'
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />

@@ -73,6 +73,27 @@ export const useAxiomStore = create(
         })
       },
 
+      /**
+       * Recalculate: refresh USER-side financials (income from the LATEST
+       * profile) while keeping session-specific fields (price, DP, tenor).
+       * Persisted so the update survives reload. No-op without profile data.
+       */
+      recalculateSession: (id, profile) => {
+        const income = Number(profile?.monthly_income) || 0
+        if (!income) return false
+        set({
+          history: get().history.map(s => {
+            if (s.id !== id) return s
+            return {
+              ...s,
+              financials: { ...s.financials, monthly_income: income },
+              recalculated_at: new Date().toISOString(),
+            }
+          }),
+        })
+        return true
+      },
+
       setCurrency: (currency) => set({ currency }),
 
       saveProfile: (data) => {

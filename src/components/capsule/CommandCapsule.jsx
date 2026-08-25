@@ -22,7 +22,7 @@ const TYPE_MS = 50
 const HOLD_MS = 2000
 const DELETE_MS = 25
 const GAP_MS = 400
-const RESUME_IDLE_MS = 3000
+const RESUME_DELAY_MS = 300 // resume < 0.5s after blur (spec)
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(
@@ -38,20 +38,21 @@ function usePrefersReducedMotion() {
 }
 
 /**
- * Typewriter placeholder. Returns the string to render in the input's
- * placeholder attribute (including a "|" caret while typing/deleting/holding).
- * Single interval-chain in a ref; one small setState per character —
- * contained to this component. Cleans up on unmount/pause.
+ * Typewriter placeholder. State (charIndex/phase/textIndex) lives in a REF so
+ * pausing (focus/typing) never loses position — resuming continues the exact
+ * phase it stopped in. Reset to the next example happens ONLY after a text is
+ * fully deleted. Single timer, cleaned up on pause/unmount (no leaks).
  */
 function useTypingPlaceholder(examples, active) {
   const [frame, setFrame] = useState({ text: '', caret: false })
   const timerRef = useRef(null)
+  const stRef = useRef({ i: 0, pos: 0, phase: 'typing' })
 
   useEffect(() => {
     clearTimeout(timerRef.current)
     if (!active || !Array.isArray(examples) || examples.length === 0) return undefined
 
-    const st = { i: 0, pos: 0, phase: 'typing' }
+    const st = stRef.current
 
     const step = () => {
       const ex = String(examples[st.i] ?? '')
@@ -63,7 +64,7 @@ function useTypingPlaceholder(examples, active) {
         setFrame({ text: ex.slice(0, st.pos), caret })
         if (st.pos >= ex.length) { st.phase = 'holding'; delay = HOLD_MS }
       } else if (st.phase === 'holding') {
-        setFrame({ text: ex, caret: true }) // keep blinking caret during hold
+        setFrame({ text: ex, caret: true })
         st.phase = 'deleting'
         delay = DELETE_MS
       } else if (st.phase === 'deleting') {
@@ -75,7 +76,7 @@ function useTypingPlaceholder(examples, active) {
         } else {
           setFrame({ text: ex.slice(0, st.pos), caret })
         }
-      } else { // gap between examples
+      } else { // gap between examples — the ONLY place textIndex advances
         st.i = (st.i + 1) % examples.length
         st.phase = 'typing'
         caret = false
@@ -103,8 +104,7 @@ export default function CommandCapsule() {
 
   const [input, setInput] = useState('')
   const [focused, setFocused] = useState(false)
-  const [everTyped, setEverTyped] = useState(false) // stop animation once real input happens
-  const [resumeOk, setResumeOk] = useState(true) // gates the ~3s idle before resuming
+  const [resumeOk, setResumeOk] = useState(true) // gates the brief pause before resuming
   const [activeChip, setActiveChip] = useState(null)
   const [error, setError] = useState(null)
   const [extracting, setExtracting] = useState(false)
@@ -119,7 +119,8 @@ export default function CommandCapsule() {
   }, [t])
 
   const hasText = input.trim().length > 0
-  const typingActive = !reducedMotion && !everTyped && !focused && !hasText && resumeOk && examples.length > 0
+  // Pause ONLY while focused or typing — state is kept for a seamless resume.
+  const typingActive = !reducedMotion && !focused && !hasText && resumeOk && examples.length > 0
   const animatedPlaceholder = useTypingPlaceholder(examples, typingActive)
 
   const placeholder = hasText
@@ -133,7 +134,6 @@ export default function CommandCapsule() {
   // Chip → populate input only (spec: does NOT submit)
   const handleChipClick = (chip) => {
     setInput(t(chip.exampleKey))
-    setEverTyped(false) // chip text is disposable — let the animation come back later
     setActiveChip(chip.key)
     setError(null)
     inputRef.current?.focus()
@@ -141,20 +141,16 @@ export default function CommandCapsule() {
 
   const handleInputChange = (e) => {
     setInput(e.target.value)
-    if (e.target.value.trim()) setEverTyped(true) // permanent stop on real typing
     setActiveChip(null)
   }
 
   const handleBlur = () => {
     setFocused(false)
-    // cleared + blurred → resume the loop FROM THE START after ~3s idle
+    // cleared + blurred → resume the loop FROM THE SAME STATE within 0.5s
     if (!input.trim()) {
       clearTimeout(resumeTimer.current)
       setResumeOk(false)
-      resumeTimer.current = setTimeout(() => {
-        setEverTyped(false)
-        setResumeOk(true)
-      }, RESUME_IDLE_MS)
+      resumeTimer.current = setTimeout(() => setResumeOk(true), RESUME_DELAY_MS)
     }
   }
 

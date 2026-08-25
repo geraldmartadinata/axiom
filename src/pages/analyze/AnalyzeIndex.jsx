@@ -242,7 +242,7 @@ export default function AnalyzeIndex() {
 
             {/* Search + filter bar */}
             <motion.div
-              className="flex items-stretch gap-0 rounded-2xl border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl overflow-visible mb-6 relative"
+              className="flex items-stretch gap-0 rounded-2xl border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl overflow-visible mb-6 relative z-20"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.05 }}
@@ -271,7 +271,7 @@ export default function AnalyzeIndex() {
               <AnimatePresence>
                 {filterOpen && (
                   <motion.div
-                    className="absolute right-0 top-full mt-2 z-30 w-44 rounded-2xl border border-white/[7%] bg-zinc-900 shadow-2xl overflow-hidden"
+                    className="absolute right-0 top-full mt-2 z-50 w-44 rounded-2xl border border-white/[7%] bg-zinc-900 shadow-2xl overflow-hidden"
                     initial={{ opacity: 0, y: -6, scale: 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -6, scale: 0.97 }}
