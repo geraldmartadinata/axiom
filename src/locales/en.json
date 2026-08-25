@@ -187,7 +187,12 @@
     "alt1": "a fully-funded emergency fund",
     "alt2": "20% of your next down payment",
     "alt3": "a year of groceries",
-    "noCrossover": "No crossover within 10 years"
+    "noCrossover": "No crossover within 10 years",
+    "stats": {
+      "assetValue": "Asset Value (10yr)",
+      "investmentValue": "Investment Value (10yr)",
+      "netWorthDiff": "Net Worth Difference"
+    }
   },
   "profile": {
     "title": "Financial Profile",
@@ -198,22 +203,22 @@
     "fields": {
       "monthlyIncome": {
         "label": "Monthly Net Income",
-        "placeholder": "e.g., 8000",
+        "placeholder": "e.g., 15,000,000",
         "help": "After tax, what hits your account"
       },
       "emergencyFund": {
         "label": "Emergency Fund",
-        "placeholder": "e.g., 15000",
+        "placeholder": "e.g., 30,000,000",
         "help": "Cash you can access in 24 hours"
       },
       "monthlySavings": {
         "label": "Monthly Savings",
-        "placeholder": "e.g., 2000",
+        "placeholder": "e.g., 2,000,000",
         "help": "What you actually save each month"
       },
       "existingDebt": {
         "label": "Existing Monthly Debt Payments",
-        "placeholder": "e.g., 500",
+        "placeholder": "e.g., 500,000",
         "help": "Student loans, car payments, credit cards"
       },
       "investmentReturn": {
@@ -231,6 +236,28 @@
         "saved": "Profile saved",
         "settingsTitle": "Profile Settings",
         "quickActions": "Quick Actions",
+    "status": {
+      "complete": "Baseline complete. All analyses will use your profile.",
+      "addMissing": "Add {field} to unlock full capacity modeling.",
+      "empty": "Set your baseline to activate full scoring."
+    },
+    "sections": {
+      "riskDesc": "Choose your investment horizon and return expectations."
+    },
+    "risk": {
+      "conservative": {
+        "label": "Conservative",
+        "desc": "Capital preservation, low-return assumptions (~4%/yr)"
+      },
+      "moderate": {
+        "label": "Moderate",
+        "desc": "Balanced growth assumptions (~7%/yr)"
+      },
+      "aggressive": {
+        "label": "Aggressive",
+        "desc": "High growth, high volatility assumptions (~10%/yr)"
+      }
+    },
     "actions": {
       "viewAnalyses": "View Analyses",
       "viewAnalysesDesc": "See all your purchase analyses",
@@ -286,7 +313,8 @@
       "term": "Term Length",
       "income": "Monthly Income",
       "dpHint": "DP ≥ 20% unlocks better rates",
-      "termHint": "Shorter term = less interest",
+      "termHint": "0 = cash purchase · shorter term = less interest",
+      "cash": "Cash",
       "incomeHint": "After tax"
     },
     "health": {

@@ -229,35 +229,38 @@ export function calculateTCO(scenario) {
 
 ## 5. Opportunity Cost (The "What If" Scenario)
 
-Calculates the missed gains if the user invested their down payment + monthly installments into an S&P 500 equivalent (assumed 8% annual return).
+Calculates the missed gains if the user invested their down payment + monthly installments into an S&P 500 equivalent (assumed 8% annual return). Horizon is a FIXED 10 years (matches the projection chart): the down payment compounds for the whole horizon; monthly installments are contributed during the tenor, then the accumulated balance keeps compounding until year 10. Works for cash purchases too (tenor 0 → the full price compounds for 10 years).
 
 ```javascript
 /**
  * Calculate opportunity cost — what if you invested instead?
  * @param {number} downPayment - The down payment amount
  * @param {number} monthlyInstallment - The monthly installment
- * @param {number} tenorMonths - Loan duration in months
+ * @param {number} tenorMonths - Loan duration in months (0 = cash)
  * @param {number} annualReturnPercent - Assumed annual return (default 8)
  * @returns {{futureValueDP: number, futureValueMonthly: number, total: number, multiple: number}}
  */
 export function calculateOpportunityCost(downPayment, monthlyInstallment, tenorMonths, annualReturnPercent = 8) {
-  const years = tenorMonths / 12;
+  const HORIZON_YEARS = 10;
   const r = annualReturnPercent / 100;
-
-  // Future Value of Down Payment (lump sum)
-  const futureValueDP = downPayment * Math.pow(1 + r, years);
-
-  // Future Value of Monthly Installments (annuity)
   const monthlyR = r / 12;
+  const tenor = Math.max(0, Math.min(tenorMonths || 0, HORIZON_YEARS * 12));
+
+  // Future Value of Down Payment (lump sum, grows over the full 10yr horizon)
+  const futureValueDP = downPayment * Math.pow(1 + r, HORIZON_YEARS);
+
+  // Future Value of Monthly Installments: contributed during the tenor,
+  // then the accumulated amount keeps compounding until the horizon ends.
   let futureValueMonthly = 0;
-  if (monthlyR > 0) {
-    futureValueMonthly = monthlyInstallment * ((Math.pow(1 + monthlyR, tenorMonths) - 1) / monthlyR);
+  if (monthlyR > 0 && tenor > 0) {
+    const annuityAtTenor = monthlyInstallment * ((Math.pow(1 + monthlyR, tenor) - 1) / monthlyR);
+    futureValueMonthly = annuityAtTenor * Math.pow(1 + monthlyR, HORIZON_YEARS * 12 - tenor);
   } else {
-    futureValueMonthly = monthlyInstallment * tenorMonths;
+    futureValueMonthly = monthlyInstallment * tenor;
   }
 
   const total = futureValueDP + futureValueMonthly;
-  const purchasePrice = downPayment + (monthlyInstallment * tenorMonths);
+  const purchasePrice = downPayment + (monthlyInstallment * tenor);
   const multiple = purchasePrice > 0 ? total / purchasePrice : 0;
 
   return {
@@ -271,7 +274,7 @@ export function calculateOpportunityCost(downPayment, monthlyInstallment, tenorM
 
 ## 6. Depreciation / Appreciation Curves
 
-Generate year-by-year value data for the 10-year projection chart.
+Generate year-by-year value data for the 10-year projection chart. Front-loaded annual loss: steepest drop in year 1, gentler tail — matches real resale behavior (a flagship phone keeps roughly ~60% of its price after 3 years).
 
 ```javascript
 /**
@@ -281,15 +284,18 @@ Generate year-by-year value data for the 10-year projection chart.
  * @returns {Array<{year: number, value: number}>} 11 data points (year 0-10)
  */
 export function generateDepreciationCurve(basePrice, category) {
-  const rates = {
-    tech: -0.20,      // -20% per year
-    vehicle: -0.15,  // -15% per year
-    property: 0.03   // +3% per year (appreciation)
-  };
-  const rate = rates[category] ?? -0.15; // default to vehicle
+  // Front-loaded annual loss: steepest drop in year 1, gentler tail — matches
+  // real resale behavior (a flagship phone keeps roughly ~60% after 3 years).
+  const year1 = { tech: -0.25, vehicle: -0.15, property: 0.03 };
+  const tail = { tech: -0.10, vehicle: -0.10, property: 0.03 };
+  const first = year1[category] ?? -0.15;
+  const rest = tail[category] ?? -0.10;
   const data = [];
+  let value = basePrice;
   for (let year = 0; year <= 10; year++) {
-    const value = basePrice * Math.pow(1 + rate, year);
+    if (year > 0) {
+      value *= 1 + (year === 1 ? first : rest);
+    }
     data.push({ year, value: Math.round(value * 100) / 100 });
   }
   return data;
@@ -298,26 +304,33 @@ export function generateDepreciationCurve(basePrice, category) {
 
 ## 7. Investment Growth Curve
 
-Generate year-by-year investment value data (what the DP + monthly payments would grow to if invested).
+Generate year-by-year investment value data (what the DP + monthly payments would grow to if invested). Contributions happen only during the loan tenor; afterwards the balance keeps compounding until year 10.
 
 ```javascript
 /**
  * Generate 10-year investment growth data.
  * @param {number} downPayment - Initial investment (lump sum)
  * @param {number} monthlyInstallment - Monthly contribution
+ * @param {number} tenorMonths - Months the monthly contribution keeps flowing (0 = cash)
  * @param {number} annualReturnPercent - Assumed annual return (default 8)
  * @returns {Array<{year: number, value: number}>} 11 data points (year 0-10)
  */
-export function generateInvestmentCurve(downPayment, monthlyInstallment, annualReturnPercent = 8) {
+export function generateInvestmentCurve(downPayment, monthlyInstallment, tenorMonths = 0, annualReturnPercent = 8) {
+  const HORIZON_YEARS = 10;
   const r = annualReturnPercent / 100;
   const monthlyR = r / 12;
+  const tenor = Math.max(0, Math.min(tenorMonths || 0, HORIZON_YEARS * 12));
   const data = [];
-  for (let year = 0; year <= 10; year++) {
-    const fvDP = downPayment * Math.pow(1 + r, year);
+  for (let year = 0; year <= HORIZON_YEARS; year++) {
     const months = year * 12;
+    const fvDP = downPayment * Math.pow(1 + r, year);
+    // Contributions only happen during the tenor; afterwards the balance
+    // simply keeps compounding until the horizon ends.
+    const contribMonths = Math.min(months, tenor);
     let fvMonthly = 0;
-    if (monthlyR > 0 && months > 0) {
-      fvMonthly = monthlyInstallment * ((Math.pow(1 + monthlyR, months) - 1) / monthlyR);
+    if (monthlyR > 0 && contribMonths > 0) {
+      const annuity = monthlyInstallment * ((Math.pow(1 + monthlyR, contribMonths) - 1) / monthlyR);
+      fvMonthly = annuity * Math.pow(1 + monthlyR, months - contribMonths);
     }
     data.push({ year, value: Math.round((fvDP + fvMonthly) * 100) / 100 });
   }
@@ -339,20 +352,26 @@ This function runs all calculations and attaches results to the Master JSON. Cal
 export function enrichScenario(rawScenario, profile) {
   const f = rawScenario.financials;
 
+  // Missing/zero tenor (prompt didn't mention a duration) defaults to a
+  // 12-month plan — 0 would silently zero out the installment, TCO and
+  // opportunity cost.
+  const tenor = f.tenor_months > 0 ? f.tenor_months : 12;
+
   // Calculate installment if not provided by AI
-  const installment = f.calculated_monthly_installment || 
-    calculateMonthlyInstallment(f.base_price, f.down_payment, f.tenor_months, f.interest_rate_assumed || 6.5);
+  const installment = f.calculated_monthly_installment > 0
+    ? f.calculated_monthly_installment
+    : calculateMonthlyInstallment(f.base_price, f.down_payment, tenor, f.interest_rate_assumed || 6.5);
 
   const scenarioWithInstallment = {
     ...rawScenario,
-    financials: { ...f, calculated_monthly_installment: installment }
+    financials: { ...f, tenor_months: tenor, calculated_monthly_installment: installment }
   };
 
   const sanggup = calculateSanggupScore(scenarioWithInstallment, profile);
   const tco = calculateTCO(scenarioWithInstallment);
-  const opportunity = calculateOpportunityCost(f.down_payment, installment, f.tenor_months);
+  const opportunity = calculateOpportunityCost(f.down_payment, installment, tenor);
   const depreciation = generateDepreciationCurve(f.base_price, rawScenario.scenario.category);
-  const investment = generateInvestmentCurve(f.down_payment, installment);
+  const investment = generateInvestmentCurve(f.down_payment, installment, tenor);
 
   return {
     ...scenarioWithInstallment,

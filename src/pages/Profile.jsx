@@ -39,11 +39,16 @@ export default function Profile() {
   }
 
   const handleNumberChange = (field) => (e) => {
-    const val = e.target.value.replace(/,/g, '')
-    if (val === '' || /^\d+$/.test(val)) {
-      setForm(prev => ({ ...prev, [field]: val }))
-      setSaved(false)
-    }
+    const raw = e.target.value.replace(/[^\d]/g, '')
+    setForm(prev => ({ ...prev, [field]: raw }))
+    setSaved(false)
+  }
+
+  // Thousand-grouped display (dots for id-ID, commas for en-US); raw digits stay in state.
+  const formatThousands = (v) => {
+    if (v === '' || v === null || v === undefined) return ''
+    const n = Number(v)
+    return Number.isNaN(n) ? '' : n.toLocaleString(lang === 'id' ? 'id-ID' : 'en-US')
   }
 
   const handleDependentsStepper = (delta) => {
@@ -118,13 +123,15 @@ export default function Profile() {
     const val = form[f]
     return val === '' || val === null || val === undefined || Number(val) < 0
   })
-  const missingLabel = nextMissing ? t(`profile.fields.${nextMissing}.label`) : null
-
-  const riskLabels = {
-    conservative: 'Konservatif',
-    moderate: 'Moderat',
-    aggressive: 'Agresif'
+  // Store fields use snake_case; locale keys use camelCase.
+  const FIELD_LABEL_KEYS = {
+    monthly_income: 'monthlyIncome',
+    monthly_savings: 'monthlySavings',
+    existing_monthly_debt: 'existingDebt',
+    emergency_fund: 'emergencyFund',
+    dependents: 'dependents'
   }
+  const missingLabel = nextMissing ? t(`profile.fields.${FIELD_LABEL_KEYS[nextMissing]}.label`) : null
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-24 pb-16 px-4 sm:px-6">
@@ -165,9 +172,9 @@ export default function Profile() {
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={form.monthly_income}
+                      value={formatThousands(form.monthly_income)}
                       onChange={handleNumberChange('monthly_income')}
-                      placeholder="e.g. 15000000"
+                      placeholder={t('profile.fields.monthlyIncome.placeholder')}
                       className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
                     />
                   </div>
@@ -178,9 +185,9 @@ export default function Profile() {
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={form.monthly_savings}
+                      value={formatThousands(form.monthly_savings)}
                       onChange={handleNumberChange('monthly_savings')}
-                      placeholder="e.g. 2000000"
+                      placeholder={t('profile.fields.monthlySavings.placeholder')}
                       className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
                     />
                   </div>
@@ -202,9 +209,9 @@ export default function Profile() {
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={form.existing_monthly_debt}
+                      value={formatThousands(form.existing_monthly_debt)}
                       onChange={handleNumberChange('existing_monthly_debt')}
-                      placeholder="e.g. 500000"
+                      placeholder={t('profile.fields.existingDebt.placeholder')}
                       className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
                     />
                   </div>
@@ -250,9 +257,9 @@ export default function Profile() {
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={form.emergency_fund}
+                      value={formatThousands(form.emergency_fund)}
                       onChange={handleNumberChange('emergency_fund')}
-                      placeholder="e.g. 30000000"
+                      placeholder={t('profile.fields.emergencyFund.placeholder')}
                       className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
                     />
                   </div>
@@ -280,19 +287,9 @@ export default function Profile() {
                   <span className="font-mono text-xs font-bold text-amber-400 tracking-wider">04</span>
                   <h2 className="text-lg font-semibold text-white">RISK PROFILE</h2>
                 </div>
-                <p className="text-xs text-zinc-500 mb-4">Choose your investment horizon and return expectations.</p>
+                <p className="text-xs text-zinc-500 mb-4">{t('profile.sections.riskDesc')}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {['conservative', 'moderate', 'aggressive'].map((key) => {
-                    const labels = {
-                      conservative: 'Konservatif',
-                      moderate: 'Moderat',
-                      aggressive: 'Agresif'
-                    }
-                    const descs = {
-                      conservative: 'Capital preservation, low-return assumptions (~4%/yr)',
-                      moderate: 'Balanced growth assumptions (~7%/yr)',
-                      aggressive: 'High growth, high volatility assumptions (~10%/yr)'
-                    }
                     const isActive = form.riskProfile === key
                     return (
                       <button
@@ -306,8 +303,8 @@ export default function Profile() {
                         }`}
                         aria-pressed={isActive}
                       >
-                        <div className="font-mono text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">{labels[key]}</div>
-                        <div className="text-xs text-zinc-400 leading-relaxed">{descs[key]}</div>
+                        <div className="font-mono text-xs font-bold uppercase tracking-wider text-amber-400 mb-1">{t(`profile.risk.${key}.label`)}</div>
+                        <div className="text-xs text-zinc-400 leading-relaxed">{t(`profile.risk.${key}.desc`)}</div>
                       </button>
                     )
                   })}
@@ -395,10 +392,10 @@ export default function Profile() {
               </div>
               <p className="text-xs text-zinc-400 mt-3">
                 {isComplete
-                  ? 'Baseline complete. All analyses will use your profile.'
+                  ? t('profile.status.complete')
                   : missingLabel
-                    ? `Add ${missingLabel} to unlock full capacity modeling.`
-                    : 'Set your baseline to activate full scoring.'}
+                    ? t('profile.status.addMissing').replace('{field}', missingLabel)
+                    : t('profile.status.empty')}
               </p>
             </div>
 
@@ -435,7 +432,7 @@ export default function Profile() {
                 <div className="pt-3">
                   <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">CURRENT STANCE</div>
                   <div className="inline-block mt-1 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-400 text-xs font-mono font-semibold">
-                    {riskLabels[form.riskProfile] || '—'}
+                    {t(`profile.risk.${form.riskProfile}.label`) || '—'}
                   </div>
                 </div>
               </div>

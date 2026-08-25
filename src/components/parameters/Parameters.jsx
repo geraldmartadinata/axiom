@@ -16,6 +16,32 @@ import { cn } from '../../utils/cn'
  * (never around it). The result is a derived preview; it does not mutate the
  * saved session.
  */
+// Module-level so state updates never remount the <input type="range"> —
+// an inline definition would recreate the component each render and break
+// the pointer drag after every change.
+function Slider({ label, value, min, max, step, onChange, display, hint }) {
+  const pct = ((value - min) / (max - min)) * 100
+  return (
+    <div className="mb-5 last:mb-0">
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-[13px] text-zinc-400 font-medium">{label}</label>
+        <output className="tabular-nums text-sm font-bold text-white">{display}</output>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        style={{ '--fill': `${pct}%` }}
+        className="w-full"
+      />
+      {hint && <p className="text-[11px] text-zinc-600 mt-1.5">{hint}</p>}
+    </div>
+  )
+}
+
 export default function Parameters({ scenario }) {
   const { t, lang } = useLanguage()
   const profile = useAxiomStore(s => s.profile)
@@ -31,7 +57,7 @@ export default function Parameters({ scenario }) {
   const [income, setIncome] = useState(f.monthly_income || profile?.monthly_income || 0)
 
   const dpMax = Math.max(basePrice, 1)
-  const termMin = 12, termMax = 96
+  const termMin = 0, termMax = 96
   const incomeMax = Math.max(income, 50e6)
 
   const result = useMemo(() => {
@@ -61,29 +87,6 @@ export default function Parameters({ scenario }) {
   const scoreStatus =
     score >= 80 ? t('gauge.safe') :
     score >= 50 ? t('gauge.caution') : t('gauge.danger')
-
-  const Slider = ({ label, value, min, max, step, onChange, display, hint }) => {
-    const pct = ((value - min) / (max - min)) * 100
-    return (
-      <div className="mb-5 last:mb-0">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-[13px] text-zinc-400 font-medium">{label}</label>
-          <output className="tabular-nums text-sm font-bold text-white">{display}</output>
-        </div>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          style={{ '--fill': `${pct}%` }}
-          className="w-full"
-        />
-        {hint && <p className="text-[11px] text-zinc-600 mt-1.5">{hint}</p>}
-      </div>
-    )
-  }
 
   return (
     <div className="rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl p-6">
@@ -116,7 +119,7 @@ export default function Parameters({ scenario }) {
         max={termMax}
         step={6}
         onChange={setTerm}
-        display={`${term} mo`}
+        display={term === 0 ? t('cards.params.cash') : `${term} mo`}
         hint={t('cards.params.termHint')}
       />
       <Slider

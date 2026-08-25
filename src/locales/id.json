@@ -187,7 +187,12 @@
     "alt1": "dana darurat yang terisi penuh",
     "alt2": "20% DP pembelianmu berikutnya",
     "alt3": "belanja setahun",
-    "noCrossover": "Tidak ada crossover dalam 10 tahun"
+    "noCrossover": "Tidak ada crossover dalam 10 tahun",
+    "stats": {
+      "assetValue": "Nilai Aset (Tahun 10)",
+      "investmentValue": "Nilai Investasi (Tahun 10)",
+      "netWorthDiff": "Selisih Kekayaan Bersih"
+    }
   },
   "profile": {
     "title": "Profil Finansial",
@@ -198,22 +203,22 @@
     "fields": {
       "monthlyIncome": {
         "label": "Gaji Bersih Bulanan",
-        "placeholder": "cth: 15000000",
+        "placeholder": "cth: 15.000.000",
         "help": "Setelah pajak, yang masuk rekening"
       },
       "emergencyFund": {
         "label": "Dana Darurat",
-        "placeholder": "cth: 30000000",
+        "placeholder": "cth: 30.000.000",
         "help": "Uang tunai yang bisa diakses dalam 24 jam"
       },
       "monthlySavings": {
         "label": "Tabungan Bulanan",
-        "placeholder": "cth: 2000000",
+        "placeholder": "cth: 2.000.000",
         "help": "Yang benar-benar kamu tabung tiap bulan"
       },
       "existingDebt": {
         "label": "Cicilan Bulanan yang Ada",
-        "placeholder": "cth: 500000",
+        "placeholder": "cth: 500.000",
         "help": "Kredit mahasiswa, mobil, kartu kredit"
       },
       "investmentReturn": {
@@ -231,6 +236,28 @@
         "saved": "Profil tersimpan",
         "settingsTitle": "Pengaturan Profil",
         "quickActions": "Aksi Cepat",
+    "status": {
+      "complete": "Baseline lengkap. Semua analisis akan memakai profilmu.",
+      "addMissing": "Isi {field} untuk membuka pemodelan kapasitas penuh.",
+      "empty": "Atur data dasarmu untuk mengaktifkan skoring penuh."
+    },
+    "sections": {
+      "riskDesc": "Pilih horizon investasi dan ekspektasi return-mu."
+    },
+    "risk": {
+      "conservative": {
+        "label": "Konservatif",
+        "desc": "Fokus menjaga modal, asumsi return rendah (~4%/tahun)"
+      },
+      "moderate": {
+        "label": "Moderat",
+        "desc": "Asumsi pertumbuhan seimbang (~7%/tahun)"
+      },
+      "aggressive": {
+        "label": "Agresif",
+        "desc": "Pertumbuhan tinggi, volatilitas tinggi (~10%/tahun)"
+      }
+    },
     "actions": {
       "viewAnalyses": "Lihat Analisis",
       "viewAnalysesDesc": "Lihat semua analisis pembelianmu",
@@ -286,7 +313,8 @@
       "term": "Tenor",
       "income": "Gaji Bulanan",
       "dpHint": "DP ≥ 20% dapat bunga lebih baik",
-      "termHint": "Tenor pendek = bunga lebih sedikit",
+      "termHint": "0 = beli cash · tenor pendek = bunga lebih sedikit",
+      "cash": "Cash",
       "incomeHint": "Setelah pajak"
     },
     "health": {

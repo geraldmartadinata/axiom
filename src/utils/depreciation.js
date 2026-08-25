@@ -15,7 +15,7 @@ export function depreciationRate(category, ageYears = 0) {
   switch (category) {
     case 'vehicle':    return -0.15                       // car ~15%/yr
     case 'motorcycle': return -0.12                       // motorcycle ~12%/yr
-    case 'tech':       return ageYears < 2 ? -0.25 : -0.15 // electronics 25% yr 1–2, then 15%
+    case 'tech':       return ageYears < 1 ? -0.25 : -0.10 // electronics 25% yr 1, then 10% — flagship phones keep ~60% after 3 yrs
     case 'property':   return 0.02                        // slight appreciation
     default:           return -0.20                       // other
   }
