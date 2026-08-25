@@ -126,3 +126,49 @@ The primary verdict page. All data from Zustand store.
 - **AI:** Gemini API (mock-first, clean swap path)
 - **Routing:** react-router-dom v7
 - **No backend.** Pure client-side. localStorage for persistence.
+
+---
+
+## Implemented Features (current version)
+
+> This section reflects the app AS BUILT. Where an older section above disagrees, this section wins. Items not yet built are marked **[Planned]**.
+
+### Pages & Routing
+- / Dashboard (hero prompt bar, health gauge with real-vs-simulation mode, baseline sliders, 3-line growth projection, recent analyses)
+- /analyze hub + /analyze/:sessionId session workspace; /profile; legal pages /privacy, /terms, /contact
+- SPA refresh fix via ercel.json (API-safe rewrite); scroll-to-top on every route change
+
+### AI Extraction
+- Gemini via serverless proxy (pi/gemini.js): key server-side only, rate-limited (10 req/min/IP), mock fallback with visible "Demo mode" banner
+- Lenient parsing: missing price falls back to an internal vehicle/tech price DB then a marked estimate; missing income falls back to the profile baseline; requests are never rejected for missing fields
+- Gemini returns lternatives (cheaper options + reasons) used by the Recommendations card
+
+### Calculation Engine (src/utils/calculations.js — deterministic, no AI math)
+- creditCalc: flat-rate installments (Indonesian store-credit style), breakdown DP/principal/interest/tax/insurance/service; TCO never double-counts the base price
+- Sanggup Score (DTI 35% / emergency 25% / DP health 20% / savings 20%); DTI guarded — empty income renders "—", never a false "Safe"
+- Opportunity cost on a fixed 10-year horizon; front-loaded depreciation curves; 
+ormalizeInterestRate (fraction/rupiah garbage → sane %)
+
+### Analyze Session
+- Two-layer model: static session data + derived values recomputed live from the CURRENT profile ("Recalculated with latest profile" badge)
+- Live sliders (DP 0–70%, tenor 0=cash/6–72, flat interest 0–30%/yr, income) + reset-to-initial; everything downstream recomputes (TCO, DTI, chart, recommendations)
+- Recalculate button: persists latest profile income into the session, keeps session-specific fields; no-profile fallback message
+- Hidden-costs vertical card (wrap-safe), opportunity-cost explainer with hypothetical disclaimer, recommendations with ≤18-month postpone threshold and risk-profile investment suggestions
+
+### Health Score
+- One shared computeHealthScore(profile, sessions, opts) for navbar pill, dashboard gauge (simulation mode labeled), and analyze page
+- Collapsible breakdown with real component weights + prioritized improvement steps with formula-derived point estimates
+
+### Profile
+- Sections: income/expenses/savings, obligations, reserves (+ stocks & crypto with IHSG/top-100 growth modeling), risk profile
+- Thousand-grouped inputs; completeness meter; live synthesis (FCF, runway, DTI, portfolio growth)
+
+### UI/UX
+- ID/EN i18n (all strings in locale files); language decoupled from currency; display-only USD toggle (USD_RATE=16000) via burger dropdown (click-outside + Escape, aria)
+- Typewriter prompt suggestions: pause on focus/typing, resume same phase <0.5s after blur; suggestion chips fade out while typing; no "cth/e.g." prefixes
+- Liquid-glass navbar with live health score; premium dark footer (link grid, social icons, dynamic copyright); legal pages; scroll reset on navigation
+
+### **[Planned]** (not yet implemented)
+- USD as a true input currency (currently display-only)
+- Export data / settings page (buttons exist as placeholders)
+- Backend accounts & sync (intentionally none — local-first)
