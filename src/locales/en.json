@@ -39,6 +39,12 @@
     "growthEmptyMsg": "Your asset timeline will appear after your first analysis.",
     "legendAssets": "Total Assets",
     "legendCash": "Cash & Savings",
+    "legendPersonal": "Personal Assets",
+    "legendBought": "Bought Assets",
+    "legendPlanned": "Planned",
+    "summaryPersonal": "Personal Assets (5Y)",
+    "summaryBought": "Bought Asset Value",
+    "summaryPlanned": "Plan Projection",
     "tooltipAssets": "ASSETS",
     "tooltipCash": "CASH",
     "endpointAssets": "ASSETS",
@@ -47,10 +53,11 @@
     "summaryCurrent": "CURRENT ASSET VALUE",
     "summaryEst5": "EST. VALUE IN 5 YRS",
     "todayLabel": "TODAY",
+    "simulation": "Simulation",
     "recentTitle": "Recent Analysis",
     "heroSubtitle": "An AI-powered reality check for your next major purchase.",
     "chipCar": "Car",
-    "chipTech": "Tech",
+    "chipTech": "Gadget",
     "chipHome": "Home",
     "chipCarExample": "Can I afford a 2024 Honda Civic RS at Rp 550.000.000 with Rp 100.000.000 down over a 5 year loan, earning Rp 15.000.000/month?",
     "chipTechExample": "Can I afford a MacBook Pro M4 + iPhone 16 Pro for Rp 45.000.000 paid over 12 months, earning Rp 10.000.000/month?",
@@ -59,7 +66,7 @@
     "statusTight": "Tight",
     "statusRisky": "Risky",
     "catVehicle": "Auto Loan",
-    "catTech": "Tech Purchase",
+    "catTech": "Gadget Purchase",
     "catProperty": "Property",
     "catOther": "Purchase",
     "warnExceeds": "Expenses + savings exceed income",
@@ -83,7 +90,7 @@
   "cat": {
     "auto": "Auto",
     "house": "House",
-    "tech": "Tech"
+    "tech": "Gadget"
   },
   "analyze": {
     "indexTitle": "Your Analyses",
@@ -117,6 +124,21 @@
     "averageScore": "Average Score",
     "sessionNotFound": "Session not found",
     "sessionNotFoundSub": "This analysis may have been deleted. Pick another one below.",
+    "recalcBadge": "Recalculated with latest profile",
+    "incompleteData": "Incomplete data",
+    "prelimBanner": "Complete your profile for an accurate analysis.",
+    "reco": {
+      "title": "Recommendations",
+      "sub": "Ways to make this purchase make sense",
+      "postpone": "Delay the purchase by ~{months} months",
+      "postponeTarget": "Until a 30% DP ({amount}) is saved",
+      "postponeFcf": "saving {amount}/mo",
+      "alternative": "Consider a more affordable alternative",
+      "genericAlt": "look for options with installments ≤ {amount}/mo (30% of income)",
+      "noIncome": "Add your income in Profile to compute affordability.",
+      "emergency": "Your emergency fund covers less than 6 months of expenses — prioritize it before new obligations.",
+      "dependents": "With {count} dependent(s), keep total monthly debt below 30% of income."
+    },
     "fallbackNoticeTitle": "Demo mode — AI unavailable",
     "fallbackNoticeBody": "Gemini couldn't be reached, so this analysis uses a sample scenario. Numbers are illustrative, not a real quote.",
     "backToAnalyses": "Back to analyses",
@@ -308,11 +330,20 @@
       "safe": "Safe",
       "warning": "Caution",
       "danger": "Danger",
+      "incomplete": "Incomplete",
       "desc": "Your monthly debt payments as % of income. Under 36% is healthy."
     },
     "tco": {
       "title": "Total Cost of Ownership",
-      "desc": "All-in cost over the loan term including hidden costs."
+      "desc": "DP + principal + interest + all fees — never the price twice.",
+      "dp": "Down Payment",
+      "principal": "Loan Principal",
+      "interest": "Loan Interest",
+      "taxFee": "Tax & Fees",
+      "insurance": "Insurance",
+      "maintenance": "Service & Maintenance",
+      "other": "Other",
+      "total": "Grand Total"
     },
     "opportunity": {
       "title": "Opportunity Cost",
@@ -349,9 +380,10 @@
       "termHint": "0 = cash purchase · shorter term = less interest",
       "cash": "Cash",
       "incomeHint": "After tax",
-      "interest": "Flat Interest /mo",
-      "interestHint": "Store credit charges flat on the full principal — HP/paylater typically 1.5–3%/mo",
-      "totalInterest": "Total Interest"
+      "interest": "Flat Interest (%/yr)",
+      "interestHint": "Flat on the full principal — HP/paylater often 18–36%/yr",
+      "totalInterest": "Total Interest",
+      "reset": "Reset to initial values"
     },
     "health": {
       "title": "Health Score",

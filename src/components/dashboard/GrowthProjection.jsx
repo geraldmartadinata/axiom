@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, useCallback, useEffect } from 'react'
+import { useMemo, useRef, useState, useCallback } from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import { useLanguage } from '../../store/LanguageContext.jsx'
 import { useAxiomStore } from '../../store/useAxiomStore'
@@ -6,36 +6,32 @@ import { formatCurrency } from '../../utils/format'
 import { assetValueAt, formatCompactIDR, YEAR_MS } from '../../utils/depreciation'
 
 /**
- * Growth Projection — "Total Asset Value Over Time".
- * STATE A (no sessions): bare axes + muted hint. Never fabricates curves.
- * STATE B: solid gold TOTAL ASSETS line (each purchase steps the line up at its own
- * date, then decays by category rate) vs dashed blue-gray CASH & SAVINGS trajectory
- * (current savings compounding + monthly contribution from the baseline sliders).
- * Cash history before today is unknowable → the cash line intentionally starts at
- * today rather than inventing a past balance.
+ * Growth Projection — THREE lines, never fabricated:
+ *   a) PERSONAL ASSETS (solid gold): savings + emergency fund + stocks + crypto.
+ *      Stocks grow at the risk profile's expected return; crypto at the same
+ *      return × 0.8 (volatility discount). Monthly contribution = free cash flow.
+ *   b) BOUGHT ASSETS (solid blue-gray): confirmed sessions, each asset decaying
+ *      via assetGrowthRate from its own purchase date.
+ *   c) PLANNED (dashed amber): analyzed-but-not-confirmed sessions.
+ * Empty states: no profile AND no sessions → axes only; profile only → line (a).
  */
 
 const GOLD = '#e8c47a'
+const AMBER = '#f5d9a8'
 const GRAY = '#7a8ba3'
-const W = 400, H = 210          // viewBox units
-const PL = 8, PR = 8, PT = 26, PB = 20 // paddings (labels live in HTML overlays)
+const W = 400, H = 210
+const PL = 8, PR = 8, PT = 26, PB = 20
 
 const MONTH_MS = YEAR_MS / 12
-const N = 160                    // sample points across the domain
+const N = 160
 
 export default function GrowthProjection() {
   const { t, lang } = useLanguage()
   const history = useAxiomStore(s => s.history)
   const profile = useAxiomStore(s => s.profile)
 
-  // Baseline slider state lives in Dashboard… read the persisted profile instead —
-  // it is debounced-written by those very sliders (~300ms), so this recomputes live.
-  const income = Number(profile?.monthly_income) || 0
-  const expenses = Number(profile?.monthly_expenses) || 0
-  const savingsRatePct = income > 0 ? Math.max(0, Math.min(100, Math.round(((Number(profile?.monthly_savings) || 0) / income) * 100))) : 0
-
   const wrapRef = useRef(null)
-  const [hover, setHover] = useState(null) // { type:'crosshair', i } | { type:'marker', i, asset }
+  const [hover, setHover] = useState(null)
   const reducedMotion = useMemo(
     () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
     []
@@ -45,92 +41,128 @@ export default function GrowthProjection() {
     new Date(ms).toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', opts || { day: 'numeric', month: 'short', year: 'numeric' })
   , [lang])
 
+  const income = Number(profile?.monthly_income) || 0
+  const expenses = Number(profile?.monthly_expenses) || 0
+  const monthlySavings = Number(profile?.monthly_savings) || 0
+  const fcf = Math.max(0, income - expenses - monthlySavings)
+
   // ---------- data model ----------
   const model = useMemo(() => {
-    const valid = (Array.isArray(history) ? history : [])
-      .map(s => ({
-        id: s?.id,
-        name: String(s?.scenario?.item_name || '').trim(),
-        price: Number(s?.financials?.base_price),
-        category: s?.scenario?.category,
-        ms: new Date(s?.created_at || NaN).getTime(),
-        currency: s?.currency || 'IDR',
-      }))
-      .filter(a => a.name && Number.isFinite(a.price) && a.price > 0 && Number.isFinite(a.ms))
-      .sort((a, b) => a.ms - b.ms)
+    const sessions = Array.isArray(history) ? history : []
+    const toAsset = s => ({
+      id: s?.id,
+      name: String(s?.scenario?.item_name || '').trim(),
+      price: Number(s?.financials?.base_price),
+      category: s?.scenario?.category,
+      ms: new Date(s?.created_at || NaN).getTime(),
+      currency: s?.currency || 'IDR',
+    })
+    const valid = sessions.map(toAsset).filter(a => a.name && Number.isFinite(a.price) && a.price > 0 && Number.isFinite(a.ms))
+    const bought = valid.filter(a => sessions.find(s => s?.id === a.id)?.status === 'CONFIRMED').sort((a, b) => a.ms - b.ms)
+    const planned = valid.filter(a => sessions.find(s => s?.id === a.id)?.status !== 'CONFIRMED').sort((a, b) => a.ms - b.ms)
 
-    if (valid.length === 0) return null
+    const hasProfile = Boolean(profile) && (
+      income > 0 || Number(profile?.emergency_fund) > 0 ||
+      Number(profile?.stocks_value) > 0 || Number(profile?.crypto_value) > 0
+    )
+    if (!hasProfile && valid.length === 0) return null
 
     const now = Date.now()
-    const t0 = valid[0].ms
+    const purchaseDates = [...bought, ...planned].map(a => a.ms)
+    const t0 = purchaseDates.length ? Math.min(now, ...purchaseDates) : now
     const tEnd = now + 5 * YEAR_MS
-
     const ts = Array.from({ length: N }, (_, i) => t0 + ((tEnd - t0) * i) / (N - 1))
 
-    // Per-asset decay, stacked into a total (0 before each asset's purchase).
-    const totals = ts.map(time => {
+    // (a) personal assets — stocks at expected return, crypto at 0.8×, cash flat,
+    // plus free-cash-flow contributions compounded monthly from today.
+    const r = (Number(profile?.investment_return) || 7) / 100
+    const stocks0 = Number(profile?.stocks_value) || 0
+    const crypto0 = Number(profile?.crypto_value) || 0
+    const cash0 = Number(profile?.emergency_fund) || 0
+    const monthlyR = r / 12
+    const personal = ts.map(time => {
+      if (time < now) return null
+      const months = (time - now) / MONTH_MS
+      const stocks = stocks0 * Math.pow(1 + r, months)
+      const crypto = crypto0 * Math.pow(1 + r * 0.8, months)
+      const contribs = fcf > 0 && monthlyR > 0
+        ? fcf * ((Math.pow(1 + monthlyR, months) - 1) / monthlyR)
+        : fcf * months
+      return cash0 + stocks + crypto + contribs
+    })
+
+    // (b)/(c) purchased & planned asset stacks (0 before each purchase date).
+    const stackAt = (assets, time) => {
       let sum = 0
-      for (const a of valid) {
+      for (const a of assets) {
         const v = assetValueAt({ price: a.price, category: a.category, purchaseMs: a.ms }, time)
         if (v != null) sum += v
       }
       return sum
-    })
+    }
+    const boughtLine = bought.length ? ts.map(time => stackAt(bought, time)) : null
+    const plannedLine = planned.length ? ts.map(time => stackAt(planned, time)) : null
 
-    // Cash & savings: current balance compounds at the expected return, plus the
-    // monthly contribution implied by the baseline sliders. Starts at TODAY.
-    const annualReturn = (Number(profile?.investment_return) || 7) / 100
-    const startBalance = Math.max(0, Number(profile?.emergency_fund) || 0)
-    const monthlyContrib = Math.max(0, Math.min((savingsRatePct / 100) * income, income - expenses))
-    const cash = ts.map(time => {
-      if (time < now) return null // no fabricated history
-      const months = (time - now) / MONTH_MS
-      const grown = startBalance * Math.pow(1 + annualReturn / 12, months)
-      const contribs = monthlyContrib > 0
-        ? monthlyContrib * ((Math.pow(1 + annualReturn / 12, months) - 1) / (annualReturn / 12))
-        : 0
-      return grown + contribs
-    })
-
-    // Purchase markers sit ON the total line at each asset's buy date (nearest sample).
-    const markers = valid.map(a => {
-      const i = Math.min(N - 1, Math.round(((a.ms - t0) / (tEnd - t0)) * (N - 1)))
-      return { ...a, i }
-    })
-
-    const spent = valid.reduce((acc, a) => acc + a.price, 0)
     const nowI = Math.min(N - 1, Math.round(((now - t0) / (tEnd - t0)) * (N - 1)))
-    const current = totals[nowI]
+    const markers = [...bought, ...planned].map(a => ({
+      ...a,
+      i: Math.min(N - 1, Math.round(((a.ms - t0) / (tEnd - t0)) * (N - 1))),
+      confirmed: bought.includes(a),
+    }))
+
+    const spentBought = bought.reduce((acc, a) => acc + a.price, 0)
+    const currentBought = boughtLine ? boughtLine[nowI] : null
+    const currentPct = spentBought > 0 && currentBought != null ? ((currentBought - spentBought) / spentBought) * 100 : null
 
     return {
-      assets: valid, ts, totals, cash, markers, nowI,
-      spent, current,
-      currentPct: spent > 0 ? ((current - spent) / spent) * 100 : 0,
-      est5y: totals[N - 1],
-      cashEnd: cash[N - 1],
-      t0, now, tEnd,
+      bought, planned, ts, personal, boughtLine, plannedLine,
+      markers, nowI, t0, now, tEnd,
+      personalEnd: personal[N - 1],
+      boughtEnd: boughtLine ? boughtLine[N - 1] : null,
+      plannedEnd: plannedLine ? plannedLine[N - 1] : null,
+      spentBought, currentBought, currentPct,
+      hasProfile,
     }
-  }, [history, profile, income, expenses, savingsRatePct])
+  }, [history, profile, income, expenses, monthlySavings, fcf])
 
   // ---------- scales & paths ----------
   const geo = useMemo(() => {
     if (!model) return null
-    const maxY = Math.max(...model.totals, ...model.cash.filter(v => v != null), 1)
+    const values = [
+      ...model.personal.filter(v => v != null),
+      ...(model.boughtLine || []),
+      ...(model.plannedLine || []),
+    ]
+    const maxY = Math.max(...values, 1)
     const X = time => PL + ((time - model.t0) / (model.tEnd - model.t0)) * (W - PL - PR)
     const Y = v => H - PB - (v / maxY) * (H - PT - PB)
-    const totalPath = model.ts.map((time, i) => `${i === 0 ? 'M' : 'L'}${X(time).toFixed(2)},${Y(model.totals[i]).toFixed(2)}`).join(' ')
-    const cashSegs = []
-    let seg = null
-    model.ts.forEach((time, i) => {
-      const v = model.cash[i]
-      if (v == null) { seg = null; return }
-      seg = seg || []
-      seg.push(`${seg.length === 0 ? 'M' : 'L'}${X(time).toFixed(2)},${Y(v).toFixed(2)}`)
-      if (i === N - 1 || model.cash[i + 1] == null) { cashSegs.push(seg.join(' ')); seg = null }
-    })
-    const areaPath = `${totalPath} L${X(model.tEnd).toFixed(2)},${H - PB} L${X(model.t0).toFixed(2)},${H - PB} Z`
+    const path = line => line == null
+      ? null
+      : model.ts.map((time, i) => `${i === 0 ? 'M' : 'L'}${X(time).toFixed(2)},${Y(line[i]).toFixed(2)}`).join(' ')
+    const personalPath = path(model.personal)
+    const areaPath = personalPath
+      ? `${personalPath} L${X(model.tEnd).toFixed(2)},${H - PB} L${X(Math.max(model.t0, model.now)).toFixed(2)},${H - PB} Z`
+      : null
+    const dashed = line => {
+      if (line == null) return []
+      const segs = []
+      let seg = null
+      model.ts.forEach((time, i) => {
+        const v = line[i]
+        if (v <= 0 && i > 0 && line[i - 1] <= 0) { seg = null; return }
+        seg = seg || []
+        seg.push(`${seg.length === 0 ? 'M' : 'L'}${X(time).toFixed(2)},${Y(v).toFixed(2)}`)
+        if (i === N - 1) { segs.push(seg.join(' ')); seg = null }
+      })
+      return segs
+    }
     const yTicks = [0.25, 0.5, 0.75, 1].map(f => ({ y: Y(maxY * f), label: formatCompactIDR(maxY * f) }))
-    return { X, Y, maxY, totalPath, cashSegs, areaPath, yTicks }
+    return {
+      X, Y, maxY, yTicks,
+      personalPath, areaPath,
+      boughtPath: path(model.boughtLine),
+      plannedSegs: dashed(model.plannedLine),
+    }
   }, [model])
 
   const onMove = useCallback((e) => {
@@ -142,29 +174,40 @@ export default function GrowthProjection() {
   const onLeave = useCallback(() => setHover(null), [])
 
   const hoverInfo = useMemo(() => {
-    if (!hover || !model) return null
+    if (!hover || !model || !geo) return null
     const i = hover.i ?? model.nowI
     const time = model.ts[i]
     return {
       i, time,
-      total: model.totals[i],
-      cash: model.cash[i],
+      personal: model.personal[i],
+      boughtV: model.boughtLine?.[i],
+      plannedV: model.plannedLine?.[i],
       asset: hover.type === 'marker' ? hover.asset : null,
       leftPct: (geo.X(time) / W) * 100,
       flip: geo.X(time) / W > 0.62,
     }
   }, [hover, model, geo])
 
-  // Endpoint label anti-collision: nudge apart when finals land close together.
+  // Endpoint labels with anti-collision.
   const endpoints = useMemo(() => {
     if (!model || !geo) return null
-    let ay = geo.Y(model.est5y)
-    let cy = geo.Y(model.cashEnd)
-    if (Math.abs(ay - cy) < 12) { const mid = (ay + cy) / 2; ay = mid - 6; cy = mid + 6 }
-    return { ay, cy }
+    const pts = [{ v: model.personalEnd, c: GOLD, k: 'p' }]
+    if (model.boughtEnd != null) pts.push({ v: model.boughtEnd, c: GRAY, k: 'b' })
+    if (model.plannedEnd != null) pts.push({ v: model.plannedEnd, c: AMBER, k: 'pl' })
+    pts.sort((a, b) => geo.Y(a.v) - geo.Y(b.v))
+    for (let i = 1; i < pts.length; i++) {
+      if (geo.Y(pts[i].v) - geo.Y(pts[i - 1].v) < 22) {
+        pts[i].y = geo.Y(pts[i - 1].y ?? geo.Y(pts[i - 1].v)) + 22
+        pts[i].y = (pts[i - 1].y ?? geo.Y(pts[i - 1].v)) + 22
+      } else {
+        pts[i].y = geo.Y(pts[i].v)
+      }
+    }
+    pts[0].y = geo.Y(pts[0].v)
+    return Object.fromEntries(pts.map(p => [p.k, p.y]))
   }, [model, geo])
 
-  // ---------- STATE A — empty ----------
+  // ---------- EMPTY — no profile AND no sessions ----------
   if (!model || !geo) {
     return (
       <section className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
@@ -188,7 +231,6 @@ export default function GrowthProjection() {
     )
   }
 
-  // ---------- STATE B — populated ----------
   const trans = reducedMotion ? undefined : { transition: 'd 0.6s ease' }
 
   return (
@@ -196,26 +238,28 @@ export default function GrowthProjection() {
       <Header t={t} />
 
       {/* Legend chips */}
-      <div className="flex items-center justify-end gap-4 mb-2 pointer-events-none">
+      <div className="flex items-center justify-end gap-4 mb-2 flex-wrap pointer-events-none">
         <span className="inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest text-zinc-400">
-          <span className="w-2 h-2 rounded-full shrink-0" style={{ background: GOLD, boxShadow: `0 0 6px ${GOLD}55` }} />
-          {t('dashboard.legendAssets')}
+          <span className="w-3.5 h-0 shrink-0 border-t-2" style={{ borderColor: GOLD }} />
+          {t('dashboard.legendPersonal')}
         </span>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest text-zinc-400">
-          <span className="w-3.5 h-0 shrink-0 border-t border-dashed" style={{ borderColor: GRAY }} />
-          {t('dashboard.legendCash')}
-        </span>
+        {model.boughtLine && (
+          <span className="inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest text-zinc-400">
+            <span className="w-3.5 h-0 shrink-0 border-t-2" style={{ borderColor: GRAY }} />
+            {t('dashboard.legendBought')}
+          </span>
+        )}
+        {model.plannedLine && (
+          <span className="inline-flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-widest text-zinc-400">
+            <span className="w-3.5 h-0 shrink-0 border-t-2 border-dashed" style={{ borderColor: AMBER }} />
+            {t('dashboard.legendPlanned')}
+          </span>
+        )}
       </div>
 
       {/* Chart */}
-      <div
-        ref={wrapRef}
-        className="relative h-[240px]"
-        onMouseMove={onMove}
-        onMouseLeave={onLeave}
-      >
+      <div ref={wrapRef} className="relative h-[240px]" onMouseMove={onMove} onMouseLeave={onLeave}>
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full h-full">
-          {/* grid */}
           {geo.yTicks.map(tick => (
             <line key={tick.y} x1={PL} y1={tick.y} x2={W - PR} y2={tick.y} stroke="rgba(255,255,255,0.05)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
           ))}
@@ -226,14 +270,19 @@ export default function GrowthProjection() {
               <stop offset="100%" stopColor="rgba(232,196,122,0)" />
             </linearGradient>
           </defs>
-          <path d={geo.areaPath} fill="url(#gpGoldFill)" style={trans} />
-          {geo.cashSegs.map((d, k) => (
-            <path key={k} d={d} fill="none" stroke={GRAY} strokeWidth="1.5" strokeDasharray="5 5" opacity="0.8" vectorEffect="non-scaling-stroke" style={trans} />
+          {geo.areaPath && <path d={geo.areaPath} fill="url(#gpGoldFill)" style={trans} />}
+          {geo.plannedSegs.map((d, k) => (
+            <path key={k} d={d} fill="none" stroke={AMBER} strokeWidth="1.75" strokeDasharray="5 5" opacity="0.9" vectorEffect="non-scaling-stroke" style={trans} />
           ))}
-          <path d={geo.totalPath} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" style={{ filter: 'drop-shadow(0 0 4px rgba(232,196,122,0.35))', ...trans }} />
+          {geo.boughtPath && (
+            <path d={geo.boughtPath} fill="none" stroke={GRAY} strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" style={trans} />
+          )}
+          {geo.personalPath && (
+            <path d={geo.personalPath} fill="none" stroke={GOLD} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" style={{ filter: 'drop-shadow(0 0 4px rgba(232,196,122,0.35))', ...trans }} />
+          )}
         </svg>
 
-        {/* Y-axis labels (HTML — immune to distortion) */}
+        {/* Y-axis labels */}
         {geo.yTicks.map(tick => (
           <span key={tick.label} className="absolute font-mono text-[7px] uppercase tracking-wider text-zinc-600 -translate-y-1/2 pointer-events-none" style={{ top: `${(tick.y / H) * 100}%`, left: 0 }}>
             {tick.label}
@@ -256,9 +305,9 @@ export default function GrowthProjection() {
             className="absolute w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-zinc-950 transition-transform hover:scale-125 cursor-pointer"
             style={{
               left: `${(geo.X(m.ms) / W) * 100}%`,
-              top: `${(geo.Y(model.totals[m.i]) / H) * 100}%`,
-              borderColor: GOLD,
-              boxShadow: hover?.type === 'marker' && hover.asset?.id === m.id ? `0 0 10px ${GOLD}` : 'none',
+              top: `${(geo.Y((m.confirmed ? model.boughtLine : model.plannedLine)[m.i]) / H) * 100}%`,
+              borderColor: m.confirmed ? GRAY : AMBER,
+              boxShadow: hover?.type === 'marker' && hover.asset?.id === m.id ? `0 0 10px ${m.confirmed ? GRAY : AMBER}` : 'none',
             }}
             onMouseEnter={() => setHover({ type: 'marker', i: m.i, asset: m })}
             onFocus={() => setHover({ type: 'marker', i: m.i, asset: m })}
@@ -274,56 +323,75 @@ export default function GrowthProjection() {
           />
         )}
 
-        {/* Tooltip */}
+        {/* Tooltip — date + all three lines */}
         {hoverInfo && (
           <div
-            className={`absolute z-10 pointer-events-none rounded-lg border border-white/10 bg-zinc-950/95 backdrop-blur px-3 py-2 shadow-xl min-w-[150px] ${hoverInfo.flip ? '-translate-x-full -ml-2' : 'ml-2'}`}
+            className={`absolute z-10 pointer-events-none rounded-lg border border-white/10 bg-zinc-950/95 backdrop-blur px-3 py-2 shadow-xl min-w-[160px] ${hoverInfo.flip ? '-translate-x-full -ml-2' : 'ml-2'}`}
             style={{ top: '4%', left: `${hoverInfo.leftPct}%` }}
           >
             <p className="font-mono text-[8px] uppercase tracking-widest text-zinc-500">{fmtDate(hoverInfo.time)}</p>
             {hoverInfo.asset && (
-              <p className="mt-1 text-[11px] font-semibold text-amber-100 truncate">{hoverInfo.asset.name}</p>
+              <>
+                <p className="mt-1 text-[11px] font-semibold text-amber-100 truncate">{hoverInfo.asset.name}</p>
+                <p className="font-mono text-[9px] text-zinc-400 tabular-nums">
+                  {formatCurrency(hoverInfo.asset.price, lang, hoverInfo.asset.currency)} · {fmtDate(hoverInfo.asset.ms, { day: 'numeric', month: 'short', year: '2-digit' })}
+                </p>
+              </>
             )}
-            {hoverInfo.asset && (
-              <p className="font-mono text-[9px] text-zinc-400 tabular-nums">
-                {formatCurrency(hoverInfo.asset.price, lang, hoverInfo.asset.currency)} · {fmtDate(hoverInfo.asset.ms, { day: 'numeric', month: 'short', year: '2-digit' })}
+            {hoverInfo.personal != null && (
+              <p className="mt-1 font-mono text-[10px] tabular-nums" style={{ color: GOLD }}>
+                {t('dashboard.legendPersonal')} {formatCurrency(hoverInfo.personal, lang, 'IDR')}
               </p>
             )}
-            <p className="mt-1 font-mono text-[10px] tabular-nums" style={{ color: GOLD }}>
-              {t('dashboard.tooltipAssets')} {formatCurrency(hoverInfo.total, lang, 'IDR')}
-            </p>
-            {hoverInfo.cash != null && (
+            {hoverInfo.boughtV != null && (
               <p className="font-mono text-[10px] tabular-nums" style={{ color: GRAY }}>
-                {t('dashboard.tooltipCash')} {formatCurrency(hoverInfo.cash, lang, 'IDR')}
+                {t('dashboard.legendBought')} {formatCurrency(hoverInfo.boughtV, lang, 'IDR')}
+              </p>
+            )}
+            {hoverInfo.plannedV != null && (
+              <p className="font-mono text-[10px] tabular-nums" style={{ color: AMBER }}>
+                {t('dashboard.legendPlanned')} {formatCurrency(hoverInfo.plannedV, lang, 'IDR')}
               </p>
             )}
           </div>
         )}
 
         {/* Endpoint labels */}
-        <div className="absolute font-mono text-[7px] font-bold uppercase tracking-wider pointer-events-none -translate-y-1/2 text-right" style={{ top: `${(endpoints.ay / H) * 100}%`, right: 0, color: GOLD }}>
-          {t('dashboard.endpointAssets')}<br />{formatCompactIDR(model.est5y)}
+        <div className="absolute font-mono text-[7px] font-bold uppercase tracking-wider pointer-events-none -translate-y-1/2 text-right" style={{ top: `${((endpoints?.p ?? geo.Y(model.personalEnd)) / H) * 100}%`, right: 0, color: GOLD }}>
+          {t('dashboard.legendPersonal')}<br />{formatCompactIDR(model.personalEnd)}
         </div>
-        <div className="absolute font-mono text-[7px] font-bold uppercase tracking-wider pointer-events-none translate-y-1/2 text-right" style={{ top: `${(endpoints.cy / H) * 100}%`, right: 0, color: GRAY }}>
-          {t('dashboard.endpointCash')}<br />{formatCompactIDR(model.cashEnd)}
-        </div>
+        {model.boughtEnd != null && (
+          <div className="absolute font-mono text-[7px] font-bold uppercase tracking-wider pointer-events-none -translate-y-1/2 text-right" style={{ top: `${((endpoints?.b ?? geo.Y(model.boughtEnd)) / H) * 100}%`, right: 0, color: GRAY }}>
+            {t('dashboard.legendBought')}<br />{formatCompactIDR(model.boughtEnd)}
+          </div>
+        )}
+        {model.plannedEnd != null && (
+          <div className="absolute font-mono text-[7px] font-bold uppercase tracking-wider pointer-events-none -translate-y-1/2 text-right" style={{ top: `${((endpoints?.pl ?? geo.Y(model.plannedEnd)) / H) * 100}%`, right: 0, color: AMBER }}>
+            {t('dashboard.legendPlanned')}<br />{formatCompactIDR(model.plannedEnd)}
+          </div>
+        )}
       </div>
 
       {/* Summary strip */}
       <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/[6%]">
-        <Stat label={t('dashboard.summarySpent')} value={formatCurrency(model.spent, lang, 'IDR')} />
+        <Stat label={t('dashboard.summaryPersonal')} value={formatCurrency(model.personalEnd, lang, 'IDR')} accent />
         <Stat
-          label={t('dashboard.summaryCurrent')}
-          value={
+          label={t('dashboard.summaryBought')}
+          value={model.currentBought != null ? (
             <>
-              {formatCurrency(model.current, lang, 'IDR')}{' '}
-              <span className={model.currentPct < 0 ? 'text-terracotta' : 'text-sand'}>
-                ({model.currentPct >= 0 ? '+' : '−'}{Math.abs(Math.round(model.currentPct))}%)
-              </span>
+              {formatCurrency(model.currentBought, lang, 'IDR')}{' '}
+              {model.currentPct != null && (
+                <span className={model.currentPct < 0 ? 'text-terracotta' : 'text-sand'}>
+                  ({model.currentPct >= 0 ? '+' : '−'}{Math.abs(Math.round(model.currentPct))}%)
+                </span>
+              )}
             </>
-          }
+          ) : '—'}
         />
-        <Stat label={t('dashboard.summaryEst5')} value={formatCurrency(model.est5y, lang, 'IDR')} accent />
+        <Stat
+          label={t('dashboard.summaryPlanned')}
+          value={model.plannedEnd != null ? formatCurrency(model.plannedEnd, lang, 'IDR') : '—'}
+        />
       </div>
     </section>
   )
@@ -337,8 +405,6 @@ function Header({ t }) {
     </header>
   )
 }
-
-function Frame() { return null } // reserved: empty-state grid handled inline
 
 function Stat({ label, value, accent }) {
   return (

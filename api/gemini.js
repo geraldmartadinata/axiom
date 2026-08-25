@@ -71,8 +71,17 @@ Return this exact JSON structure:
       "amount_upfront": <number or null>,
       "type": "<one of: mandatory, upfront, optional, tax, maintenance>"
     }
+  ],
+  "alternatives": [
+    {
+      "item": "<a realistic cheaper alternative to the requested item>",
+      "estimated_price": <number or null>,
+      "reason": "<one short reason it is more sensible>"
+    }
   ]
-}`
+}
+
+Rules for alternatives: always provide 2 realistic cheaper options for the SAME need (e.g. a previous-gen or mid-range model). Use null for estimated_price only if truly unknown.`
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

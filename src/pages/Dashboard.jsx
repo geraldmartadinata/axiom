@@ -48,11 +48,29 @@ export default function Dashboard() {
     hasData
   )
 
-  // ---- Health score (live, shared util) ----
-  const health = useMemo(
-    () => computeHealthScore({ income, expenses, savingsRate: rate }),
-    [income, expenses, rate]
+  // ---- Health score — ONE shared util for navbar, dashboard and analyze ----
+  // Default: REAL score from the profile. When a slider deviates from the
+  // saved profile, the gauge switches to SIMULATION mode (clearly labeled)
+  // using the exact same util — only the inputs differ.
+  const profileRate = income > 0
+    ? Math.max(0, Math.min(100, Math.round(((Number(profile?.monthly_savings) || 0) / income) * 100)))
+    : 0
+  const realHealth = useMemo(
+    () => computeHealthScore(profile, history),
+    [profile, history]
   )
+  const simHealth = useMemo(
+    () => computeHealthScore(profile, history, {
+      incomeOverride: income,
+      expensesOverride: expenses,
+      savingsRateOverride: rate,
+    }),
+    [profile, history, income, expenses, rate]
+  )
+  const isSimulation = income !== (Number(profile?.monthly_income) || 0) ||
+    expenses !== (Number(profile?.monthly_expenses) || 0) ||
+    rate !== profileRate
+  const health = isSimulation ? simHealth : realHealth
   const rawSavings = (rate / 100) * income
 
   // ---- Per-slider change handlers (pure — each touches ONLY its own state).
@@ -176,7 +194,15 @@ export default function Dashboard() {
           <motion.section {...fadeUp(0.08)} className="rounded-[20px] border border-white/[7%] bg-zinc-900/60 backdrop-blur-xl p-6 sm:p-7 flex flex-col">
             <header className="flex items-center justify-between mb-6">
               <h2 className="text-base font-semibold text-white">{t('dashboard.healthTitle')}</h2>
-              <BarChart3 className="h-4 w-4 text-amber-400" strokeWidth={2} />
+              <div className="flex items-center gap-2">
+                {isSimulation && (
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-golden/30 bg-golden/10 font-mono text-[8px] font-bold uppercase tracking-widest text-golden">
+                    <span className="w-1 h-1 rounded-full bg-golden animate-pulse shrink-0" />
+                    {t('dashboard.simulation')}
+                  </span>
+                )}
+                <BarChart3 className="h-4 w-4 text-amber-400" strokeWidth={2} />
+              </div>
             </header>
 
             {!showHealth ? (

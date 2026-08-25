@@ -6,19 +6,26 @@
 export const YEAR_MS = 365.25 * 24 * 60 * 60 * 1000
 
 /**
- * Annual rate by category. Negative = loses value, positive = appreciates.
- * @param {string} category - 'vehicle' | 'motorcycle' | 'tech' | 'property' | other
- * @param {number} ageYears - years since purchase (tech front-loads its losses)
+ * Annual growth rate by category — REPLACES depreciationRate as the canonical
+ * util. Negative = depreciates, positive = appreciates.
+ * @param {string} category - 'vehicle' | 'motorcycle' | 'tech' | 'property' | 'gold' | other
+ * @param {number} ageYears - years since purchase (gawai front-loads its losses)
  * @returns {number} e.g. -0.15 means −15%/yr
  */
-export function depreciationRate(category, ageYears = 0) {
+export function assetGrowthRate(category, ageYears = 0) {
   switch (category) {
-    case 'vehicle':    return -0.15                       // car ~15%/yr
-    case 'motorcycle': return -0.12                       // motorcycle ~12%/yr
-    case 'tech':       return ageYears < 1 ? -0.25 : -0.10 // electronics 25% yr 1, then 10% — flagship phones keep ~60% after 3 yrs
-    case 'property':   return 0.02                        // slight appreciation
-    default:           return -0.20                       // other
+    case 'vehicle':    return -0.15                        // car ~15%/yr
+    case 'motorcycle': return -0.12                        // motorcycle ~12%/yr
+    case 'tech':       return ageYears < 2 ? -0.25 : -0.15 // gawai 25% yr 1–2, then 15%
+    case 'property':   return 0.02                         // slight appreciation
+    case 'gold':       return 0.05                         // gold / jewelry / luxury watch +5%/yr
+    default:           return -0.20                        // other
   }
+}
+
+/** Back-compat alias — new code should use assetGrowthRate. */
+export function depreciationRate(category, ageYears = 0) {
+  return assetGrowthRate(category, ageYears)
 }
 
 /** Session schema only knows these categories today; anything else decays as 'other'. */
@@ -26,8 +33,9 @@ export function normalizeCategory(rawCategory) {
   const c = String(rawCategory || '').toLowerCase()
   if (c === 'vehicle' || c === 'car') return 'vehicle'
   if (c === 'motorcycle' || c === 'motor' || c === 'bike') return 'motorcycle'
-  if (c === 'tech' || c === 'electronics' || c === 'phone') return 'tech'
+  if (c === 'tech' || c === 'electronics' || c === 'phone' || c === 'gadget') return 'tech'
   if (c === 'property' || c === 'home' || c === 'house') return 'property'
+  if (c === 'gold' || c === 'jewelry' || c === 'jewellery' || c === 'watch') return 'gold'
   return 'other'
 }
 

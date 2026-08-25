@@ -39,6 +39,12 @@
     "growthEmptyMsg": "Timeline asetmu akan muncul setelah analisis pertamamu.",
     "legendAssets": "Total Aset",
     "legendCash": "Kas & Tabungan",
+    "legendPersonal": "Aset Pribadi",
+    "legendBought": "Aset Dibeli",
+    "legendPlanned": "Rencana",
+    "summaryPersonal": "Aset Pribadi (5 Thn)",
+    "summaryBought": "Nilai Aset Dibeli",
+    "summaryPlanned": "Proyeksi Rencana",
     "tooltipAssets": "ASET",
     "tooltipCash": "KAS",
     "endpointAssets": "ASET",
@@ -47,10 +53,11 @@
     "summaryCurrent": "NILAI ASET SAAT INI",
     "summaryEst5": "EST. NILAI DALAM 5 THN",
     "todayLabel": "HARI INI",
+    "simulation": "Simulasi",
     "recentTitle": "Analisis Terakhir",
     "heroSubtitle": "Pemeriksaan kenyataan berbasis AI untuk pembelian besar berikutnya.",
     "chipCar": "Mobil",
-    "chipTech": "Teknologi",
+    "chipTech": "Gawai",
     "chipHome": "Rumah",
     "chipCarExample": "Bisa beli Honda Civic RS 2024 Rp550jt DP Rp100jt cicil 5 tahun, gaji Rp15jt/bln?",
     "chipTechExample": "Bisa beli MacBook Pro M4 + iPhone 16 Pro Rp45jt dicicil 12 bulan, gaji Rp10jt/bln?",
@@ -59,7 +66,7 @@
     "statusTight": "Ketat",
     "statusRisky": "Berisiko",
     "catVehicle": "Kredit Mobil",
-    "catTech": "Pembelian Teknologi",
+    "catTech": "Pembelian Gawai",
     "catProperty": "Properti",
     "catOther": "Pembelian",
     "warnExceeds": "Pengeluaran + tabungan melebihi pendapatan",
@@ -83,7 +90,7 @@
   "cat": {
     "auto": "Mobil",
     "house": "Rumah",
-    "tech": "Gadget"
+    "tech": "Gawai"
   },
   "analyze": {
     "indexTitle": "Analisismu",
@@ -117,6 +124,21 @@
     "averageScore": "Rata-rata Skor",
     "sessionNotFound": "Sesi tidak ditemukan",
     "sessionNotFoundSub": "Analisis ini mungkin sudah dihapus. Pilih yang lain di bawah.",
+    "recalcBadge": "Dihitung ulang dengan profil terbaru",
+    "incompleteData": "Data belum lengkap",
+    "prelimBanner": "Lengkapi profilmu untuk analisis yang akurat.",
+    "reco": {
+      "title": "Rekomendasi",
+      "sub": "Cara membuat pembelian ini masuk akal",
+      "postpone": "Tunda pembelian ±{months} bulan",
+      "postponeTarget": "Sampai DP 30% ({amount}) terkumpul",
+      "postponeFcf": "menabung {amount}/bln",
+      "alternative": "Pertimbangkan alternatif lebih terjangkau",
+      "genericAlt": "cari opsi dengan cicilan ≤ {amount}/bln (30% penghasilan)",
+      "noIncome": "Isi penghasilan di Profil agar keterjangkauan bisa dihitung.",
+      "emergency": "Dana daruratmu kurang dari 6 bulan pengeluaran — prioritaskan sebelum tambah kewajiban.",
+      "dependents": "Dengan {count} tanggungan, jaga total cicilan bulanan di bawah 30% penghasilan."
+    },
     "fallbackNoticeTitle": "Mode demo — AI tidak tersedia",
     "fallbackNoticeBody": "Gemini tidak bisa dihubungi, jadi analisis ini memakai skenario contoh. Angka bersifat ilustratif, bukan penawaran asli.",
     "backToAnalyses": "Kembali ke analisis",
@@ -308,11 +330,20 @@
       "safe": "Aman",
       "warning": "Waspada",
       "danger": "Bahaya",
+      "incomplete": "Data Kurang",
       "desc": "Cicilan bulananmu sebagai % penghasilan. Di bawah 36% itu sehat."
     },
     "tco": {
       "title": "Total Biaya Kepemilikan",
-      "desc": "Biaya all-in selama tenor termasuk biaya tersembunyi."
+      "desc": "DP + pokok + bunga + semua biaya — harga tidak dihitung dua kali.",
+      "dp": "Uang Muka",
+      "principal": "Pokok Kredit",
+      "interest": "Bunga Kredit",
+      "taxFee": "Pajak & Biaya",
+      "insurance": "Asuransi",
+      "maintenance": "Servis & Perawatan",
+      "other": "Lainnya",
+      "total": "Total Keseluruhan"
     },
     "opportunity": {
       "title": "Biaya Peluang",
@@ -349,9 +380,10 @@
       "termHint": "0 = beli cash · tenor pendek = bunga lebih sedikit",
       "cash": "Cash",
       "incomeHint": "Setelah pajak",
-      "interest": "Bunga Flat /bln",
-      "interestHint": "Kredit toko menghitung flat dari pokok penuh — HP/paylater umumnya 1,5–3%/bln",
-      "totalInterest": "Total Bunga"
+      "interest": "Bunga Flat (%/thn)",
+      "interestHint": "Flat dari pokok penuh — HP/paylater umumnya 18–36%/th",
+      "totalInterest": "Total Bunga",
+      "reset": "Reset ke nilai awal"
     },
     "health": {
       "title": "Skor Kesehatan",

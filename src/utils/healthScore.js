@@ -1,57 +1,82 @@
 /**
- * Financial Health Score — shared util (Dashboard gauge + reusable by Analyze).
+ * Financial Health Score — SINGLE SOURCE OF TRUTH.
+ * Used by: navbar pill, Dashboard gauge (real + simulation mode), and the
+ * Analyze page (post-purchase, via opts.extraInstallment).
  *
- * Derived ONLY from baseline parameters (no API, no fabricated data):
- *   • DTI component      (40%): expenses/income — 0% → 100 pts, ≥50% → 0 pts, linear
- *   • Savings component  (40%): savings rate    — ≥30% → 100 pts, 0% → 0 pts, linear
- *   • Cash flow component(20%): income − expenses > 0 → 100 pts, ≤ 0 → 0 pts
+ * Composition:
+ *   • Savings rate      (30%): monthly savings / income — ≥30% → 100 pts
+ *   • Emergency fund    (25%): months of expenses covered — ≥6 → 100
+ *   • Free cash flow    (15%): income − expenses − savings > 0 → 100
+ *   • DTI               (30%): confirmed-purchase installments (+ scenario
+ *     installment via opts.extraInstallment) / income — 0% → 100 pts, ≥50% → 0
  *
- * Returns null score when there is no meaningful data (income ≤ 0) so callers
- * can render their empty states instead of a misleading 0.
+ * Returns score:null when income ≤ 0 (callers render "—"/incomplete states —
+ * never a misleading 0 or a "Safe" verdict without data).
  */
+export function computeHealthScore(profile, sessions = [], opts = {}) {
+  const income = Math.max(0, Number(opts.incomeOverride ?? profile?.monthly_income) || 0)
+  const expenses = Math.max(0, Number(opts.expensesOverride ?? profile?.monthly_expenses) || 0)
+  const savings = Math.max(0, Number(profile?.monthly_savings) || 0)
+  const emergencyFund = Math.max(0, Number(profile?.emergency_fund) || 0)
+  const existingDebt = Math.max(0, Number(profile?.existing_monthly_debt) || 0)
 
-export function computeHealthScore({ income = 0, expenses = 0, savingsRate = 0 } = {}) {
-  const inc = Math.max(0, Number(income) || 0)
-  const exp = Math.max(0, Number(expenses) || 0)
-  const rate = Math.min(100, Math.max(0, Number(savingsRate) || 0))
+  const savingsRate = opts.savingsRateOverride != null
+    ? Math.min(100, Math.max(0, Number(opts.savingsRateOverride) || 0))
+    : (income > 0 ? (savings / income) * 100 : 0)
 
-  if (inc <= 0) {
+  // Installments from CONFIRMED purchases only (+ optional scenario preview).
+  const confirmedInstallments = (Array.isArray(sessions) ? sessions : [])
+    .filter(s => s?.status === 'CONFIRMED')
+    .reduce((acc, s) => {
+      const c = s?.confirmation || {}
+      const price = Number(c.final_price ?? s?.financials?.base_price) || 0
+      const dp = Number(c.final_down_payment ?? s?.financials?.down_payment) || 0
+      const tenor = Number(c.final_term_months ?? s?.financials?.tenor_months) || 0
+      if (tenor <= 0 || price <= 0) return acc
+      const principal = Math.max(0, price - dp)
+      const rate = Math.min(100, Math.max(0, Number(s?.financials?.interest_rate_assumed) || 5)) / 100
+      acc += (principal + principal * rate * (tenor / 12)) / tenor
+      return acc
+    }, 0)
+  const extraInstallment = Math.max(0, Number(opts.extraInstallment) || 0)
+  const totalDebt = confirmedInstallments + extraInstallment + existingDebt
+
+  const freeCashFlow = income - expenses - Math.min(savings, Math.max(0, income - expenses))
+  const emergencyMonths = expenses > 0 ? emergencyFund / expenses : null
+  const dtiRatio = income > 0 ? totalDebt / income : null
+
+  if (income <= 0) {
     return {
-      score: null,
-      status: 'NO_DATA',
-      dtiPercent: null,
-      liquidityMonths: null,
-      effectiveSavings: 0,
-      freeCashFlow: 0,
+      score: null, status: 'NO_DATA', incomplete: true,
+      dtiPercent: null, dtiRatio: null,
+      liquidityMonths: emergencyMonths,
+      effectiveSavings: 0, freeCashFlow: 0,
+      monthlyDebt: totalDebt, confirmedInstallments,
       overBudget: false,
     }
   }
 
-  // --- DTI (40%) ---
-  const dtiRatio = exp / inc // 0 .. 1+
+  const savingsPoints = Math.min(savingsRate / 30, 1) * 100
+  const emergencyPoints = emergencyMonths == null ? 50 : emergencyMonths >= 6 ? 100 : emergencyMonths >= 3 ? 70 : emergencyMonths >= 1 ? 40 : 0
+  const fcfPoints = freeCashFlow > 0 ? 100 : 0
   const dtiPoints = Math.max(0, Math.min(1, 1 - dtiRatio / 0.5)) * 100
 
-  // --- Savings (40%) ---
-  const savingsPoints = Math.min(rate / 30, 1) * 100
-
-  // --- Cash flow after savings (20%) ---
-  const rawSavings = (rate / 100) * inc
-  const effectiveSavings = Math.min(rawSavings, Math.max(0, inc - exp))
-  const freeCashFlow = inc - exp - effectiveSavings
-  const cashFlowPoints = freeCashFlow > 0 ? 100 : 0
-
-  const score = Math.round(dtiPoints * 0.4 + savingsPoints * 0.4 + cashFlowPoints * 0.2)
-
+  const score = Math.round(savingsPoints * 0.3 + emergencyPoints * 0.25 + fcfPoints * 0.15 + dtiPoints * 0.3)
   const status = score >= 70 ? 'HEALTHY' : score >= 40 ? 'TIGHT' : 'RISKY'
-  const overBudget = exp + rawSavings > inc + 1e-6
+  const rawSavings = (savingsRate / 100) * income
+  const overBudget = expenses + rawSavings > income + 1e-6
 
   return {
     score,
     status,
+    incomplete: false,
     dtiPercent: Math.round(dtiRatio * 100),
-    liquidityMonths: null, // filled by computeLiquidity when profile available
-    effectiveSavings: Math.round(effectiveSavings),
+    dtiRatio,
+    liquidityMonths: emergencyMonths,
+    effectiveSavings: Math.round(Math.min(rawSavings, Math.max(0, income - expenses))),
     freeCashFlow: Math.round(freeCashFlow),
+    monthlyDebt: Math.round(totalDebt),
+    confirmedInstallments: Math.round(confirmedInstallments),
     overBudget,
   }
 }

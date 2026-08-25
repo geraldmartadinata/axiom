@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAxiomStore } from '../../store/useAxiomStore'
 import { useLanguage } from '../../store/LanguageContext.jsx'
-import { computeOverallScore } from '../../utils/overallScore'
+import { computeHealthScore } from '../../utils/healthScore'
 import { cn } from '../../utils/cn'
 import { Sparkles, Activity, User } from 'lucide-react'
 import Flag, { FlagID, FlagUS } from '../ui/Flag'
@@ -19,13 +19,14 @@ export default function DynamicIsland() {
   const profile = useAxiomStore(s => s.profile)
   const { lang, t, toggleLang } = useLanguage()
 
-  const overall = computeOverallScore(history, profile)
+  // Single source of truth — same util as Dashboard gauge & Analyze page.
+  const health = computeHealthScore(profile, history)
+  const score = health.score
 
-  // Personalized score color mapping
-  let scoreColor = 'text-white' // default state
-  if (overall.confirmedCount > 0) {
-    if (overall.score <= 33) scoreColor = 'text-terracotta'
-    else if (overall.score <= 66) scoreColor = 'text-golden'
+  let scoreColor = 'text-zinc-500'
+  if (score != null) {
+    if (score < 40) scoreColor = 'text-terracotta'
+    else if (score < 70) scoreColor = 'text-golden'
     else scoreColor = 'text-sand'
   }
 
@@ -78,11 +79,9 @@ export default function DynamicIsland() {
                 'font-display font-bold text-lg tracking-tight tabular-nums',
                 scoreColor
               )}
-              title={overall.confirmedCount > 0
-                ? `${overall.confirmedCount} confirmed purchase(s)`
-                : 'No confirmed purchases yet'}
+              title={score != null ? 'Financial health score' : 'Complete your profile to compute your score'}
             >
-              {overall.confirmedCount > 0 ? overall.score : '0'}
+              {score != null ? score : '—'}
             </span>
           </Link>
 

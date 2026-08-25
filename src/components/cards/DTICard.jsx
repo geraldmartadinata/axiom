@@ -6,13 +6,15 @@ import { formatCurrency } from '../../utils/format'
 export default function DTICard({ dti, status, newInstallment, existingDebt, income, lang, currency }) {
   const { t } = useLanguage()
   const uiLang = lang || 'en'
-  const statusBadge = status === 'SAFE' ? 'safe' : status === 'WARNING' ? 'warning' : 'danger'
-  const markerPos = Math.min(dti, 100)
+  const incomplete = dti == null || status === 'INCOMPLETE'
+  const statusBadge = incomplete ? 'neutral' : status === 'SAFE' ? 'safe' : status === 'WARNING' ? 'warning' : 'danger'
+  const markerPos = incomplete ? 0 : Math.min(dti, 100)
 
   const statusLabels = {
     SAFE: t('cards.dti.safe'),
     WARNING: t('cards.dti.warning'),
     DANGER: t('cards.dti.danger'),
+    INCOMPLETE: t('cards.dti.incomplete'),
   }
 
   return (
@@ -23,7 +25,9 @@ export default function DTICard({ dti, status, newInstallment, existingDebt, inc
       </div>
 
       <div className="mb-6">
-        <span className="text-4xl font-extrabold text-white tracking-tighter">{Number(dti || 0).toLocaleString(uiLang === 'id' ? 'id-ID' : 'en-US', { maximumFractionDigits: 3 })}%</span>
+        <span className="text-4xl font-extrabold text-white tracking-tighter">
+          {incomplete ? '—' : `${Number(dti).toLocaleString(uiLang === 'id' ? 'id-ID' : 'en-US', { maximumFractionDigits: 3 })}%`}
+        </span>
       </div>
 
       {/* DTI Bar with new palette */}

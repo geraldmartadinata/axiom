@@ -61,6 +61,75 @@ export function calculateFlatInstallment(principal, monthlyFlatPercent, tenorMon
   };
 }
 
+/**
+ * Normalize an interest rate from AI extraction into ANNUAL PERCENT.
+ * null/missing → 5 (sane default) · fraction (0.055 → 5.5) · rupiah/garbage
+ * (>100) → 5 · else clamped 0–30.
+ */
+export function normalizeInterestRate(v) {
+  if (v == null || v === '') return 5;
+  const n = Number(v);
+  if (!Number.isFinite(n) || n < 0) return 5;
+  if (n > 100) return 5;
+  if (n > 0 && n <= 1) return Math.round(n * 10000) / 100;
+  return Math.min(30, Math.max(0, n));
+}
+
+// ──────────────────────────────────────────────────────────
+// 1c. creditCalc — single source of truth for credit math
+// ──────────────────────────────────────────────────────────
+
+/**
+ * Consumer-credit math (FLAT annual rate — how Indonesian store credit /
+ * paylater actually bills) + ownership cost breakdown. The base price is
+ * NEVER added on top of installments: installments already contain
+ * principal + interest.
+ */
+export function creditCalc({ basePrice = 0, downPayment = 0, tenorMonths = 0, annualFlatRate = 0, hiddenCosts = [] } = {}) {
+  const price = Math.max(0, Number(basePrice) || 0);
+  const dp = Math.min(Math.max(0, Number(downPayment) || 0), price);
+  const tenor = Math.max(0, Math.round(Number(tenorMonths) || 0));
+  const rate = Math.min(100, Math.max(0, Number(annualFlatRate) || 0)) / 100;
+
+  const principal = price - dp;
+  const totalInterest = tenor > 0 ? principal * rate * (tenor / 12) : 0;
+  const installment = tenor > 0 ? (principal + totalInterest) / tenor : 0;
+
+  const years = tenor / 12;
+  let taxes = 0, insurance = 0, maintenance = 0, other = 0;
+  (Array.isArray(hiddenCosts) ? hiddenCosts : []).forEach(c => {
+    const perYear = Number(c?.amount_per_year) || 0;
+    const upfront = Number(c?.amount_upfront) || 0;
+    const sum = perYear * years + upfront;
+    const type = String(c?.type || '').toLowerCase();
+    const name = String(c?.name || '').toLowerCase();
+    if (type === 'tax') taxes += sum;
+    else if (type === 'maintenance') maintenance += sum;
+    else if (name.includes('asuransi') || name.includes('insurance') || name.includes('care')) insurance += sum;
+    else if (type === 'optional' || type === 'mandatory') insurance += sum;
+    else other += sum;
+  });
+
+  const total = dp + principal + totalInterest + taxes + insurance + maintenance + other;
+  const r2 = (x) => Math.round(x * 100) / 100;
+
+  return {
+    principal: r2(principal),
+    totalInterest: r2(totalInterest),
+    installment: r2(installment),
+    breakdown: {
+      downPayment: r2(dp),
+      principal: r2(principal),
+      interest: r2(totalInterest),
+      taxes: r2(taxes),
+      insurance: r2(insurance),
+      maintenance: r2(maintenance),
+      other: r2(other),
+    },
+    total: r2(total),
+  };
+}
+
 // ──────────────────────────────────────────────────────────
 // 2. Debt-to-Income (DTI) Ratio
 // ──────────────────────────────────────────────────────────
@@ -164,49 +233,21 @@ export function calculateSanggupScore(scenario, profile) {
 
 /**
  * Calculate total cost of ownership over the loan tenor.
+ * DELEGATES to creditCalc — installments already include principal + interest,
+ * so the base price is never double-counted.
  * @param {Object} scenario - Master JSON scenario
  * @returns {{breakdown: Object, total: number}}
  */
 export function calculateTCO(scenario) {
   const f = scenario.financials;
-  const basePrice = f.base_price || 0;
-  const installment = f.calculated_monthly_installment || 0;
-  const tenor = f.tenor_months || 0;
-  const hiddenCosts = scenario.hidden_costs || [];
-
-  const totalInstallments = installment * tenor;
-  const totalDownPayment = f.down_payment || 0;
-
-  let totalTaxes = 0;
-  let totalMaintenance = 0;
-  let totalOther = 0;
-
-  const years = tenor / 12;
-  hiddenCosts.forEach(cost => {
-    if (cost.amount_per_year) {
-      const total = cost.amount_per_year * years;
-      if (cost.type === 'tax') totalTaxes += total;
-      else if (cost.type === 'maintenance') totalMaintenance += total;
-      else totalOther += total;
-    }
-    if (cost.amount_upfront) {
-      totalOther += cost.amount_upfront;
-    }
+  const result = creditCalc({
+    basePrice: f.base_price || 0,
+    downPayment: f.down_payment || 0,
+    tenorMonths: f.tenor_months || 0,
+    annualFlatRate: normalizeInterestRate(f.interest_rate_assumed),
+    hiddenCosts: scenario.hidden_costs || [],
   });
-
-  const total = basePrice + totalInstallments + totalTaxes + totalMaintenance + totalOther;
-
-  return {
-    breakdown: {
-      basePrice,
-      downPayment: totalDownPayment,
-      totalInstallments,
-      totalTaxes,
-      totalMaintenance,
-      totalOther
-    },
-    total: Math.round(total * 100) / 100
-  };
+  return { breakdown: result.breakdown, total: result.total };
 }
 
 // ──────────────────────────────────────────────────────────
@@ -349,22 +390,27 @@ export function enrichScenario(rawScenario, profile) {
   // 12-month plan — 0 would silently zero out the installment, TCO and
   // opportunity cost.
   const tenor = f.tenor_months > 0 ? f.tenor_months : 12;
+  const rate = normalizeInterestRate(f.interest_rate_assumed);
 
-  // Calculate installment if not provided by AI
-  const installment = f.calculated_monthly_installment > 0
-    ? f.calculated_monthly_installment
-    : calculateMonthlyInstallment(f.base_price, f.down_payment, tenor, f.interest_rate_assumed || 6.5);
+  // Flat-rate installment via creditCalc (single source of truth).
+  const credit = creditCalc({
+    basePrice: f.base_price || 0,
+    downPayment: f.down_payment || 0,
+    tenorMonths: tenor,
+    annualFlatRate: rate,
+    hiddenCosts: rawScenario.hidden_costs || [],
+  });
 
   const scenarioWithInstallment = {
     ...rawScenario,
-    financials: { ...f, tenor_months: tenor, calculated_monthly_installment: installment }
+    financials: { ...f, tenor_months: tenor, interest_rate_assumed: rate, calculated_monthly_installment: credit.installment }
   };
 
   const sanggup = calculateSanggupScore(scenarioWithInstallment, profile);
   const tco = calculateTCO(scenarioWithInstallment);
-  const opportunity = calculateOpportunityCost(f.down_payment, installment, tenor);
+  const opportunity = calculateOpportunityCost(f.down_payment, credit.installment, tenor);
   const depreciation = generateDepreciationCurve(f.base_price, rawScenario.scenario.category);
-  const investment = generateInvestmentCurve(f.down_payment, installment, tenor);
+  const investment = generateInvestmentCurve(f.down_payment, credit.installment, tenor);
 
   return {
     ...scenarioWithInstallment,

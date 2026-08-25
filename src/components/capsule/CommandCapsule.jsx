@@ -146,11 +146,14 @@ export default function CommandCapsule() {
 
   const handleBlur = () => {
     setFocused(false)
-    // cleared + blurred → resume the loop after ~3s idle
-    if (!input.trim() && everTyped) {
+    // cleared + blurred → resume the loop FROM THE START after ~3s idle
+    if (!input.trim()) {
       clearTimeout(resumeTimer.current)
       setResumeOk(false)
-      resumeTimer.current = setTimeout(() => setResumeOk(true), RESUME_IDLE_MS)
+      resumeTimer.current = setTimeout(() => {
+        setEverTyped(false)
+        setResumeOk(true)
+      }, RESUME_IDLE_MS)
     }
   }
 

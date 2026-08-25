@@ -30,17 +30,17 @@ function CustomTooltip({ active, payload, lang, currency }) {
  *   - Time-to-Ceiling (months until this purchase fits comfortably)
  *   - Alternative Milestones (what the money could buy instead)
  */
-export default function ProjectionChart({ scenario }) {
+export default function ProjectionChart({ scenario, depreciationCurve, investmentCurve, opportunity: opportunityProp, crossoverYear: crossoverProp }) {
   const { t, lang } = useLanguage()
   const currency = scenario?.currency || useAxiomStore(s => s.currency) || 'IDR'
 
   const enrichment = scenario?.enrichment || {}
-  const depreciation = enrichment.depreciation_curve || []
-  const investment = enrichment.investment_curve || []
-  const crossoverYear = enrichment.crossover_year ?? null
+  const depreciation = depreciationCurve || enrichment.depreciation_curve || []
+  const investment = investmentCurve || enrichment.investment_curve || []
+  const crossoverYear = crossoverProp ?? enrichment.crossover_year ?? null
   const f = scenario?.financials || {}
 
-  const opportunity = enrichment.opportunity_cost || calculateOpportunityCost(
+  const opportunity = opportunityProp || enrichment.opportunity_cost || calculateOpportunityCost(
     f.down_payment || 0,
     f.calculated_monthly_installment || 0,
     f.tenor_months || 12
@@ -53,26 +53,26 @@ export default function ProjectionChart({ scenario }) {
     investment: investment[i]?.value || 0,
   }))
 
-  // --- meaningful framing calculations ---
+  // --- meaningful framing calculations ("—" when inputs are incomplete) ---
   const installment = f.calculated_monthly_installment || 0
   const monthlyIncome = f.monthly_income || 0
-  const savingsRate = monthlyIncome > 0 ? Math.max(0.05, (0.15 * monthlyIncome)) : installment * 1.2
+  const savingsRate = monthlyIncome > 0 ? Math.max(0.05, (0.15 * monthlyIncome)) : 0
 
   // recovery time: months to rebuild ~6x monthly-expense buffer at savings rate
   const monthlyExpenses = monthlyIncome > 0 ? monthlyIncome * 0.6 : 0
   const bufferTarget = monthlyExpenses * 6
-  const recoveryMonths = savingsRate > 0 ? Math.ceil(bufferTarget / savingsRate) : 72
+  const recoveryMonths = savingsRate > 0 ? Math.ceil(bufferTarget / savingsRate) : null
 
   // retirement impact: how many extra months to first milestone given the purchase
   const milestone = 100e6 // first Rp100M
   const investMonthly = Math.max(0, savingsRate - installment)
   const withoutPurchase = savingsRate > 0 ? Math.ceil(milestone / savingsRate) : 0
   const withPurchase = investMonthly > 0 ? Math.ceil(milestone / investMonthly) : Infinity
-  const delayMonths = withPurchase === Infinity ? 999 : Math.max(0, withPurchase - withoutPurchase)
+  const delayMonths = withPurchase === Infinity || savingsRate <= 0 ? null : Math.max(0, withPurchase - withoutPurchase)
 
   // time-to-ceiling: months until this purchase is < 25% DTI
   const ceilingMonths = (() => {
-    if (monthlyIncome <= 0 || installment <= 0) return 0
+    if (monthlyIncome <= 0 || installment <= 0) return null
     const targetDti = 0.25
     const neededIncome = installment / targetDti
     const growthRate = 0.05 // 5% annual income growth
@@ -170,24 +170,24 @@ export default function ProjectionChart({ scenario }) {
         <p className="text-xs text-zinc-500 max-w-[200px] text-right leading-relaxed">{t('projections.subtitle')}</p>
       </div>
 
-      {/* Meaningful framing cards */}
+      {/* Meaningful framing cards — "—" when the input behind the unit is missing */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <FramingCard
           label={t('projections.recovery')}
           sub={t('projections.recoverySub')}
-          value={t('projections.recoveryValue').replace('{months}', recoveryMonths)}
+          value={recoveryMonths != null ? t('projections.recoveryValue').replace('{months}', recoveryMonths) : '—'}
           accent="text-amber-400"
         />
         <FramingCard
           label={t('projections.retirement')}
           sub={t('projections.retirementSub')}
-          value={t('projections.retirementValue').replace('{months}', delayMonths)}
+          value={delayMonths != null ? t('projections.retirementValue').replace('{months}', delayMonths) : '—'}
           accent="text-emerald-400"
         />
         <FramingCard
           label={t('projections.ceiling')}
           sub={t('projections.ceilingSub')}
-          value={t('projections.ceilingValue').replace('{months}', ceilingMonths)}
+          value={ceilingMonths != null ? t('projections.ceilingValue').replace('{months}', ceilingMonths) : '—'}
           accent="text-emerald-400"
         />
       </div>
