@@ -3,6 +3,7 @@ import { useLanguage } from '../../store/LanguageContext.jsx'
 import { useAxiomStore } from '../../store/useAxiomStore'
 import {
   calculateMonthlyInstallment,
+  calculateFlatInstallment,
   calculateDTI,
   calculateSanggupScore,
 } from '../../utils/calculations'
@@ -55,13 +56,24 @@ export default function Parameters({ scenario }) {
   const [dp, setDp] = useState(f.down_payment || 0)
   const [term, setTerm] = useState(f.tenor_months || 12)
   const [income, setIncome] = useState(f.monthly_income || profile?.monthly_income || 0)
+  // Flat monthly rate (HP credit / paylater style, typ. 1.5–3%/mo). Defaults
+  // from the scenario's annual rate (÷12, capped at the 3% slider max).
+  const [rateMo, setRateMo] = useState(() => {
+    const annual = Number(f.interest_rate_assumed)
+    const perMo = Number.isFinite(annual) && annual > 0 ? annual / 12 : 2
+    return Math.min(3, Math.max(0, Math.round(perMo * 20) / 20))
+  })
 
   const dpMax = Math.max(basePrice, 1)
   const termMin = 0, termMax = 96
   const incomeMax = Math.max(income, 50e6)
 
   const result = useMemo(() => {
-    const installment = calculateMonthlyInstallment(basePrice, dp, term, interestRate)
+    // Preview uses the FLAT-rate math Indonesian store credit actually bills
+    // (interest on the full principal every month). Cash (term 0) → no interest.
+    const principal = Math.max(0, basePrice - dp)
+    const flat = calculateFlatInstallment(principal, term > 0 ? rateMo : 0, term)
+    const installment = flat.installment
     const previewScenario = {
       ...scenario,
       financials: {
@@ -74,10 +86,10 @@ export default function Parameters({ scenario }) {
     }
     const sanggup = calculateSanggupScore(previewScenario, profile)
     const dti = calculateDTI(installment, income, profile?.existing_monthly_debt || 0)
-    return { installment, sanggup, dti: dti.dti }
-  }, [basePrice, dp, term, income, interestRate, f, profile, scenario])
+    return { installment, totalInterest: flat.totalInterest, totalPaid: flat.totalPaid, sanggup, dti: dti.dti }
+  }, [basePrice, dp, term, income, rateMo, interestRate, f, profile, scenario])
 
-  const { installment, sanggup, dti } = result
+  const { installment, totalInterest, sanggup, dti } = result
   const score = sanggup.score
 
   const scoreColor =
@@ -132,8 +144,18 @@ export default function Parameters({ scenario }) {
         display={formatCurrency(income, lang, currency)}
         hint={t('cards.params.incomeHint')}
       />
+      <Slider
+        label={t('cards.params.interest')}
+        value={rateMo}
+        min={0}
+        max={3}
+        step={0.05}
+        onChange={setRateMo}
+        display={`${Number(rateMo.toFixed(2))}% /mo`}
+        hint={term === 0 ? t('cards.params.cash') : t('cards.params.interestHint')}
+      />
 
-      <div className="mt-5 pt-4 border-t border-white/[6%] grid grid-cols-2 gap-3">
+      <div className="mt-5 pt-4 border-t border-white/[6%] grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="rounded-xl bg-white/[0.04] border border-white/[6%] px-4 py-3">
           <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1">{t('cards.health.post')}</p>
           <p className={cn('font-display text-lg font-bold tabular-nums', dti > 30 ? 'text-terracotta' : dti > 20 ? 'text-golden' : 'text-sand')}>
@@ -143,6 +165,10 @@ export default function Parameters({ scenario }) {
         <div className="rounded-xl bg-white/[0.04] border border-white/[6%] px-4 py-3">
           <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1">{t('cards.health.installment')}</p>
           <p className="font-display text-lg font-bold text-white tabular-nums">{formatCurrency(installment, lang, currency)}</p>
+        </div>
+        <div className="rounded-xl bg-white/[0.04] border border-white/[6%] px-4 py-3 col-span-2 sm:col-span-1">
+          <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-1">{t('cards.params.totalInterest')}</p>
+          <p className="font-display text-lg font-bold text-golden tabular-nums">{formatCurrency(totalInterest, lang, currency)}</p>
         </div>
       </div>
     </div>

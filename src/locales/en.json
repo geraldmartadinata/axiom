@@ -206,6 +206,21 @@
         "placeholder": "e.g., 15,000,000",
         "help": "After tax, what hits your account"
       },
+      "monthlyExpenses": {
+        "label": "Monthly Expenses",
+        "placeholder": "e.g., 6,000,000",
+        "help": "Rent, food, transport, bills"
+      },
+      "stocks": {
+        "label": "Stocks (IHSG)",
+        "placeholder": "e.g., 25,000,000",
+        "help": "Current total value; modeled at the IHSG long-run average"
+      },
+      "crypto": {
+        "label": "Crypto (Top 100)",
+        "placeholder": "e.g., 10,000,000",
+        "help": "Current total value; modeled at the top-100 long-run average"
+      },
       "emergencyFund": {
         "label": "Emergency Fund",
         "placeholder": "e.g., 30,000,000",
@@ -242,7 +257,25 @@
       "empty": "Set your baseline to activate full scoring."
     },
     "sections": {
-      "riskDesc": "Choose your investment horizon and return expectations."
+      "income": {
+        "title": "INCOME",
+        "desc": "Your take-home pay and how much you set aside each month."
+      },
+      "obligations": {
+        "title": "OBLIGATIONS",
+        "desc": "Fixed commitments that reduce your free cash flow."
+      },
+      "reserves": {
+        "title": "RESERVES",
+        "desc": "Liquid safety net and investments available before the purchase."
+      },
+      "risk": {
+        "title": "RISK PROFILE",
+        "desc": "Choose your investment horizon and return expectations."
+      }
+    },
+    "synthesis": {
+      "portfolio": "PORTFOLIO GROWTH /YR"
     },
     "risk": {
       "conservative": {
@@ -315,7 +348,10 @@
       "dpHint": "DP ≥ 20% unlocks better rates",
       "termHint": "0 = cash purchase · shorter term = less interest",
       "cash": "Cash",
-      "incomeHint": "After tax"
+      "incomeHint": "After tax",
+      "interest": "Flat Interest /mo",
+      "interestHint": "Store credit charges flat on the full principal — HP/paylater typically 1.5–3%/mo",
+      "totalInterest": "Total Interest"
     },
     "health": {
       "title": "Health Score",

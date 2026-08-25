@@ -30,7 +30,6 @@ const CAT_KEY = { vehicle: 'catVehicle', tech: 'catTech', property: 'catProperty
 export default function Dashboard() {
   const history = useAxiomStore(s => s.history)
   const profile = useAxiomStore(s => s.profile)
-  const saveProfile = useAxiomStore(s => s.saveProfile)
   const { t, lang } = useLanguage()
 
   // ---- Baseline state, initialized from EXISTING profile keys ----
@@ -43,9 +42,10 @@ export default function Dashboard() {
   })
 
   const hasData = income > 0 || expenses > 0 || rate > 0
-  const hasAnyProfile = Boolean(
+  const showHealth = Boolean(
     Number(profile?.monthly_income) || Number(profile?.monthly_expenses) ||
-    Number(profile?.monthly_savings) || Number(profile?.emergency_fund)
+    Number(profile?.monthly_savings) || Number(profile?.emergency_fund) ||
+    hasData
   )
 
   // ---- Health score (live, shared util) ----
@@ -102,22 +102,10 @@ export default function Dashboard() {
     setRate(v)
   }
 
-  // ---- Debounced persist (~300ms) to EXISTING profile keys ----
-  // Persisted values are always the exact rendered values — no divergence.
-  const persistTimer = useRef(null)
-  useEffect(() => {
-    if (persistTimer.current) clearTimeout(persistTimer.current)
-    persistTimer.current = setTimeout(() => {
-      if (!hasData && !profile) return // nothing to save yet
-      saveProfile({
-        ...profile,
-        monthly_income: income,
-        monthly_expenses: expenses, // NEW optional field (no existing key existed)
-        monthly_savings: Math.round((rate / 100) * income),
-      })
-    }, 300)
-    return () => clearTimeout(persistTimer.current)
-  }, [income, expenses, rate]) // eslint-disable-line
+  // ---- Sliders are a live PREVIEW of the profile baseline: they initialize
+  // from the profile on every mount (so a refresh snaps back to the saved
+  // values, or 0 when no profile exists) and never write back to it — the
+  // Profile page is the single source of truth for the baseline. ----
 
   const liquidityGrade = useMemo(() => {
     const fund = Number(profile?.emergency_fund) || 0
@@ -191,7 +179,7 @@ export default function Dashboard() {
               <BarChart3 className="h-4 w-4 text-amber-400" strokeWidth={2} />
             </header>
 
-            {!hasAnyProfile ? (
+            {!showHealth ? (
               /* EMPTY STATE — dashed track, no fake numbers */
               <div className="flex-1 flex flex-col items-center justify-center py-6">
                 <div className="relative w-[180px] h-[180px]">

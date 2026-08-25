@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '../store/LanguageContext.jsx'
 import { useAxiomStore } from '../store/useAxiomStore'
 import { formatCurrency, formatNumber } from '../utils/format'
+import { PORTFOLIO_YIELDS } from '../utils/calculations'
 import { Shield, Lock, TrendingUp, AlertTriangle, CheckCircle, Users, DollarSign, Wallet, PiggyBank, BarChart3, Download, RotateCcw, Settings, ChevronRight, Plus, Minus } from 'lucide-react'
 
 /**
@@ -19,10 +20,13 @@ export default function Profile() {
   
   const [form, setForm] = useState({
     monthly_income: initialProfile.monthly_income ?? '',
+    monthly_expenses: initialProfile.monthly_expenses ?? '',
     monthly_savings: initialProfile.monthly_savings ?? '',
     existing_monthly_debt: initialProfile.existing_monthly_debt ?? '',
     dependents: initialProfile.dependents ?? 0,
     emergency_fund: initialProfile.emergency_fund ?? '',
+    stocks_value: initialProfile.stocks_value ?? '',
+    crypto_value: initialProfile.crypto_value ?? '',
     investment_return: initialProfile.investment_return ?? 7,
     riskProfile: initialProfile.riskProfile ?? 'moderate',
     currency: initialProfile.currency ?? 'IDR',
@@ -77,10 +81,13 @@ export default function Profile() {
     e.preventDefault()
     const payload = {
       monthly_income: Number(form.monthly_income) || 0,
+      monthly_expenses: Number(form.monthly_expenses) || 0,
       monthly_savings: Number(form.monthly_savings) || 0,
       existing_monthly_debt: Number(form.existing_monthly_debt) || 0,
       dependents: Number(form.dependents) || 0,
       emergency_fund: Number(form.emergency_fund) || 0,
+      stocks_value: Number(form.stocks_value) || 0,
+      crypto_value: Number(form.crypto_value) || 0,
       investment_return: Number(form.investment_return) || 7,
       riskProfile: form.riskProfile || 'moderate',
       currency: form.currency || 'IDR',
@@ -101,9 +108,14 @@ export default function Profile() {
   const emergency = Number(form.emergency_fund) || 0
   const dependents = Number(form.dependents) || 0
   const returnRate = Number(form.investment_return) || 7
+  const stocks = Number(form.stocks_value) || 0
+  const crypto = Number(form.crypto_value) || 0
+  // Blended long-run growth: stocks at the IHSG average, crypto at the
+  // top-100 market-cap average (see PORTFOLIO_YIELDS in calculations.js).
+  const portfolioGrowth = stocks * PORTFOLIO_YIELDS.stocks + crypto * PORTFOLIO_YIELDS.crypto
 
   const freeCashFlow = income > 0 ? income - debt - savings : null
-  const monthlyExpenses = income > 0 ? income * 0.6 : 0 // assumption for runway
+  const monthlyExpenses = Number(form.monthly_expenses) > 0 ? Number(form.monthly_expenses) : (income > 0 ? income * 0.6 : 0) // explicit expenses win; else 60% assumption
   const runwayMonths = (income > 0 && savings > 0 && income - savings > 0)
     ? emergency / (income - savings)
     : null
@@ -111,7 +123,7 @@ export default function Profile() {
   const dti = income > 0 ? (debt / income) * 100 : null
 
   // Completeness
-  const fields = ['monthly_income', 'monthly_savings', 'existing_monthly_debt', 'emergency_fund', 'dependents']
+  const fields = ['monthly_income', 'monthly_expenses', 'monthly_savings', 'existing_monthly_debt', 'emergency_fund', 'dependents']
   const filled = fields.filter(f => {
     const val = form[f]
     return val !== '' && val !== null && val !== undefined && Number(val) >= 0
@@ -126,6 +138,7 @@ export default function Profile() {
   // Store fields use snake_case; locale keys use camelCase.
   const FIELD_LABEL_KEYS = {
     monthly_income: 'monthlyIncome',
+    monthly_expenses: 'monthlyExpenses',
     monthly_savings: 'monthlySavings',
     existing_monthly_debt: 'existingDebt',
     emergency_fund: 'emergencyFund',
@@ -161,9 +174,9 @@ export default function Profile() {
               <div className="relative pl-6 border-l-2 border-amber-400/60">
                 <div className="flex items-center gap-3 mb-1">
                   <span className="font-mono text-xs font-bold text-amber-400 tracking-wider">01</span>
-                  <h2 className="text-lg font-semibold text-white">INCOME</h2>
+                  <h2 className="text-lg font-semibold text-white">{t('profile.sections.income.title')}</h2>
                 </div>
-                <p className="text-xs text-zinc-500 mb-4">Your take-home pay and how much you set aside each month.</p>
+                <p className="text-xs text-zinc-500 mb-4">{t('profile.sections.income.desc')}</p>
                 <div className="space-y-4">
                   <div>
                     <label className="block font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
@@ -175,6 +188,19 @@ export default function Profile() {
                       value={formatThousands(form.monthly_income)}
                       onChange={handleNumberChange('monthly_income')}
                       placeholder={t('profile.fields.monthlyIncome.placeholder')}
+                      className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                      {t('profile.fields.monthlyExpenses.label')}
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatThousands(form.monthly_expenses)}
+                      onChange={handleNumberChange('monthly_expenses')}
+                      placeholder={t('profile.fields.monthlyExpenses.placeholder')}
                       className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
                     />
                   </div>
@@ -198,9 +224,9 @@ export default function Profile() {
               <div className="relative pl-6 border-l-2 border-amber-400/60">
                 <div className="flex items-center gap-3 mb-1">
                   <span className="font-mono text-xs font-bold text-amber-400 tracking-wider">02</span>
-                  <h2 className="text-lg font-semibold text-white">OBLIGATIONS</h2>
+                  <h2 className="text-lg font-semibold text-white">{t('profile.sections.obligations.title')}</h2>
                 </div>
-                <p className="text-xs text-zinc-500 mb-4">Fixed commitments that reduce your free cash flow.</p>
+                <p className="text-xs text-zinc-500 mb-4">{t('profile.sections.obligations.desc')}</p>
                 <div className="space-y-4">
                   <div>
                     <label className="block font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
@@ -246,9 +272,9 @@ export default function Profile() {
               <div className="relative pl-6 border-l-2 border-amber-400/60">
                 <div className="flex items-center gap-3 mb-1">
                   <span className="font-mono text-xs font-bold text-amber-400 tracking-wider">03</span>
-                  <h2 className="text-lg font-semibold text-white">RESERVES</h2>
+                  <h2 className="text-lg font-semibold text-white">{t('profile.sections.reserves.title')}</h2>
                 </div>
-                <p className="text-xs text-zinc-500 mb-4">Liquid safety net available before the purchase.</p>
+                <p className="text-xs text-zinc-500 mb-4">{t('profile.sections.reserves.desc')}</p>
                 <div className="space-y-4">
                   <div>
                     <label className="block font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
@@ -260,6 +286,32 @@ export default function Profile() {
                       value={formatThousands(form.emergency_fund)}
                       onChange={handleNumberChange('emergency_fund')}
                       placeholder={t('profile.fields.emergencyFund.placeholder')}
+                      className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                      {t('profile.fields.stocks.label')}
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatThousands(form.stocks_value)}
+                      onChange={handleNumberChange('stocks_value')}
+                      placeholder={t('profile.fields.stocks.placeholder')}
+                      className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                      {t('profile.fields.crypto.label')}
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={formatThousands(form.crypto_value)}
+                      onChange={handleNumberChange('crypto_value')}
+                      placeholder={t('profile.fields.crypto.placeholder')}
                       className="w-full bg-zinc-950/80 border border-white/[8%] rounded-xl px-4 py-3 text-white font-mono text-base focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30 placeholder:text-zinc-600"
                     />
                   </div>
@@ -285,9 +337,9 @@ export default function Profile() {
               <div className="relative pl-6 border-l-2 border-amber-400/60">
                 <div className="flex items-center gap-3 mb-1">
                   <span className="font-mono text-xs font-bold text-amber-400 tracking-wider">04</span>
-                  <h2 className="text-lg font-semibold text-white">RISK PROFILE</h2>
+                  <h2 className="text-lg font-semibold text-white">{t('profile.sections.risk.title')}</h2>
                 </div>
-                <p className="text-xs text-zinc-500 mb-4">{t('profile.sections.riskDesc')}</p>
+                <p className="text-xs text-zinc-500 mb-4">{t('profile.sections.risk.desc')}</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {['conservative', 'moderate', 'aggressive'].map((key) => {
                     const isActive = form.riskProfile === key
@@ -427,6 +479,12 @@ export default function Profile() {
                     dti > 30 ? 'text-amber-400' : 'text-emerald-400'
                   }`}>
                     {dti !== null ? `${dti.toFixed(1)}%` : '—'}
+                  </div>
+                </div>
+                <div className="pt-3">
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">{t('profile.synthesis.portfolio')}</div>
+                  <div className={`text-xl font-mono font-bold ${portfolioGrowth > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                    {portfolioGrowth > 0 ? `+ ${formatCurrency(portfolioGrowth, lang, form.currency)}` : '—'}
                   </div>
                 </div>
                 <div className="pt-3">

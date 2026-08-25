@@ -47,6 +47,7 @@ CRITICAL RULES:
 4. For hidden_costs: estimate REALISTIC costs based on the item category (e.g., cars have insurance, registration, maintenance; phones have insurance, accessories, AppleCare). These are estimates, not exact quotes.
 5. Return ONLY a valid JSON object. No markdown, no explanation, no code fences.
 6. Handle both English and Indonesian input. Currency can be USD ($) or IDR (Rp/jt/miliar).
+7. Consumer credit in Indonesia (phones, paylater, credit-card installments) usually has NO down payment — leave down_payment null unless the user mentions one. Store/installment interest is typically FLAT 1.5–3% per MONTH; when the user mentions a monthly rate (or for tech-category installment scenarios), set interest_rate_assumed to the annualized figure (monthly × 12, e.g. 2%/mo → 24). Mortgages (KPR) and car loans use annual rates directly.
 
 Return this exact JSON structure:
 {

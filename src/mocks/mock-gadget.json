@@ -1,15 +1,15 @@
 {
   "scenario": {
-    "raw_prompt": "Bisa beli iPhone 16 Pro 256GB Rp24jt DP Rp5jt cicil 24 bln, gaji Rp15jt/bln?",
+    "raw_prompt": "Bisa beli iPhone 16 Pro 256GB Rp24jt cicil 12 bulan lewat aplikasi tanpa DP, bunga 2% per bulan, gaji Rp15jt/bln?",
     "item_name": "iPhone 16 Pro 256GB",
     "category": "tech"
   },
   "financials": {
     "monthly_income": 15000000,
     "base_price": 24000000,
-    "down_payment": 5000000,
-    "tenor_months": 24,
-    "interest_rate_assumed": 0.06,
+    "down_payment": null,
+    "tenor_months": 12,
+    "interest_rate_assumed": 42,
     "calculated_monthly_installment": null
   },
   "hidden_costs": [

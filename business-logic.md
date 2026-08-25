@@ -32,6 +32,38 @@ export function calculateMonthlyInstallment(basePrice, downPayment, tenorMonths,
 }
 ```
 
+## 1b. Flat-Rate Installment (Indonesian consumer credit)
+
+Phone credit / paylater in Indonesia charges FLAT monthly interest (typ. 1.5–3%/mo): interest is computed on the FULL principal every month, unlike an amortized loan. Used by the Analyze page Parameters panel.
+
+```javascript
+// Average long-run nominal growth used for portfolio modeling:
+// stocks → IHSG historical average, crypto → top-100 market cap average.
+export const PORTFOLIO_YIELDS = { stocks: 0.06, crypto: 0.20 };
+
+/**
+ * Flat-rate consumer credit installment.
+ * @param {number} principal - Price minus down payment
+ * @param {number} monthlyFlatPercent - Flat rate per month (e.g. 2 for 2%/mo)
+ * @param {number} tenorMonths - Loan duration in months
+ * @returns {{installment: number, totalInterest: number, totalPaid: number}}
+ */
+export function calculateFlatInstallment(principal, monthlyFlatPercent, tenorMonths) {
+  if (principal <= 0 || tenorMonths <= 0) {
+    return { installment: 0, totalInterest: 0, totalPaid: principal > 0 ? principal : 0 };
+  }
+  const rate = (monthlyFlatPercent || 0) / 100;
+  const installment = principal / tenorMonths + principal * rate;
+  const totalInterest = principal * rate * tenorMonths;
+  const totalPaid = principal + totalInterest;
+  return {
+    installment: Math.round(installment * 100) / 100,
+    totalInterest: Math.round(totalInterest * 100) / 100,
+    totalPaid: Math.round(totalPaid * 100) / 100,
+  };
+}
+```
+
 ## 2. Debt-to-Income (DTI) Ratio
 
 ```javascript

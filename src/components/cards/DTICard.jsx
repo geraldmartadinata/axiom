@@ -23,7 +23,7 @@ export default function DTICard({ dti, status, newInstallment, existingDebt, inc
       </div>
 
       <div className="mb-6">
-        <span className="text-4xl font-extrabold text-white tracking-tighter">{dti}%</span>
+        <span className="text-4xl font-extrabold text-white tracking-tighter">{Number(dti || 0).toLocaleString(uiLang === 'id' ? 'id-ID' : 'en-US', { maximumFractionDigits: 3 })}%</span>
       </div>
 
       {/* DTI Bar with new palette */}

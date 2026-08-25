@@ -206,6 +206,21 @@
         "placeholder": "cth: 15.000.000",
         "help": "Setelah pajak, yang masuk rekening"
       },
+      "monthlyExpenses": {
+        "label": "Pengeluaran Bulanan",
+        "placeholder": "cth: 6.000.000",
+        "help": "Sewa, makan, transport, tagihan"
+      },
+      "stocks": {
+        "label": "Saham (IHSG)",
+        "placeholder": "cth: 25.000.000",
+        "help": "Total nilai saat ini; dimodelkan dengan rata-rata jangka panjang IHSG"
+      },
+      "crypto": {
+        "label": "Kripto (Top 100)",
+        "placeholder": "cth: 10.000.000",
+        "help": "Total nilai saat ini; dimodelkan dengan rata-rata jangka panjang top 100"
+      },
       "emergencyFund": {
         "label": "Dana Darurat",
         "placeholder": "cth: 30.000.000",
@@ -242,7 +257,25 @@
       "empty": "Atur data dasarmu untuk mengaktifkan skoring penuh."
     },
     "sections": {
-      "riskDesc": "Pilih horizon investasi dan ekspektasi return-mu."
+      "income": {
+        "title": "PENDAPATAN",
+        "desc": "Gaji bersih bulanan dan berapa yang kamu sisihkan tiap bulan."
+      },
+      "obligations": {
+        "title": "KEWAJIBAN",
+        "desc": "Komitmen tetap yang mengurangi arus kas bebas-mu."
+      },
+      "reserves": {
+        "title": "CADANGAN",
+        "desc": "Jaring pengaman likuid dan investasi sebelum pembelian."
+      },
+      "risk": {
+        "title": "PROFIL RISIKO",
+        "desc": "Pilih horizon investasi dan ekspektasi return-mu."
+      }
+    },
+    "synthesis": {
+      "portfolio": "PERTUMBUHAN PORTOFOLIO /THN"
     },
     "risk": {
       "conservative": {
@@ -315,7 +348,10 @@
       "dpHint": "DP ≥ 20% dapat bunga lebih baik",
       "termHint": "0 = beli cash · tenor pendek = bunga lebih sedikit",
       "cash": "Cash",
-      "incomeHint": "Setelah pajak"
+      "incomeHint": "Setelah pajak",
+      "interest": "Bunga Flat /bln",
+      "interestHint": "Kredit toko menghitung flat dari pokok penuh — HP/paylater umumnya 1,5–3%/bln",
+      "totalInterest": "Total Bunga"
     },
     "health": {
       "title": "Skor Kesehatan",
