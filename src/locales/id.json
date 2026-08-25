@@ -475,9 +475,13 @@
     "try": "Coba:"
   },
   "footer": {
-    "tagline": "Kejelasan finansial yang canggih untuk era modern.",
+    "tagline": "Bantu kamu mengambil keputusan finansial mobil yang lebih cerdas.",
+    "product": "Produk",
+    "legalHelp": "Legal & Bantuan",
+    "madeIn": "Dibuat di Indonesia",
+    "rights": "Hak cipta dilindungi.",
     "terms": "Syarat & Ketentuan",
-    "privacy": "Privasi",
+    "privacy": "Kebijakan Privasi",
     "support": "Kontak",
     "disclaimer": "Bukan nasihat keuangan. Investasi mengandung risiko."
   },

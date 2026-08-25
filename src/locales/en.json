@@ -476,9 +476,13 @@
   },
   "footer": {
     "tagline": "Sophisticated financial clarity for the modern era.",
-    "terms": "Terms",
-    "privacy": "Privacy",
-    "support": "Support",
+    "product": "Product",
+    "legalHelp": "Legal & Help",
+    "madeIn": "Made in Indonesia",
+    "rights": "All rights reserved.",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "support": "Contact",
     "disclaimer": "Not financial advice. Trading involves risk."
   },
   "menu": {
