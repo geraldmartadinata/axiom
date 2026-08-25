@@ -1,4 +1,4 @@
-﻿{
+{
   "app": {
     "name": "Axiom",
     "tagline": "Can you afford it?",
@@ -11,8 +11,8 @@
     "profile": "Profile"
   },
   "dashboard": {
-    "title": "Can you afford",
-    "titleAccent": "it?",
+    "title": "Can You Afford",
+    "titleAccent": "It?",
     "subtitle": "Describe a purchase in plain language. Axiom extracts the numbers, calculates the real cost, and tells you if it fits your life â€” no judgment, just math.",
     "analyzeButton": "Analyze",
     "analyzingButton": "Analyzing...",
@@ -22,9 +22,9 @@
     "overallTitle": "Your Financial Health",
     "overallSub": "Based on confirmed purchases and your profile",
     "overallEmpty": "Confirm a purchase to track your post-purchase health",
-    "recentTitle": "Recent Analyses",
+    "recentTitle": "Recent Analysis",
     "recentEmpty": "No analyses yet â€” your first purchase is waiting.",
-    "recentViewAll": "View all",
+    "recentViewAll": "View All",
     "insightLabel": "Axiom Insight",
     "scrollHint": "Scroll to explore",
     "healthTitle": "Financial Health",
@@ -54,7 +54,6 @@
     "summaryEst5": "EST. VALUE IN 5 YRS",
     "todayLabel": "TODAY",
     "simulation": "Simulation",
-    "recentTitle": "Recent Analysis",
     "heroSubtitle": "An AI-powered reality check for your next major purchase.",
     "chipCar": "Car",
     "chipTech": "Gadget",
@@ -91,11 +90,6 @@
       "stepDti": "Installments are {{pct}}% of income. Don't add new obligations yet â€” reduce or pay off before the next commitment.",
       "stepIncome": "Income is the limiting factor. A side hustle or skill upgrade lifts every ratio at once."
     },
-    "title": "Can You Afford",
-    "titleAccent": "It?",
-    "liquidity": "Liquidity",
-    "debtToIncome": "Debt-to-Income",
-    "recentViewAll": "View All",
     "recentEmptyNew": "No analyses yet â€” run your first reality check above.",
     "examples": [
       "Honda Civic 2025, 5-year loan...",
@@ -313,9 +307,9 @@
       }
     },
     "saveButton": "Save Profile",
-        "saved": "Profile saved",
-        "settingsTitle": "Profile Settings",
-        "quickActions": "Quick Actions",
+    "saved": "Profile saved",
+    "settingsTitle": "Profile Settings",
+    "quickActions": "Quick Actions",
     "status": {
       "complete": "Baseline complete. All analyses will use your profile.",
       "addMissing": "Add {field} to unlock full capacity modeling.",
@@ -476,15 +470,15 @@
   },
   "footer": {
     "tagline": "Sophisticated financial clarity for the modern era.",
-    "product": "Product",
     "legalHelp": "Legal & Help",
-    "madeIn": "Made in Indonesia",
-    "about": "Built by Gerald Martadinata, a third-semester Computer Science student at Bina Nusantara (BINUS) University. He explores AI through self-directed learning, online resources, and hands-on competitions. Axiom is part of that journey — turning curiosity into something useful.",
+    "about": "Built by a third-semester Computer Science student at BINUS University. Explores AI through self-directed learning, online resources, and hands-on competitions. Axiom is part of that journey — turning curiosity into something useful.",
     "rights": "All rights reserved.",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "support": "Contact",
-    "disclaimer": "Not financial advice. Trading involves risk."
+    "disclaimer": "Not financial advice. Trading involves risk.",
+    "pages": "Pages",
+    "aboutTitle": "About"
   },
   "menu": {
     "label": "Menu",
@@ -495,29 +489,83 @@
   "contact": {
     "title": "Contact",
     "sub": "Questions, feedback, or bug reports â€” reach me here.",
-    "github": { "label": "GitHub", "value": "github.com/geraldmartadinata" },
-    "email": { "label": "Email", "value": "geraldbinus@gmail.com" },
-    "instagram": { "label": "Instagram", "value": "@gerald404_" }
+    "github": {
+      "label": "GitHub",
+      "value": "github.com/geraldmartadinata"
+    },
+    "email": {
+      "label": "Email",
+      "value": "geraldbinus@gmail.com"
+    },
+    "instagram": {
+      "label": "Instagram",
+      "value": "@gerald404_"
+    }
   },
   "legal": {
     "privacy": {
       "title": "Privacy Policy",
       "updated": "Last updated: August 2026",
       "sections": [
-        { "h": "1. Data we collect", "body": ["The financial inputs you type (income, savings, debts, purchase scenarios) and your analysis sessions are stored to power the calculations.", "We do not collect your name, email, or any identity data unless you contact us directly."] },
-        { "h": "2. Local storage, not servers", "body": ["Your profile and session history are stored locally in your browser (localStorage). We do not operate a user database and there is no account system.", "Clearing your browser data or using Reset Profile permanently removes everything."] },
-        { "h": "3. Third parties", "body": ["We never sell or share your data. Purchase prompts are processed by our AI extraction proxy solely to return structured numbers; prompts are not stored.", "No analytics or tracking scripts are used."] },
-        { "h": "4. Your rights", "body": ["You can delete any analysis, reset your profile, or clear localStorage at any time â€” full control stays with you.", "For data questions, use the Contact page."] }
+        {
+          "h": "1. Data we collect",
+          "body": [
+            "The financial inputs you type (income, savings, debts, purchase scenarios) and your analysis sessions are stored to power the calculations.",
+            "We do not collect your name, email, or any identity data unless you contact us directly."
+          ]
+        },
+        {
+          "h": "2. Local storage, not servers",
+          "body": [
+            "Your profile and session history are stored locally in your browser (localStorage). We do not operate a user database and there is no account system.",
+            "Clearing your browser data or using Reset Profile permanently removes everything."
+          ]
+        },
+        {
+          "h": "3. Third parties",
+          "body": [
+            "We never sell or share your data. Purchase prompts are processed by our AI extraction proxy solely to return structured numbers; prompts are not stored.",
+            "No analytics or tracking scripts are used."
+          ]
+        },
+        {
+          "h": "4. Your rights",
+          "body": [
+            "You can delete any analysis, reset your profile, or clear localStorage at any time â€” full control stays with you.",
+            "For data questions, use the Contact page."
+          ]
+        }
       ]
     },
     "terms": {
       "title": "Terms of Service",
       "updated": "Last updated: August 2026",
       "sections": [
-        { "h": "1. Educational tool, not financial advice", "body": ["Axiom is a simulation and education tool. It is NOT a licensed financial advisor, and nothing here constitutes financial, investment, or credit advice."] },
-        { "h": "2. No accuracy guarantee", "body": ["Calculations follow fixed formulas, but inputs may be estimates (including AI-extracted or estimated prices). Always verify numbers with your bank or dealer before deciding.", "Every financial decision remains your own responsibility."] },
-        { "h": "3. Hypothetical assumptions", "body": ["Investment return assumptions (e.g. 8%/yr) are hypothetical historical averages. Real returns fluctuate and can be negative; inflation is not modeled."] },
-        { "h": "4. Limitation of liability", "body": ["Axiom is provided 'as is'. To the maximum extent permitted by law, we are not liable for any loss arising from decisions made using this app."] }
+        {
+          "h": "1. Educational tool, not financial advice",
+          "body": [
+            "Axiom is a simulation and education tool. It is NOT a licensed financial advisor, and nothing here constitutes financial, investment, or credit advice."
+          ]
+        },
+        {
+          "h": "2. No accuracy guarantee",
+          "body": [
+            "Calculations follow fixed formulas, but inputs may be estimates (including AI-extracted or estimated prices). Always verify numbers with your bank or dealer before deciding.",
+            "Every financial decision remains your own responsibility."
+          ]
+        },
+        {
+          "h": "3. Hypothetical assumptions",
+          "body": [
+            "Investment return assumptions (e.g. 8%/yr) are hypothetical historical averages. Real returns fluctuate and can be negative; inflation is not modeled."
+          ]
+        },
+        {
+          "h": "4. Limitation of liability",
+          "body": [
+            "Axiom is provided 'as is'. To the maximum extent permitted by law, we are not liable for any loss arising from decisions made using this app."
+          ]
+        }
       ]
     }
   },

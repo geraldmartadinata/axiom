@@ -1,4 +1,4 @@
-﻿{
+{
   "app": {
     "name": "Axiom",
     "tagline": "Bisa beli nggak?",
@@ -11,8 +11,8 @@
     "profile": "Profil"
   },
   "dashboard": {
-    "title": "Bisa beli",
-    "titleAccent": "nggak?",
+    "title": "Bisa Beli",
+    "titleAccent": "Nggak?",
     "subtitle": "Tulis pembelian dalam bahasa sehari-hari. Axiom mengekstrak angkanya, menghitung biaya aslinya, dan memberi tahu kamu apakah itu pas dengan hidupmu â€” tanpa menghakimi, murni matematika.",
     "analyzeButton": "Analisis",
     "analyzingButton": "Menganalisis...",
@@ -24,12 +24,12 @@
     "overallEmpty": "Konfirmasi pembelian untuk melacak kesehatan pasca-pembelian",
     "recentTitle": "Analisis Terakhir",
     "recentEmpty": "Belum ada analisis â€” pembelian pertamamu menunggu.",
-    "recentViewAll": "Lihat semua",
+    "recentViewAll": "Lihat Semua",
     "insightLabel": "Insight Axiom",
     "scrollHint": "Scroll untuk eksplorasi",
     "healthTitle": "Kesehatan Finansial",
     "liquidity": "Likuiditas",
-    "debtToIncome": "Rasio Utang",
+    "debtToIncome": "Utang / Pendapatan",
     "baselineTitle": "Parameter Dasar",
     "monthlyIncome": "Pendapatan Bulanan",
     "monthlyExpenses": "Pengeluaran Bulanan",
@@ -54,7 +54,6 @@
     "summaryEst5": "EST. NILAI DALAM 5 THN",
     "todayLabel": "HARI INI",
     "simulation": "Simulasi",
-    "recentTitle": "Analisis Terakhir",
     "heroSubtitle": "Pemeriksaan kenyataan berbasis AI untuk pembelian besar berikutnya.",
     "chipCar": "Mobil",
     "chipTech": "Gawai",
@@ -91,11 +90,6 @@
       "stepDti": "Cicilan {{pct}}% dari income. Jangan tambah kewajiban baru dulu â€” pertimbangkan turunkan atau lunasi sebelum komitmen berikutnya.",
       "stepIncome": "Pendapatan menjadi faktor pembatas. Side hustle atau peningkatan skill bisa menaikkan seluruh rasio sekaligus."
     },
-    "title": "Bisa Beli",
-    "titleAccent": "Nggak?",
-    "liquidity": "Likuiditas",
-    "debtToIncome": "Utang / Pendapatan",
-    "recentViewAll": "Lihat Semua",
     "recentEmptyNew": "Belum ada analisis â€” jalankan reality check pertamamu di atas.",
     "examples": [
       "Honda Civic 2025, cicilan 5 tahun...",
@@ -313,9 +307,9 @@
       }
     },
     "saveButton": "Simpan Profil",
-        "saved": "Profil tersimpan",
-        "settingsTitle": "Pengaturan Profil",
-        "quickActions": "Aksi Cepat",
+    "saved": "Profil tersimpan",
+    "settingsTitle": "Pengaturan Profil",
+    "quickActions": "Aksi Cepat",
     "status": {
       "complete": "Baseline lengkap. Semua analisis akan memakai profilmu.",
       "addMissing": "Isi {field} untuk membuka pemodelan kapasitas penuh.",
@@ -475,16 +469,16 @@
     "try": "Coba:"
   },
   "footer": {
-    "tagline": "Bantu kamu mengambil keputusan finansial mobil yang lebih cerdas.",
-    "product": "Produk",
+    "tagline": "Sophisticated financial clarity for the modern era.",
     "legalHelp": "Legal & Bantuan",
-    "madeIn": "Dibuat di Indonesia",
-    "about": "Dibangun oleh Gerald Martadinata, mahasiswa Computer Science semester tiga di Bina Nusantara (BINUS) University. Ia mengeksplorasi AI lewat self-directed learning, sumber online, dan kompetisi hands-on. Axiom adalah bagian dari perjalanan itu — mengubah rasa penasaran menjadi sesuatu yang bermanfaat.",
+    "about": "Built by a third-semester Computer Science student at BINUS University. Explores AI through self-directed learning, online resources, and hands-on competitions. Axiom is part of that journey — turning curiosity into something useful.",
     "rights": "Hak cipta dilindungi.",
     "terms": "Syarat & Ketentuan",
     "privacy": "Kebijakan Privasi",
     "support": "Kontak",
-    "disclaimer": "Bukan nasihat keuangan. Investasi mengandung risiko."
+    "disclaimer": "Bukan nasihat keuangan. Investasi mengandung risiko.",
+    "pages": "Pages",
+    "aboutTitle": "About"
   },
   "menu": {
     "label": "Menu",
@@ -495,29 +489,83 @@
   "contact": {
     "title": "Kontak",
     "sub": "Pertanyaan, masukan, atau laporan bug â€” hubungi saya di sini.",
-    "github": { "label": "GitHub", "value": "github.com/geraldmartadinata" },
-    "email": { "label": "Email", "value": "geraldbinus@gmail.com" },
-    "instagram": { "label": "Instagram", "value": "@gerald404_" }
+    "github": {
+      "label": "GitHub",
+      "value": "github.com/geraldmartadinata"
+    },
+    "email": {
+      "label": "Email",
+      "value": "geraldbinus@gmail.com"
+    },
+    "instagram": {
+      "label": "Instagram",
+      "value": "@gerald404_"
+    }
   },
   "legal": {
     "privacy": {
       "title": "Kebijakan Privasi",
       "updated": "Terakhir diperbarui: Agustus 2026",
       "sections": [
-        { "h": "1. Data yang kami kumpulkan", "body": ["Input finansial yang kamu ketik (penghasilan, tabungan, hutang, skenario pembelian) dan sesi analisis disimpan untuk menjalankan perhitungan.", "Kami tidak mengumpulkan nama, email, atau data identitas apa pun kecuali kamu menghubungi kami langsung."] },
-        { "h": "2. Penyimpanan lokal, bukan server", "body": ["Profil dan riwayat analisis disimpan secara lokal di browser-mu (localStorage). Kami tidak memiliki database pengguna dan tidak ada sistem akun.", "Menghapus data browser atau menekan Reset Profil menghapus semuanya secara permanen."] },
-        { "h": "3. Pihak ketiga", "body": ["Kami tidak pernah menjual atau membagikan datamu. Prompt pembelian diproses oleh proxy AI semata untuk mengembalikan angka terstruktur; prompt tidak disimpan.", "Tidak ada skrip analitik atau pelacakan."] },
-        { "h": "4. Hak kamu", "body": ["Kamu bisa menghapus analisis apa pun, mereset profil, atau membersihkan localStorage kapan saja â€” kendali penuh ada padamu.", "Untuk pertanyaan data, gunakan halaman Kontak."] }
+        {
+          "h": "1. Data yang kami kumpulkan",
+          "body": [
+            "Input finansial yang kamu ketik (penghasilan, tabungan, hutang, skenario pembelian) dan sesi analisis disimpan untuk menjalankan perhitungan.",
+            "Kami tidak mengumpulkan nama, email, atau data identitas apa pun kecuali kamu menghubungi kami langsung."
+          ]
+        },
+        {
+          "h": "2. Penyimpanan lokal, bukan server",
+          "body": [
+            "Profil dan riwayat analisis disimpan secara lokal di browser-mu (localStorage). Kami tidak memiliki database pengguna dan tidak ada sistem akun.",
+            "Menghapus data browser atau menekan Reset Profil menghapus semuanya secara permanen."
+          ]
+        },
+        {
+          "h": "3. Pihak ketiga",
+          "body": [
+            "Kami tidak pernah menjual atau membagikan datamu. Prompt pembelian diproses oleh proxy AI semata untuk mengembalikan angka terstruktur; prompt tidak disimpan.",
+            "Tidak ada skrip analitik atau pelacakan."
+          ]
+        },
+        {
+          "h": "4. Hak kamu",
+          "body": [
+            "Kamu bisa menghapus analisis apa pun, mereset profil, atau membersihkan localStorage kapan saja â€” kendali penuh ada padamu.",
+            "Untuk pertanyaan data, gunakan halaman Kontak."
+          ]
+        }
       ]
     },
     "terms": {
       "title": "Syarat & Ketentuan",
       "updated": "Terakhir diperbarui: Agustus 2026",
       "sections": [
-        { "h": "1. Alat edukasi, bukan nasihat keuangan", "body": ["Axiom adalah alat simulasi dan edukasi. BUKAN penasihat keuangan berlisensi, dan tidak ada di sini yang merupakan nasihat keuangan, investasi, atau kredit."] },
-        { "h": "2. Tanpa jaminan akurasi", "body": ["Perhitungan mengikuti rumus tetap, namun input bisa berupa estimasi (termasuk harga hasil ekstraksi AI atau estimasi). Selalu verifikasi angka dengan bank atau dealer sebelum memutuskan.", "Setiap keputusan finansial tetap menjadi tanggung jawabmu."] },
-        { "h": "3. Asumsi hipotetis", "body": ["Asumsi return investasi (mis. 8%/thn) adalah rata-rata historis hipotetis. Return nyata berfluktuasi dan bisa negatif; inflasi tidak dimodelkan."] },
-        { "h": "4. Batasan tanggung jawab", "body": ["Axiom disediakan 'sebagaimana adanya'. Sejauh diizinkan hukum, kami tidak bertanggung jawab atas kerugian apa pun dari keputusan yang dibuat menggunakan aplikasi ini."] }
+        {
+          "h": "1. Alat edukasi, bukan nasihat keuangan",
+          "body": [
+            "Axiom adalah alat simulasi dan edukasi. BUKAN penasihat keuangan berlisensi, dan tidak ada di sini yang merupakan nasihat keuangan, investasi, atau kredit."
+          ]
+        },
+        {
+          "h": "2. Tanpa jaminan akurasi",
+          "body": [
+            "Perhitungan mengikuti rumus tetap, namun input bisa berupa estimasi (termasuk harga hasil ekstraksi AI atau estimasi). Selalu verifikasi angka dengan bank atau dealer sebelum memutuskan.",
+            "Setiap keputusan finansial tetap menjadi tanggung jawabmu."
+          ]
+        },
+        {
+          "h": "3. Asumsi hipotetis",
+          "body": [
+            "Asumsi return investasi (mis. 8%/thn) adalah rata-rata historis hipotetis. Return nyata berfluktuasi dan bisa negatif; inflasi tidak dimodelkan."
+          ]
+        },
+        {
+          "h": "4. Batasan tanggung jawab",
+          "body": [
+            "Axiom disediakan 'sebagaimana adanya'. Sejauh diizinkan hukum, kami tidak bertanggung jawab atas kerugian apa pun dari keputusan yang dibuat menggunakan aplikasi ini."
+          ]
+        }
       ]
     }
   },

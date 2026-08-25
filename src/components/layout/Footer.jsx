@@ -9,7 +9,7 @@ const SOCIALS = [
   { key: 'instagram', href: 'https://instagram.com/gerald404_', Icon: Instagram, external: true },
 ]
 
-const PRODUCT_LINKS = [
+const PAGES_LINKS = [
   { to: '/', labelKey: 'nav.home' },
   { to: '/analyze', labelKey: 'nav.analyze' },
   { to: '/profile', labelKey: 'nav.profile' },
@@ -22,8 +22,8 @@ const LEGAL_LINKS = [
 ]
 
 /**
- * Footer — dark, premium, three vertical areas: brand + link grid, thin
- * divider, bottom bar with dynamic copyright and social icon buttons.
+ * Footer — reference layout: brand top-left, thin divider, three top-aligned
+ * columns (About / Pages / Legal & Help), thin divider, bottom bar.
  */
 export default function Footer() {
   const { t } = useLanguage()
@@ -36,7 +36,6 @@ export default function Footer() {
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
     >
-      {/* Subtle dark radial glow for depth — stays dark */}
       <div
         aria-hidden="true"
         className="absolute inset-x-0 top-0 h-full pointer-events-none"
@@ -44,20 +43,28 @@ export default function Footer() {
       />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-8">
-        {/* ── Top: brand + link grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_1fr] gap-10 sm:gap-8 mb-12">
+        {/* ── Row 1: brand (top-left) ── */}
+        <div className="mb-10">
+          <Link to="/" className="inline-block">
+            <span className="font-display text-2xl font-bold text-white tracking-tight">Axiom</span>
+          </Link>
+          <p className="mt-2 text-sm text-zinc-500 leading-relaxed max-w-xs">{t('footer.tagline')}</p>
+        </div>
+
+        {/* ── Divider ── */}
+        <div className="border-t border-white/[8%]" />
+
+        {/* ── Row 2: three top-aligned columns ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1.2fr_1fr_1fr] gap-10 sm:gap-8 mt-10 mb-12 items-start">
           <div>
-            <Link to="/" className="inline-block">
-              <span className="font-display text-2xl font-bold text-white tracking-tight">Axiom</span>
-            </Link>
-            <p className="mt-3 text-sm text-zinc-500 leading-relaxed max-w-xs">{t('footer.tagline')}</p>
-            <p className="mt-4 text-sm text-zinc-500/80 leading-relaxed max-w-xs">{t('footer.about')}</p>
+            <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">{t('footer.aboutTitle')}</h3>
+            <p className="text-sm text-zinc-500/90 leading-relaxed max-w-sm">{t('footer.about')}</p>
           </div>
 
-          <nav aria-label={t('footer.product')}>
-            <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">{t('footer.product')}</h3>
+          <nav aria-label={t('footer.pages')} className="sm:pt-0">
+            <h3 className="font-mono text-[10px] font-bold uppercase tracking-widest text-zinc-600 mb-4">{t('footer.pages')}</h3>
             <ul className="space-y-2.5">
-              {PRODUCT_LINKS.map(l => (
+              {PAGES_LINKS.map(l => (
                 <li key={l.to}>
                   <Link
                     to={l.to}
